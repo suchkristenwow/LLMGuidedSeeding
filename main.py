@@ -1,0 +1,251 @@
+import toml
+import subprocess
+import os
+import argparse
+import signal
+import threading
+import logging
+import uuid
+import shutil
+
+class ExperimentRunner:
+    def __init__(self, args):
+        self.args = args
+        with open(self.args.config, "r") as f:
+            self.settings = toml.load(f)
+        self.running_processes = []
+        self.success = False
+        self.logging_file = ""
+        self.shutdown_event = threading.Event()
+        self.policyGeneration_process = None
+        self.policyRehearsal_process = None 
+        self.policyExecution_process = None 
+
+        with open(self.settings["prompt_file"],"r") as f:
+            self.query = f.read() 
+
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
+        
+        self.uuid_logging_dir = self.settings["logging_directory"] + str(uuid.uuid4())
+
+        self.vqa_url = f"http://{self.settings['common_ip']}:{self.settings["vqa_model"]["port"]}/completion"
+
+    def create_logging_directory(self):
+        """
+        Creates the experiment log directory specified in the settings.
+
+        Returns:
+            None
+        """
+        logging_dir = self.uuid_logging_dir
+        os.makedirs(logging_dir, exist_ok=True)
+        os.makedirs(logging_dir + "/application_logs", exist_ok=True)
+        full_path = os.path.abspath(logging_dir)
+        logging.info(f"Created experiment directory at {full_path}")
+
+    def copy_logs_and_data(self, base_destination_dir):
+        """
+        Copies the logs and data from the experiment directories to a specific subdirectory
+        within the specified base destination directory, based on the experiment outcome.
+
+        Args:
+            base_destination_dir (str): The base destination directory where logs and data should be copied.
+        """
+        # Determine the subdirectory based on the experiment outcome
+        outcome_subdir = "success" if self.success else "failure"
+        destination_dir = os.path.join(base_destination_dir, outcome_subdir)
+
+        try:
+            # Ensure the destination directory exists
+            os.makedirs(destination_dir, exist_ok=True)
+            # Copy the entire logging directory
+            logging.info(f"Coppying logs and data to {destination_dir}")
+            shutil.copytree(self.uuid_logging_dir, os.path.join(destination_dir, os.path.basename(self.uuid_logging_dir)), dirs_exist_ok=True)
+            logging.info(f"Copied logs and data to {destination_dir}")
+        except Exception as e:
+            logging.error(f"Failed to copy logs and data: {e}")
+
+    def load_prompt(self):
+        with open(self.settings["prompt_file"], "r") as file:
+            self.prompt_text = file.read().strip()
+        if not self.prompt_text:
+            raise ValueError("Prompt text is empty.")
+
+    def start_process_with_terminal(self, launch_command, process_name, cwd=None):
+        try:
+            log_file_path = os.path.join(
+                self.uuid_logging_dir + "/application_logs",
+                f"{process_name}.log",
+            )
+            
+            log_file_path_abs = os.path.abspath(log_file_path)
+                        
+            # Combine the launch command into a single string if it's a list
+            if isinstance(launch_command, list):
+                launch_command_str = " ".join(launch_command)
+            else:
+                launch_command_str = launch_command
+            # Use tee to duplicate output to both logfile and terminal
+            tee_command = f"{launch_command_str} | tee '{log_file_path_abs}'"
+            
+            process = subprocess.Popen(
+                tee_command, shell=True, env=os.environ, cwd=cwd, preexec_fn=os.setsid
+            )
+            logging.info(
+                f"Process '{process_name}' launched with command: {tee_command}"
+            )
+
+        except OSError as e:
+            logging.error(f"Error launching process '{process_name}': {e}")
+
+        return process 
+    
+    def start_process_monitoring(self):
+        """
+        Starts a separate thread that monitors all running processes.
+        If a process exits unexpectedly, an exception is raised.
+        """
+
+        def monitor():
+            while not self.shutdown_event.is_set():
+                for process in self.running_processes:
+                    if process.poll() is not None:  # Process has exited
+                        # Optionally, log the exit code if needed
+                        exit_code = process.returncode
+                        logging.error(
+                            f"Process {process.args} exited prematurely with exit code {exit_code}."
+                        )
+                        self.success = False
+                        time.sleep(5)
+                        self.shutdown_event.set()  # Set the shutdown event
+                        raise Exception(
+                            f"Process {process.args} died unexpectedly with exit code {exit_code}."
+                        )
+                self.shutdown_event.wait(1)  # Check every second
+
+        monitor_thread = threading.Thread(target=monitor)
+        monitor_thread.start()
+
+    def terminate_all_processes(self):
+        """
+        Terminates all running subprocesses gracefully. If a subprocess doesn't
+        terminate within the timeout, it's forcefully killed.
+        """
+        if self.explore_process is not None:
+            logging.info("Terminating explore process")
+            os.killpg(os.getpgid(self.explore_process.pid), signal.SIGTERM)
+            self.explore_process = None
+    
+        for process in self.running_processes:
+            logging.info(f"Terminating process {process.pid}...")
+            if process.poll() is None:  # Check if the process is still running
+                os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                # process.terminate()  # Attempt to terminate it gracefully
+                # try:
+                #     process.wait(timeout=5)  # Give it some time to terminate
+                # except subprocess.TimeoutExpired:
+                #     process.kill()  # Force termination if it doesn't respond
+                #     process.wait()  # Wait for the killing to complete
+                # logging.info(f"Process {process.pid} terminated.")
+    
+    def launch_policy_gen(self):
+        logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
+        logs_dir_absolute = os.path.abspath(logs_dir)
+        print("Explore logs dir", logs_dir_absolute)
+        os.makedirs(logs_dir_absolute, exist_ok=True)
+        
+        config_path = os.path.abspath(self.args.config)
+        # Split the command into a list of arguments
+        launch_command = [
+            "python", "generate_policies.py",
+            "--prompt", self.query,
+            "--config_path", config_path,
+            "--logging_dir", logs_dir_absolute
+        ]
+        
+        explore_runner_dir = os.path.abspath(os.path.join("../"))
+        self.policyGeneration_process = self.start_process_with_terminal(launch_command, "generate_policies", cwd=explore_runner_dir)
+
+    def launch_policy_rehearsal(self,policy): 
+        logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
+        logs_dir_absolute = os.path.abspath(logs_dir)
+        print("Explore logs dir", logs_dir_absolute)
+        os.makedirs(logs_dir_absolute, exist_ok=True)
+        
+        config_path = os.path.abspath(self.args.config)
+        # Split the command into a list of arguments
+        launch_command = [
+            "python", "rehearse_policies.py",
+            "--policy", policy,
+            "--config_path", config_path,
+            "--logging_dir", logs_dir_absolute
+        ]
+        
+        explore_runner_dir = os.path.abspath(os.path.join("../"))
+        self.policyRehearsal_process = self.start_process_with_terminal(launch_command, "rehearse_policies", cwd=explore_runner_dir)
+
+    def launch_policy_execution(self,policy):
+        logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
+        logs_dir_absolute = os.path.abspath(logs_dir)
+        print("Explore logs dir", logs_dir_absolute)
+        os.makedirs(logs_dir_absolute, exist_ok=True)
+        
+        config_path = os.path.abspath(self.args.config)
+        # Split the command into a list of arguments
+        launch_command = [
+            "python", "execute_policy.py",
+            "--policy", policy,
+            "--config_path", config_path,
+            "--logging_dir", logs_dir_absolute
+        ]
+        
+        explore_runner_dir = os.path.abspath(os.path.join("../"))
+        self.policyExecution_process = self.start_process_with_terminal(launch_command, "execute_policy", cwd=explore_runner_dir)
+
+    def run(self):
+        self.create_logging_directory() 
+        #launch the robot 
+        self.launch_policy_gen()
+        raise OSError 
+        rehearsed_policy = self.launch_policy_rehearsal(policy)
+        self.launch_policy_execution(rehearsed_policy)
+        self.start_process_monitoring()
+
+        try:
+            while not self.shutdown_event.is_set():
+                self.shutdown_event.wait(timeout=1)
+        finally:
+            # Cleanup code here (e.g., terminating running processes)
+            self.terminate_all_processes()
+            if self.args.log_copy_dest != "None":
+                self.copy_logs_and_data(self.args.log_copy_dest)
+            logging.info("Cleaning up and exiting...")
+
+def setup_signal_handling(runner):
+    def signal_handler(sig, frame):
+        logging.info("Ctrl+C detected. Setting shutdown event...")
+        runner.shutdown_event.set()
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Experiment Runner")
+    parser.add_argument(
+        "--config",
+        default="configs/example_config.toml",
+        help="Path to the TOML configuration file",
+    )
+
+    parser.add_argument(
+        "--log_dir",
+        default="None",
+        help="The directory to save the experiment logs",
+    )
+
+    args = parser.parse_args()
+
+    runner = ExperimentRunner(args)  # Pass the config file from arguments
+    setup_signal_handling(runner)
+    runner.run()

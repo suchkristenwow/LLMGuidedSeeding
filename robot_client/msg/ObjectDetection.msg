@@ -1,0 +1,9 @@
+Header header
+string name
+float32 confidence
+int32 x
+int32 y
+int32 left
+int32 lower
+int32 right
+int32 upper

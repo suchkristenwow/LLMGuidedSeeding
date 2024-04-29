@@ -1,0 +1,1 @@
+Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.

@@ -1,0 +1,13 @@
+flask
+Pillow
+opencv-python
+matplotlib
+nltk
+inflect
+pycocotools
+torch
+openai==0.28.1
+transformers
+requests
+dynaconf
+google-generativeai
