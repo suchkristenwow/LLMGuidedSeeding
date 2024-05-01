@@ -1,0 +1,15 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "LLMGuidedSeeding_pkg"
+version = "0.1.0"
+description = "A very special project"
+authors = [
+    { name = "Kristen Such", email = "kristen.such@colorado.edu" }
+]
+packages = [
+    { include = "LLMGuidedSeeding" },
+    { include = "LLMGuidedSeeding_pkg.utils" }
+]

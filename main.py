@@ -7,6 +7,7 @@ import threading
 import logging
 import uuid
 import shutil
+import numpy as np 
 
 class ExperimentRunner:
     def __init__(self, args):
@@ -20,17 +21,14 @@ class ExperimentRunner:
         self.policyGeneration_process = None
         self.policyRehearsal_process = None 
         self.policyExecution_process = None 
-
-        with open(self.settings["prompt_file"],"r") as f:
-            self.query = f.read() 
-
+        
         logging.basicConfig(
             level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
         )
         
         self.uuid_logging_dir = self.settings["logging_directory"] + str(uuid.uuid4())
 
-        self.vqa_url = f"http://{self.settings['common_ip']}:{self.settings["vqa_model"]["port"]}/completion"
+        self.vqa_url = f"http://{self.settings['common_ip']}:{self.settings['vqa_model']['port']}/completion"
 
     def create_logging_directory(self):
         """
@@ -133,10 +131,13 @@ class ExperimentRunner:
         Terminates all running subprocesses gracefully. If a subprocess doesn't
         terminate within the timeout, it's forcefully killed.
         """
+
+        '''
         if self.explore_process is not None:
             logging.info("Terminating explore process")
             os.killpg(os.getpgid(self.explore_process.pid), signal.SIGTERM)
             self.explore_process = None
+        '''
     
         for process in self.running_processes:
             logging.info(f"Terminating process {process.pid}...")
@@ -155,18 +156,22 @@ class ExperimentRunner:
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
         os.makedirs(logs_dir_absolute, exist_ok=True)
-        
+        prompt_path = os.path.abspath(self.args.prompt)
         config_path = os.path.abspath(self.args.config)
+        bounds_path = os.path.abspath(self.args.plot_bounds_path)
+        print("this is config path: ",config_path)
         # Split the command into a list of arguments
+        #TO DO: LOAD IN PLOT BOUNDS FROM USER INTERFACE 
         launch_command = [
             "python", "generate_policies.py",
-            "--prompt", self.query,
+            "--prompt_path", prompt_path,
             "--config_path", config_path,
-            "--logging_dir", logs_dir_absolute
+            "--logging_dir", logs_dir_absolute,
+            "--plot_bounds", bounds_path
         ]
         
-        explore_runner_dir = os.path.abspath(os.path.join("../"))
-        self.policyGeneration_process = self.start_process_with_terminal(launch_command, "generate_policies", cwd=explore_runner_dir)
+        #explore_runner_dir = os.path.abspath(os.path.join("../"))
+        self.policyGeneration_process = self.start_process_with_terminal(launch_command, "generate_policies", cwd=os.getcwd())
 
     def launch_policy_rehearsal(self,policy): 
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
@@ -183,8 +188,8 @@ class ExperimentRunner:
             "--logging_dir", logs_dir_absolute
         ]
         
-        explore_runner_dir = os.path.abspath(os.path.join("../"))
-        self.policyRehearsal_process = self.start_process_with_terminal(launch_command, "rehearse_policies", cwd=explore_runner_dir)
+        #explore_runner_dir = os.path.abspath(os.path.join("../"))
+        self.policyRehearsal_process = self.start_process_with_terminal(launch_command, "rehearse_policies", cwd=os.getcwd())
 
     def launch_policy_execution(self,policy):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
@@ -201,26 +206,28 @@ class ExperimentRunner:
             "--logging_dir", logs_dir_absolute
         ]
         
-        explore_runner_dir = os.path.abspath(os.path.join("../"))
-        self.policyExecution_process = self.start_process_with_terminal(launch_command, "execute_policy", cwd=explore_runner_dir)
+        #explore_runner_dir = os.path.abspath(os.path.join("../"))
+        self.policyExecution_process = self.start_process_with_terminal(launch_command, "execute_policy", cwd=os.getcwd())
 
     def run(self):
         self.create_logging_directory() 
         #launch the robot 
         self.launch_policy_gen()
-        raise OSError 
+
+        '''
         rehearsed_policy = self.launch_policy_rehearsal(policy)
         self.launch_policy_execution(rehearsed_policy)
         self.start_process_monitoring()
-
+        '''
+        
         try:
             while not self.shutdown_event.is_set():
                 self.shutdown_event.wait(timeout=1)
         finally:
             # Cleanup code here (e.g., terminating running processes)
             self.terminate_all_processes()
-            if self.args.log_copy_dest != "None":
-                self.copy_logs_and_data(self.args.log_copy_dest)
+            if self.args.log_dir != "None":
+                self.copy_logs_and_data(self.args.log_dir)
             logging.info("Cleaning up and exiting...")
 
 def setup_signal_handling(runner):
@@ -236,6 +243,18 @@ if __name__ == "__main__":
         "--config",
         default="configs/example_config.toml",
         help="Path to the TOML configuration file",
+    )
+
+    parser.add_argument(
+        "--plot_bounds_path",
+        default="random_path.csv",
+        help="The path to the csv file where the plot bounds (in the robot frame) are saved",
+    )
+
+    parser.add_argument(
+        "--prompt",
+        default="prompts/ex_query.txt",
+        help="Path to the desired query",
     )
 
     parser.add_argument(

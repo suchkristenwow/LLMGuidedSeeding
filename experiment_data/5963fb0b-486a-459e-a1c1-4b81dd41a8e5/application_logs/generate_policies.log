@@ -1,0 +1,5 @@
+constraints_result:  {
+    "pattern": "grid",
+    "pattern_offset": 1.0,
+    "avoid": ["planted area", "conmods"]
+}

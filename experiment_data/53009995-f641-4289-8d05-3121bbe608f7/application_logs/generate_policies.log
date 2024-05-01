@@ -1,0 +1,1 @@
+constraints: {'pattern': 'grid', 'landmark_offset': 1, 'avoid': ['planted', 'conmods']}
