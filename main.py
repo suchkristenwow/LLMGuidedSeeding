@@ -8,6 +8,7 @@ import logging
 import uuid
 import shutil
 import numpy as np 
+import os
 
 class ExperimentRunner:
     def __init__(self, args):
@@ -238,6 +239,14 @@ def setup_signal_handling(runner):
     signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == "__main__":
+    # os and user agnostic edits to TOML file
+    config_path = "configs/example_config.toml"
+    config = toml.load(config_path)
+    config['prompt_file'] = os.path.join(os.path.expanduser("~"), config['prompt_file'])
+    config['logging_directory'] = os.path.join(os.path.expanduser("~"), config['logging_directory'])
+    config['commonObj_path'] = os.path.join(os.path.expanduser("~"), config['commonObj_path'])
+
+
     parser = argparse.ArgumentParser(description="Experiment Runner")
     parser.add_argument(
         "--config",
