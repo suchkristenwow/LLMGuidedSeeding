@@ -1,0 +1,7 @@
+1. Begin by checking the robot's current location within the plot bounds. If the robot is outside the bounds, plan the shortest route to get inside the plot bounds.
+2. Start by identifying the landmarks in the immediate environment to ensure accurate navigation. If any landmark in the "goal_lms" is not immediately visible, prompt the user for guidance on where to look.
+3. Initiate the planting process by determining the starting point for the grid pattern. Ensure that the robot is at least 1 meter away from any obstacles or boundaries within the plot.
+4. Implement the grid pattern planting strategy by moving the robot in 1-meter increments along both the x and y axes. Plant seeds at each grid point while maintaining a safe distance from previously planted areas and any conmods as specified in the constraints.
+5. Continuously monitor the robot's position and adjust the planting trajectory to ensure adherence to the 1mx1m grid pattern and avoidance of planted areas and conmods.
+6. Complete the planting process for the entire plot area following the grid pattern, making sure to cover the entire designated region while respecting the avoidance constraints.
+7. Once the planting task is completed, provide a status update to confirm the successful execution of planting in a 1mx1m grid within the plot bounds while avoiding previously planted areas and conmods.

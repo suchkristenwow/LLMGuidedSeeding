@@ -1,0 +1,6 @@
+Given a nx2 array of 2D coordinates describing the boundaries of a plot and a robot odometry estimate in the same coordinate frame (a ROS nav_msgs/Odometry message), and 
+the current robot pose (geometry_msgs/Pose message) write a python function that outputs a sequential list of waypoints (in the form of ROS geometry_msgs/Pose messages)
+which would allow the robot to drive *INSERT_DRIVE_PATTERN_HERE**INSERT_DRIVE_CONSTRAINTS_HERE*
+
+The robot has a skid steer drive, so it is capable of "zero-turn" by driving one set of wheels backwards while simultaneously driving the opposite set of wheels in 
+reverse. When coming up with these Poses, you can assume the z coordinate is constant but you should come up with goal x,y, and w (yaw or heading) values for the poses.

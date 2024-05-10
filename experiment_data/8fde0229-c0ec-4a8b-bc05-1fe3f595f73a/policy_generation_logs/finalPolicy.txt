@@ -1,0 +1,11 @@
+1. Initialize the robot's localization system using lidar-inertial odometry and GPS to ensure accurate positioning within the operational bounds.
+2. Determine the robot's current position. If the robot is outside the plot bounds, plan the shortest route to enter the plot bounds.
+3. Once inside the plot bounds, scan the environment using RGB cameras to detect and identify any landmarks and conmods (construction materials) present.
+4. Create a virtual grid map with a 1m x 1m resolution based on the operational bounds provided in the "plot_bounds" variable.
+5. Begin planning a path using the 'grid' pattern specified in the constraint dictionary. Ensure that the path avoids any identified conmods or previously planted areas, as per the 'avoid' directive in the constraint dictionary.
+6. For every grid point, move the robot to the point while ensuring the robot doesn't leave the plot bounds.
+7. Once the robot reaches the grid point, perform a planting action to plant a seed.
+8. After planting, mark the point as a 'planted area' in the robot's internal map to avoid overdriving in future steps.
+9. Continue the process, moving from grid point to grid point, until all points on the grid within the plot bounds have been planted.
+10. If a landmark or conmod is detected that is not recognized or cannot be located, prompt the user by saying "I can't find {landmark}, where should I look?" and await further instructions.
+11. After all points on the grid have been planted, report task completion to the user and stand by for any additional instructions.

@@ -1,0 +1,7 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/5a86f51a-fba3-4273-98ba-f76786bea254/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+llm_result: To execute the task of planting in a 1mx1m grid in the bounded area while avoiding driving over the planted areas or any conmods, the relevant constraints can be categorized as follows:
+
+{"goal_lms": "bounded area", "pattern": "grid", "pattern_offset": 1.0, "avoid": ["planted areas", "conmods"], "seed": "True"}
+
+Does this format capture the constraints of your prompt accurately? If you have any specific details to add or modify, please let me know.

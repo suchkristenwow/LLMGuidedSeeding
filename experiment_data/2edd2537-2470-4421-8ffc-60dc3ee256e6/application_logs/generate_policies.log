@@ -1,0 +1,17 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/2edd2537-2470-4421-8ffc-60dc3ee256e6/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+results_str:  {"pattern":"grid", "landmark_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
+I dont know what planted is. Ill have to ask.
+I dont know what conmods is. Ill have to ask.
+llm_result:  Policy:
+
+1. Check if the current pose is inside the plot bounds. If not, take the shortest path to be inside the plot bounds.
+2. Start by scanning the immediate environment for any landmarks related to the goal_lms (fence) to identify the perimeter of the plot.
+3. Once the fence is located, navigate towards the nearest unoccupied voxel next to the fence while ensuring to maintain a distance of 1m (landmark_offset) from the fence.
+4. Check if there are any obstacles labeled as 'planted' or 'conmods' in the vicinity. Avoid driving over these areas.
+5. Send the plant command at the identified location.
+6. Move in a grid pattern within the bounded area, maintaining a distance of 1m between each planting spot.
+7. While moving in the grid pattern, continue to avoid areas where you have already planted seeds or any conmods.
+8. Plant seeds at regular intervals in the 1m x 1m grid until the entire bounded area is covered.
+9. Report the locations where seeds have been planted back to the human for verification.
+10. Stop once all seeds have been planted in the grid pattern.

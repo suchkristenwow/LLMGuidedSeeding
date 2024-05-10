@@ -1,0 +1,15 @@
+1. Begin by checking if the robot is currently located inside the plot bounds. If not, plan the shortest route to enter the plot bounds while avoiding any obstacles in the way.
+
+2. Use the RGB cameras to identify the landmarks associated with "conmods" within the robot's immediate environment.
+
+3. If any "conmods" landmarks are not immediately visible, prompt the user with: "I can't find conmods, where should I look?"
+
+4. Once the "conmods" landmarks are identified, plant seeds in a 1m x 1m grid pattern throughout the bounded area. Make sure to maintain a distance of 1m from the "conmods" landmarks while planting.
+
+5. Utilize lidar-inertial odometry and GPS for accurate localization and navigation within the plot bounds.
+
+6. As the robot plants seeds, keep track of the locations to avoid driving over the planted seeds or any "conmods" landmarks.
+
+7. Continuously monitor the robot's progress to ensure that it is following the grid pattern and avoiding previously planted areas and "conmods".
+
+8. Complete the revegetation task by systematically planting seeds in the designated grid pattern while adhering to the constraints provided in the constraint dictionary.

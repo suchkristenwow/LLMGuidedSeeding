@@ -1,0 +1,2 @@
+Initially, there wont be any planted areas, so you just need to update the system memory each time you plant a seed to be sure you don't drive over any planted areas. 
+Also, the bounded area isn't a goal location so you don't need step 5. 

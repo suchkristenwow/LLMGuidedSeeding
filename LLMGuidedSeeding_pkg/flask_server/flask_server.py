@@ -5,12 +5,14 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import PoseArray, Point
 from std_msgs.msg import Header
+#from robot_client import ArtifactInfo
 from flask import Flask, request, jsonify
 import cv2
 import numpy as np
 import threading
 
 # Hypothetical ArtifactInfo message structure. Replace with your actual message.
+'''
 class ArtifactInfo:
     def __init__(self, header, artifact_id, position, obj_class, obj_prob):
         self.header = header
@@ -20,6 +22,7 @@ class ArtifactInfo:
         self.obj_prob = obj_prob
         self.waypoint = None
         self.at_waypoint = False
+'''
 
 class CameraServer:
     def __init__(self):
@@ -36,13 +39,13 @@ class CameraServer:
         self.posearray_frontier_sub = rospy.Subscriber('posearray_frontier', PoseArray, self.posearray_frontier_callback)
 
         # Subscriber for projection_artifacts
-        self.projection_artifacts_sub = rospy.Subscriber('projection_artifacts', ArtifactInfo, self.projection_artifacts_callback)
+        #self.projection_artifacts_sub = rospy.Subscriber('projection_artifacts', ArtifactInfo, self.projection_artifacts_callback)
 
         # Storage for images, posearrays, and projection artifacts
         self.images = {'front': None, 'left': None, 'right': None}
         self.posearray_spot = None
         self.posearray_frontier = None
-        self.projection_artifacts = []
+        #self.projection_artifacts = []
 
         # CV Bridge
         self.bridge = CvBridge()
@@ -85,6 +88,7 @@ class CameraServer:
                                     pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w] for pose in msg.poses]
 
     def projection_artifacts_callback(self, msg):
+        '''
         artifact = {
             'header': msg.header.stamp.to_sec(),
             'artifact_id': msg.artifact_id,
@@ -92,13 +96,14 @@ class CameraServer:
             'obj_class': msg.obj_class,
             'obj_prob': msg.obj_prob
         }
-        self.projection_artifacts.append(artifact)
+        '''
+        self.projection_artifacts.append(msg)
 
     def add_endpoints(self):
         self.app.add_url_rule('/image', 'get_image', self.send_image, methods=['GET'])
         self.app.add_url_rule('/posearray_spot', 'get_posearray_spot', self.send_posearray_spot, methods=['GET'])
         self.app.add_url_rule('/posearray_frontier', 'get_posearray_frontier', self.send_posearray_frontier, methods=['GET'])
-        self.app.add_url_rule('/projection_artifacts', 'get_projection_artifacts', self.send_projection_artifacts, methods=['GET'])
+        #self.app.add_url_rule('/projection_artifacts', 'get_projection_artifacts', self.send_projection_artifacts, methods=['GET'])
         self.app.add_url_rule('/glip_labels', 'receive_glip_labels', self.receive_glip_labels, methods=['POST'])
         self.app.add_url_rule('/query_near', 'query_near', self.query_near, methods=['GET'])
         self.app.add_url_rule('/waypoint', 'receive_waypoint', self.receive_waypoint, methods=['POST'])
@@ -174,8 +179,10 @@ class CameraServer:
             return jsonify(self.posearray_frontier)
         return 'Pose array frontier not available', 404
 
-    def send_projection_artifacts(self):
+    '''
+        def send_projection_artifacts(self):
         return jsonify(self.projection_artifacts)
+    '''
 
 if __name__ == '__main__':
     server = CameraServer()

@@ -1,0 +1,46 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/8132adc6-a4ec-4704-8535-3ea8f11059d3/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+llm_result: {"pattern": "grid", "pattern_offset": 1, "avoid": "planted areas, conmods", "seed": "True"}
+results_str:  {"pattern": "grid", "pattern_offset": 1, "avoid": "planted areas, conmods", "seed": "True"}
+constraints:  {'pattern': 'grid', 'pattern_offset': 1, 'avoid': 'planted areas, conmods', 'seed': True}
+building policy...
+feedback is none!
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Begin by checking the current position of the robot. If the robot is located outside the plot bounds, plan the shortest route possible to get inside the plot bounds.
+
+2. Activate the RGB cameras and begin surveying the area. Look for any existing "planted areas" and "conmods" within the plot bounds. These are the areas to avoid while performing the task.
+
+3. If there is any difficulty in identifying "planted areas" or "conmods", ask the user for assistance. Say, "I can't find planted areas or conmods, where should I look?"
+
+4. Begin planning the planting process. According to the 'pattern' and 'pattern_offset' provided in the constraint dictionary, plan to plant in a 1m x 1m grid.
+
+5. Start at one corner of the plot bounds. From this point, calculate the next grid position to be 1m away in the x-axis and y-axis. This will be the next planting point.
+
+6. Before moving to the next planting point, check if the path interferes with the 'avoid' areas - the "planted areas" and "conmods". If the path does interfere, calculate an alternative path.
+
+7. Once a safe path has been identified, move to the calculated grid position.
+
+8. Once the robot reaches the planting point, plant the seed.
+
+9. Update the system to mark the new planting point as part of the "planted areas".
+
+10. Repeat steps 5 through 9 until the entire plot within the plot bounds has been covered in the 1m x 1m grid pattern.
+
+11. If at any point during the process the robot is uncertain or faces an unexpected issue, pause the task and ask the user for guidance. 
+
+12. Once the entire plot has been covered, stop the planting process. Inform the user that the task has been completed. 
+
+13. Regularly update the user on the progress of the task. This includes providing updates when a row is completed, when half the plot has been planted, and when the task is nearing completion.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+Initally, there won't be any planted areas. So you can remove that from step 3.  Otherwise this looks good.
+verifying the policy; this is the llm result: False
+Updating feedback!
+building policy...
+this is the new prompt:  Given the following policy and user feedback, which steps, if any, were correct? 
+Policy: *INSERT_POLICY* 
+Feedback: Initally, there won't be any planted areas. So you can remove that from step 3.  Otherwise this looks good.
+
+modifying policy...
+good_steps:  As an AI, I am unable to process this request as there is no specific policy provided for me to compare with the user's feedback. Please provide the policy or the steps mentioned, so I can help you more effectively.

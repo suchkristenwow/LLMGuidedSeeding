@@ -1,0 +1,7 @@
+The planted areas are just the areas immediately around where you already planted. So at the beginning, there is nothing to avoid. You should keep track of where you've planted 
+and then avoid driving in a 15 cm radius of that location. You can do this by computing the transform for each of the wheels given the pose estimate of the robot. Then 
+you can be sure to not run over places where you just seeded. 
+
+You should also be able to tell visually where you've driven because you will see tire marks on the ground. 
+The tire marks will look like 2 sets of darker channels in the dirt and they'll show up any time you drive through dirt or sand. Given you see tire marks, you can compute
+the transform between the wheels and the seeder to determine where you could have seeded. 

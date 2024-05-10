@@ -1,0 +1,33 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/6a367765-4547-435a-88eb-f5c22aec8a78/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+parsing prompt to get constraints ...
+llm_result: The relevant constraints and goal landmarks for the given prompt "Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods" can be formatted into a dictionary as follows:
+
+```python
+{
+    "goal_lms": "bounded area",
+    "pattern": "grid",
+    "pattern_offset": 1.0,
+    "avoid": ["planted areas", "conmods"],
+    "seed": "True"
+}
+```
+
+This dictionary format includes the key-value pairs based on the constraints and goal landmarks mentioned in the prompt. If you need any further assistance or clarification, feel free to ask!
+results_str:  {
+    "goal_lms": "bounded area",
+    "pattern": "grid",
+    "pattern_offset": 1.0,
+    "avoid": ["planted areas", "conmods"],
+    "seed": "True"
+}
+constraints:  {'goal_lms': 'bounded area', 'pattern': 'grid', 'pattern_offset': 1.0, 'avoid': ['planted areas', 'conmods'], 'seed': True}
+building policy...
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Start by locating the "bounded area" landmark using the RGB cameras to ensure we are within the specified plot bounds.
+2. If the "bounded area" landmark is not immediately visible, prompt the user with "I can't find the bounded area, where should I look?"
+3. Once the "bounded area" is located, use lidar-inertial odometry and GPS to determine the current position within the plot bounds.
+4. Begin planting seeds in a 1mx1m grid pattern within the bounded area, making sure to maintain a distance of 1.0m between each seed.
+5. While moving and planting, continuously monitor the surroundings using RGB cameras to avoid driving over any previously planted areas or any "conmods" (constructions or man-made objects).
+6. If there are any uncertainties or obstacles in the path, prompt the user for guidance or direction.
+7. Continue planting seeds in the grid pattern until the entire bounded area has been covered while avoiding the specified obstacles.

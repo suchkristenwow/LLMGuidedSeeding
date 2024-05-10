@@ -1,0 +1,9 @@
+1. Check current location using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. Begin scanning the immediate environment using RGB cameras to identify any landmarks of interest, specifically "conmods" and areas where seeds have been previously planted.
+3. If a "conmods" landmark is not immediately visible, ask the user for guidance: "I can't find any conmods, where should I look?"
+4. Start planning a route to the nearest unseeded location within the plot bounds to begin planting seeds in a 1mx1m grid pattern.
+5. Once a suitable location is identified, position the robot and plant a seed.
+6. Check the surroundings for any obstacles or previously planted seeds to avoid driving over them.
+7. Continue planting seeds in a grid pattern, maintaining a 1m distance between each seed.
+8. Periodically reassess the location using lidar-inertial odometry and GPS to ensure the robot remains within the plot bounds.
+9. If any issues arise or further guidance is needed, communicate with the user for assistance.

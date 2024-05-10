@@ -1,0 +1,129 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/d17b061d-0375-45f5-8abd-5f80c95d0257/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+llm_result: Based on the given prompt, the relevant constraints and goal landmarks can be formatted into a dictionary as follows:
+
+{
+  "pattern": "grid",
+  "pattern_offset": 1.0,
+  "avoid": ["planted_area", "conmods"],
+  "seed": "True"
+}
+
+This dictionary captures the key constraints and goal landmarks necessary for the robotic agent to execute the task of planting seeds in a 1mx1m grid within the bounded area while avoiding driving over the planted seeds or any conmods.
+results_str:  {
+  "pattern": "grid",
+  "pattern_offset": 1.0,
+  "avoid": ["planted_area", "conmods"],
+  "seed": "True"
+}
+constraints:  {'pattern': 'grid', 'pattern_offset': 1.0, 'avoid': ['planted_area', 'conmods'], 'seed': True}
+building policy...
+self.feedback: None
+self.policy: None
+feedback is none!
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Check current location and orientation using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. Begin scanning the immediate environment using RGB cameras to identify any existing planted areas or conmods (construction materials) to avoid driving over them.
+3. If any planted areas or conmods are detected, mark them as no-go zones for planting.
+4. Start planning a path for planting in a 1m x 1m grid pattern within the bounded area, ensuring to avoid the marked no-go zones.
+5. Locate a suitable landmark in the environment that matches the criteria specified in the constraint dictionary (e.g., goal_lms).
+6. If unable to find the specific landmark needed for planting, prompt the user: "I can't find {landmark}, where should I look?"
+7. Begin planting seeds in the 1m x 1m grid pattern, maintaining a spacing of 1 meter between each planting location.
+8. Continuously monitor the robot's progress to ensure it stays within the plot bounds and follows the designated planting pattern.
+9. Once all planting locations within the grid pattern have been covered, verify that no areas with existing plantings or conmods were traversed.
+10. Notify the user of the completion of the task and await further instructions or feedback.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+At first, there won't be any planted areas. You need to add something to step 8 that updates the system memory with the locations of the planted seeds so you can avoid them. Also there are no goal landmarks in this configuration so you can remove step 6. You can also remove step 9. 
+verifying the policy; this is the llm result: False
+policy verification result: False
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Check current location and orientation using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. Begin scanning the immediate environment using RGB cameras to identify any existing planted areas or conmods (construction materials) to avoid driving over them.
+3. If any planted areas or conmods are detected, mark them as no-go zones for planting.
+4. Start planning a path for planting in a 1m x 1m grid pattern within the bounded area, ensuring to avoid the marked no-go zones.
+5. Locate a suitable landmark in the environment that matches the criteria specified in the constraint dictionary (e.g., goal_lms).
+6. If unable to find the specific landmark needed for planting, prompt the user: "I can't find {landmark}, where should I look?"
+7. Begin planting seeds in the 1m x 1m grid pattern, maintaining a spacing of 1 meter between each planting location.
+8. Continuously monitor the robot's progress to ensure it stays within the plot bounds and follows the designated planting pattern.
+9. Once all planting locations within the grid pattern have been covered, verify that no areas with existing plantings or conmods were traversed.
+10. Notify the user of the completion of the task and await further instructions or feedback.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+At first, there won't be any planted areas. You need to add something to step 8 that updates the system memory with the locations of the planted seeds so you can avoid them. Also there are no goal landmarks in this configuration so you can remove step 6. You can also remove step 9. 
+verifying the policy; this is the llm result: False
+Updating feedback!
+building policy...
+self.feedback: At first, there won't be any planted areas. You need to add something to step 8 that updates the system memory with the locations of the planted seeds so you can avoid them. Also there are no goal landmarks in this configuration so you can remove step 6. You can also remove step 9. 
+self.policy: 1. Check current location and orientation using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. Begin scanning the immediate environment using RGB cameras to identify any existing planted areas or conmods (construction materials) to avoid driving over them.
+3. If any planted areas or conmods are detected, mark them as no-go zones for planting.
+4. Start planning a path for planting in a 1m x 1m grid pattern within the bounded area, ensuring to avoid the marked no-go zones.
+5. Locate a suitable landmark in the environment that matches the criteria specified in the constraint dictionary (e.g., goal_lms).
+6. If unable to find the specific landmark needed for planting, prompt the user: "I can't find {landmark}, where should I look?"
+7. Begin planting seeds in the 1m x 1m grid pattern, maintaining a spacing of 1 meter between each planting location.
+8. Continuously monitor the robot's progress to ensure it stays within the plot bounds and follows the designated planting pattern.
+9. Once all planting locations within the grid pattern have been covered, verify that no areas with existing plantings or conmods were traversed.
+10. Notify the user of the completion of the task and await further instructions or feedback.
+self.current_policy: 1. Check current location and orientation using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. Begin scanning the immediate environment using RGB cameras to identify any existing planted areas or conmods (construction materials) to avoid driving over them.
+3. If any planted areas or conmods are detected, mark them as no-go zones for planting.
+4. Start planning a path for planting in a 1m x 1m grid pattern within the bounded area, ensuring to avoid the marked no-go zones.
+5. Locate a suitable landmark in the environment that matches the criteria specified in the constraint dictionary (e.g., goal_lms).
+6. If unable to find the specific landmark needed for planting, prompt the user: "I can't find {landmark}, where should I look?"
+7. Begin planting seeds in the 1m x 1m grid pattern, maintaining a spacing of 1 meter between each planting location.
+8. Continuously monitor the robot's progress to ensure it stays within the plot bounds and follows the designated planting pattern.
+9. Once all planting locations within the grid pattern have been covered, verify that no areas with existing plantings or conmods were traversed.
+10. Notify the user of the completion of the task and await further instructions or feedback.
+self.feedback: At first, there won't be any planted areas. You need to add something to step 8 that updates the system memory with the locations of the planted seeds so you can avoid them. Also there are no goal landmarks in this configuration so you can remove step 6. You can also remove step 9. 
+this is the new prompt:  Can you modify the following policy using the user feedback? 
+Policy: *INSERT_POLICY* 
+Feedback: At first, there won't be any planted areas. You need to add something to step 8 that updates the system memory with the locations of the planted seeds so you can avoid them. Also there are no goal landmarks in this configuration so you can remove step 6. You can also remove step 9. 
+Be sure to return all steps of the modified policy so that it can be executed by the robot. 
+modifying policy...
+
+Question:  I believe this policy should complete the desired task. What do you think?
+Modified Policy:
+
+1. Begin exploration of the area.
+2. Identify any obstacles and avoid collisions.
+3. Check for planted seeds in the surroundings.
+4. If planted seeds are detected, mark their locations.
+5. Continue exploration and mapping of the area.
+6. Return to the starting point after completing the mapping process.
+
+Updated Steps:
+
+1. Begin exploration of the area.
+2. Identify any obstacles and avoid collisions.
+3. Check for planted seeds in the surroundings.
+4. If planted seeds are detected, mark their locations.
+5. Continue exploration and mapping of the area.
+6. Return to the starting point after completing the mapping process.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+
+verifying the policy; this is the llm result: I'm sorry, but I don't see any feedback or indication of approval or disapproval in the paragraph you provided. Could you please provide more context or clarify the feedback so I can accurately determine if the user approves of the policy or not?
+policy verification result: False
+Question:  I believe this policy should complete the desired task. What do you think?
+Modified Policy:
+
+1. Begin exploration of the area.
+2. Identify any obstacles and avoid collisions.
+3. Check for planted seeds in the surroundings.
+4. If planted seeds are detected, mark their locations.
+5. Continue exploration and mapping of the area.
+6. Return to the starting point after completing the mapping process.
+
+Updated Steps:
+
+1. Begin exploration of the area.
+2. Identify any obstacles and avoid collisions.
+3. Check for planted seeds in the surroundings.
+4. If planted seeds are detected, mark their locations.
+5. Continue exploration and mapping of the area.
+6. Return to the starting point after completing the mapping process.
+Feedback: 

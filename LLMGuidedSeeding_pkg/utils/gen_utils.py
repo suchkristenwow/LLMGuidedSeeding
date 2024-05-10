@@ -1,6 +1,30 @@
 import json 
 from matplotlib.path import Path
 import numpy as np 
+import os 
+
+def get_most_recent_file(dir,filename,sub_dir_name=None): 
+    files = []
+    for sub_dir in os.listdir(dir): 
+        #print("sub_dir: ",sub_dir)
+        if not os.path.isdir(os.path.join(dir,sub_dir)):
+            #print("this is not a directory... moving on")
+            continue 
+        if sub_dir_name is None: 
+            #print("checking for filename:{} in: {}".format(filename,os.path.join(dir,sub_dir)))
+            if filename in os.listdir(os.path.join(dir,sub_dir)): 
+                abs_path = os.path.join(dir,sub_dir + "/" + filename) 
+                files.append(abs_path)
+        else:
+            #print("checking for filename: {} in: {}".format(filename,os.path.join(dir,sub_dir + "/" + sub_dir_name)))
+            path = os.path.join(dir,sub_dir + "/" + sub_dir_name) 
+            if os.path.exists(path) and os.path.isdir(path):
+                if filename in os.listdir(path): 
+                    abs_path = os.path.join(path,filename) 
+                    files.append(abs_path)
+
+    most_recent_file = max(files, key=os.path.getctime)
+    return most_recent_file
 
 def dictify(results_str):
     '''

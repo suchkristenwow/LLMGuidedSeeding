@@ -1,0 +1,20 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/8ad00487-2ed4-41cd-82a9-48e2a37409ab/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+llm_result: The constraints for the given prompt can be structured as follows in a dictionary format:
+
+{"pattern": "grid", "pattern_offset": 1.0, "avoid": ["planted", "conmods"], "seed": "True"}
+
+This dictionary includes the goal landmark being a 1mx1m grid, specifies to avoid driving over planted areas or conmods, and indicates that the robot should plant seeds according to the specified grid pattern within the bounded area.
+results_str:  {"pattern": "grid", "pattern_offset": 1.0, "avoid": ["planted", "conmods"], "seed": "True"}
+constraints:  {'pattern': 'grid', 'pattern_offset': 1.0, 'avoid': ['planted', 'conmods'], 'seed': True}
+I dont know what planted is. Ill have to ask.
+I dont know what conmods is. Ill have to ask.
+llm_result:  1. Begin by localizing the robot within the plot bounds using lidar-inertial odometry and GPS.
+2. Check for any planted seeds or conmods (constructions or obstacles) within the plot to avoid driving over them.
+3. Start scanning the environment using RGB cameras to identify landmarks within the plot, focusing on the "goal_lms" specified in the constraints dictionary.
+4. If there are any landmarks in the "goal_lms" category that are not immediately visible, ask the user for guidance: "I can't find {landmark}, where should I look?"
+5. Once the landmarks are identified, plan a route to start planting seeds in a 1m x 1m grid pattern, ensuring that the robot stays within the plot bounds at all times.
+6. Implement the grid pattern planting strategy, making sure to maintain a distance of 1m between each seed planted.
+7. Continuously monitor the robot's position and surroundings to avoid driving over any previously planted seeds or conmods, adjusting the route if necessary to prevent collisions.
+8. Complete the planting process systematically in the designated grid pattern, adhering to the avoidance constraints specified in the dictionary.
+9. Upon completion, provide a status update to the user indicating that the robot has successfully planted seeds in a 1m x 1m grid within the bounded area while avoiding previously planted seeds and conmods.

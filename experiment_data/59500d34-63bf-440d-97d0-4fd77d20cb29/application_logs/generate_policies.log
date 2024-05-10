@@ -1,0 +1,55 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/59500d34-63bf-440d-97d0-4fd77d20cb29/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+parsing prompt to get constraints ...
+llm_result: To format the constraints of the prompt into a dictionary with the specified keys, we can break it down as follows:
+
+- "goal_lms": Not explicitly mentioned in the prompt, but could be specified based on the environment. For example, if there are specific landmarks to avoid or target for planting.
+- "avoid": Specifies what areas to avoid driving over, in this case, wherever seeds have been planted or any "conmods".
+- "pattern": Indicates the planting pattern, in this case, a 1m x 1m grid.
+- "landmark_offset": Represents the distance to avoid when planting near landmarks.
+- "search": Not explicitly mentioned in the prompt, but could be used to specify any additional search parameters if needed.
+- "seed": Set to "True" as the robot should plant in the specified pattern.
+- "pattern_offset": Represents the distance between seeds in the grid pattern.
+
+Based on this breakdown, the dictionary format for the given prompt could be:
+
+{"avoid": ["planted", "conmods"], "pattern": "grid", "seed": "True", "pattern_offset": 1.0}
+
+If this format aligns with your requirements, we can proceed with this interpretation. Otherwise, please provide any necessary adjustments or additional details for further refinement.
+results_str:  {"avoid": ["planted", "conmods"], "pattern": "grid", "seed": "True", "pattern_offset": 1.0}
+constraints:  {'avoid': ['planted', 'conmods'], 'pattern': 'grid', 'seed': True, 'pattern_offset': 1.0}
+building policy...
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Initialize robot within the plot bounds defined by the "plot_bounds" variable.
+2. Set the pattern offset to 1.0 meters as specified in the constraint dictionary.
+3. Begin scanning the environment using RGB cameras to locate any existing planted areas or conmods (constructions or man-made objects) to avoid driving over them.
+4. Start the planting process by navigating the robot to the first grid position in the 1mx1m grid within the plot bounds.
+5. Plant seeds in the designated grid position while ensuring that the robot does not drive over any planted areas or conmods.
+6. Move the robot to the next grid position in the 1mx1m grid, following the defined grid pattern offset of 1.0 meters.
+7. Repeat the planting process in each grid position while avoiding areas where seeds have already been planted or any conmods present.
+8. Continue navigating and planting seeds in a systematic grid pattern until the entire bounded area has been covered.
+9. Upon completion, verify that all seeds have been planted in the specified grid pattern within the plot bounds while avoiding previously planted areas and conmods.
+10. Notify the user of the successful completion of planting in a 1mx1m grid while adhering to the constraints provided.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+Add a step where you update a list of planted seed locations so you can avoid them
+verifying the policy; this is the llm result: False
+policy verification result: False
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Initialize robot within the plot bounds defined by the "plot_bounds" variable.
+2. Set the pattern offset to 1.0 meters as specified in the constraint dictionary.
+3. Begin scanning the environment using RGB cameras to locate any existing planted areas or conmods (constructions or man-made objects) to avoid driving over them.
+4. Start the planting process by navigating the robot to the first grid position in the 1mx1m grid within the plot bounds.
+5. Plant seeds in the designated grid position while ensuring that the robot does not drive over any planted areas or conmods.
+6. Move the robot to the next grid position in the 1mx1m grid, following the defined grid pattern offset of 1.0 meters.
+7. Repeat the planting process in each grid position while avoiding areas where seeds have already been planted or any conmods present.
+8. Continue navigating and planting seeds in a systematic grid pattern until the entire bounded area has been covered.
+9. Upon completion, verify that all seeds have been planted in the specified grid pattern within the plot bounds while avoiding previously planted areas and conmods.
+10. Notify the user of the successful completion of planting in a 1mx1m grid while adhering to the constraints provided.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+[A[A[A[A[A[A[A[A[A[A[A[B[BGet rid of step 4, just avoid driving over the ConMods.
+verifying the policy; this is the llm result: False
+building policy...

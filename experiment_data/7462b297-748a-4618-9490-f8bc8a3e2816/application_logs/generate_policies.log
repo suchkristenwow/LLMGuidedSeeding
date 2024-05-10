@@ -1,0 +1,37 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/7462b297-748a-4618-9490-f8bc8a3e2816/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+parsing prompt to get constraints ...
+llm_result: To execute the task described in the prompt, we can break down the constraints into the following dictionary format:
+
+{
+  "pattern": "grid",
+  "pattern_offset": 1.0,
+  "avoid": ["planted", "conmods"],
+  "seed": "True"
+}
+
+This dictionary includes the pattern of planting in a grid, the offset of 1.0 meters for the grid spacing, the need to avoid driving over planted areas or any conmods, and the directive to plant seeds.
+results_str:  {
+  "pattern": "grid",
+  "pattern_offset": 1.0,
+  "avoid": ["planted", "conmods"],
+  "seed": "True"
+}
+constraints:  {'pattern': 'grid', 'pattern_offset': 1.0, 'avoid': ['planted', 'conmods'], 'seed': True}
+building policy...
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Begin by localizing the robot using lidar-inertial odometry and GPS to ensure it is within the plot bounds provided in the "plot_bounds" variable.
+2. Start scanning the environment using the RGB cameras to identify any existing landmarks and obstacles, such as shrubs, fences, or other vegetation.
+3. Plan the shortest route to move the robot inside the plot bounds if it is currently outside the bounds.
+4. Check the constraint dictionary for the task details. In this case, the constraint is to plant in a 1mx1m grid within the bounded area while avoiding driving over already planted seeds or conmods.
+5. Start planting seeds in a grid pattern within the plot bounds. Ensure that the planting locations are 1 meter apart from each other in both horizontal and vertical directions.
+6. While planting, use the landmark avoidance system to avoid driving over areas where seeds have already been planted or any conmods present in the environment.
+7. Continuously scan the surroundings using RGB cameras to detect any changes or obstacles that may affect the planting process.
+8. If there are any uncertainties or if a landmark mentioned in the constraint dictionary cannot be located, prompt the user with "I can't find {landmark}, where should I look?" for further guidance.
+9. Monitor the progress of planting in the 1mx1m grid pattern and ensure that the robot stays within the plot bounds throughout the task.
+10. Once all seeds have been planted in the specified grid pattern and the avoidance constraints have been followed, report the completion of the task to the user.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise. 
+
+You don't need step 4 and you dont need step 8 either. 
+verifying the policy; this is the llm result: False
+Found a valid policy approved by the human!

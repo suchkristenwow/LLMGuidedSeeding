@@ -1,0 +1,41 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/927b215d-c696-450a-b313-c3eb5c518912/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
+parsing prompt to get constraints ...
+llm_result: Based on the prompt provided, the relevant constraints can be categorized as follows:
+
+{"pattern": "grid", "pattern_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
+
+Does this categorization match your expectations for the constraints in the prompt, or would you like any adjustments?
+results_str:  {"pattern": "grid", "pattern_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
+constraints:  {'pattern': 'grid', 'pattern_offset': 1, 'avoid': ['planted', 'conmods'], 'seed': True}
+building policy...
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Check current location using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. If the robot is outside the plot bounds, plan the shortest route to enter the bounded area while avoiding obstacles.
+3. Start by locating any existing planted areas or conmods (concentrated modules) within the plot to avoid planting in those spots.
+4. Use RGB cameras to identify suitable locations for planting seeds in a 1mx1m grid pattern within the plot bounds.
+5. Begin planting seeds in the identified grid pattern, ensuring to maintain a distance of 1 meter between each seed.
+6. Continuously monitor the surroundings using the RGB cameras to avoid driving over any previously planted areas or conmods.
+7. If there are any uncertainties in locating suitable planting spots or avoiding obstacles, interface with the human for further direction or context.
+8. Repeat the planting process until the entire bounded area has been covered in the 1mx1m grid pattern.
+9. Once all seeds have been planted, verify the completion of the task and ensure that the robot remains within the plot bounds.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise. 
+
+[A[Apython[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[DCan you add a step after step 6 to update a list of planted locations?
+verifying the policy; this is the llm result: Based on the feedback provided, it seems like the user is suggesting an improvement to the policy by adding a step to update a list of planted locations after step 6. Therefore, the user likely approves of the policy with this addition. 
+
+True
+bool(llm_result): True
+<class 'str'>
+policy verification result: True
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Check current location using lidar-inertial odometry and GPS to ensure the robot is within the plot bounds.
+2. If the robot is outside the plot bounds, plan the shortest route to enter the bounded area while avoiding obstacles.
+3. Start by locating any existing planted areas or conmods (concentrated modules) within the plot to avoid planting in those spots.
+4. Use RGB cameras to identify suitable locations for planting seeds in a 1mx1m grid pattern within the plot bounds.
+5. Begin planting seeds in the identified grid pattern, ensuring to maintain a distance of 1 meter between each seed.
+6. Continuously monitor the surroundings using the RGB cameras to avoid driving over any previously planted areas or conmods.
+7. If there are any uncertainties in locating suitable planting spots or avoiding obstacles, interface with the human for further direction or context.
+8. Repeat the planting process until the entire bounded area has been covered in the 1mx1m grid pattern.
+9. Once all seeds have been planted, verify the completion of the task and ensure that the robot remains within the plot bounds.
+Feedback: 

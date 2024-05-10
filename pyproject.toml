@@ -7,9 +7,12 @@ name = "LLMGuidedSeeding_pkg"
 version = "0.1.0"
 description = "A very special project"
 authors = [
-    { name = "Kristen Such", email = "kristen.such@colorado.edu" }
+    { name = "Kristen Such", email = "kristen.such@colorado.edu" },
+    { name = "Miles Mena", email = "miles.mena@colorado.edu" }
 ]
+
 packages = [
     { include = "LLMGuidedSeeding" },
-    { include = "LLMGuidedSeeding_pkg.utils" }
+    { include = "LLMGuidedSeeding_pkg.utils" },
+    { include = "UI_pkg" }
 ]

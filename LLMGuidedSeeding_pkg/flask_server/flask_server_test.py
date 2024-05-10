@@ -72,9 +72,11 @@ class TestCameraServer(unittest.TestCase):
         self.server.run_flask()
         self.server.app.run.assert_called_once()
 
-    def test_integration(self):
+    '''
+        def test_integration(self):
         # Integration test simulating the overall functionality of the CameraServer
         # This test should be expanded based on the actual application logic and requirements
+    '''
 
 if __name__ == '__main__':
     unittest.main()

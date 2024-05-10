@@ -1,0 +1,10 @@
+1. Begin by localizing the robot using lidar-inertial odometry and GPS to ensure it is within the plot bounds provided in the "plot_bounds" variable.
+2. Start scanning the environment using the RGB cameras to identify any existing landmarks and obstacles, such as shrubs, fences, or other vegetation.
+3. Plan the shortest route to move the robot inside the plot bounds if it is currently outside the bounds.
+4. Check the constraint dictionary for the task details. In this case, the constraint is to plant in a 1mx1m grid within the bounded area while avoiding driving over already planted seeds or conmods.
+5. Start planting seeds in a grid pattern within the plot bounds. Ensure that the planting locations are 1 meter apart from each other in both horizontal and vertical directions.
+6. While planting, use the landmark avoidance system to avoid driving over areas where seeds have already been planted or any conmods present in the environment.
+7. Continuously scan the surroundings using RGB cameras to detect any changes or obstacles that may affect the planting process.
+8. If there are any uncertainties or if a landmark mentioned in the constraint dictionary cannot be located, prompt the user with "I can't find {landmark}, where should I look?" for further guidance.
+9. Monitor the progress of planting in the 1mx1m grid pattern and ensure that the robot stays within the plot bounds throughout the task.
+10. Once all seeds have been planted in the specified grid pattern and the avoidance constraints have been followed, report the completion of the task to the user.

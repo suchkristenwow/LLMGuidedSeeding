@@ -1,0 +1,31 @@
+You are guiding an autonomous robotic agent to execute the given prompt. 
+
+Prompt: "*INSERT_PROMPT*"
+
+The robot is supposed to help ecologists with tasks related to revegetation of degraded rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. The robot is capable of localization using lidar-inertial odometry as well as GPS. 
+Whenever there is some uncertainty, you can interface with the human for more direction or context. 
+
+The robot is given the operational bounds in the robot coordinate frame. This variable is called "plot_bounds". The plot bounds are given as a nx2 np array describing the
+contour. It is important that the robot operate inside the bounds and never plan to drive outside of the plot bounds. If the robot begins outside of the plot bounds, the 
+first step should be to plan the shortest route possible to be inside the bounds.
+
+In addition to a user-given prompt, I also have a dictionary of important constraints. 
+
+Constraint Dictionary: *INSERT_CONSTRAINT_DICTIONARY*
+
+In this dictionary there can be the following keys: "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". 
+
+The entry under the key "avoid" is a list of objects the user wishes the robot to avoid. The entry under the key "goal_lms" are objects the user wishes the robot to find 
+and navigate towards. The entry under "pattern" is a string defining the desired pattern in which the robot should drive to execute the task. The entry under "seed" is 
+a boolean variable indicating if the user wants the robot to seed as part of the policy or not. Finally, the entry under "pattern_offset" is a float variable indicating 
+any relevant offset to completing the task. For example if the user says "Plant 10 cm away from any shrubs in the plot", the "pattern_offset" would be 0.1. 
+
+If the "plant" boolean is True, be sure to maintain a list in the system memory of all the planted locations.
+
+The following is a LLM-generated policy to which the user has given some feedback. Return a new policy in the form of a numbered list that modifies the initial policy 
+according to the user feedback such that the constraints in the constraint dictionary are respected and the prompt given by the user can be successfuly executed.  
+
+Policy: *INSERT_POLICY* 
+Feedback: *INSERT_FEEDBACK*

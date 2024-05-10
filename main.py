@@ -213,9 +213,8 @@ class ExperimentRunner:
         self.create_logging_directory() 
         #launch the robot 
         self.launch_policy_gen()
-
+        #rehearsed_policy = self.launch_policy_rehearsal(policy)
         '''
-        rehearsed_policy = self.launch_policy_rehearsal(policy)
         self.launch_policy_execution(rehearsed_policy)
         self.start_process_monitoring()
         '''

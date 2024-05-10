@@ -1,0 +1,39 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/9bf1cdbd-42ef-4e2e-ad0b-094ae9caa8c0/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+llm_result: Based on the provided prompt, the constraints can be categorized as follows:
+
+{"pattern": "grid", "pattern_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
+
+This dictionary format captures the key elements of the prompt:
+- "pattern": specifies planting in a grid pattern
+- "pattern_offset": indicates the spacing between plantings as 1 meter
+- "avoid": lists the objects to avoid driving over, which includes areas where plants have been placed and any conmods
+- "seed": set to "True" indicating that the robot should plant in the specified pattern
+results_str:  {"pattern": "grid", "pattern_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
+constraints:  {'pattern': 'grid', 'pattern_offset': 1, 'avoid': ['planted', 'conmods'], 'seed': True}
+building policy...
+feedback is none!
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Begin by checking the current location of the robot using lidar-inertial odometry and GPS to ensure it is within the plot bounds.
+2. If the robot is outside the plot bounds, plan the shortest route to enter the bounded area while avoiding obstacles.
+3. Use the RGB cameras to scan the immediate environment for any shrubs, fences, or other landmarks specified in the constraint dictionary.
+4. Start planting seeds in a grid pattern within the bounded area. The grid spacing should be 1 meter by 1 meter as specified in the constraints.
+5. While planting, make sure to avoid driving over areas where seeds have already been planted or any conmods (constructed modules).
+6. Continuously update the robot's position using lidar-inertial odometry to ensure accurate placement of seeds in the grid pattern.
+7. If there are any uncertainties or if a specified landmark is not immediately visible, prompt the user for guidance by stating, "I can't find {landmark}, where should I look?"
+8. Once the grid pattern is completed, verify that all planting has been done correctly and that the robot remains within the plot bounds.
+9. Confirm that the task has been completed successfully and await further instructions or tasks.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+
+You can remove step 7 and also, be sure to update the system memory each time you plant with the location of the seed to ensure you avoid driving over them 
+verifying the policy; this is the llm result: False
+Updating feedback!
+building policy...
+this is the new prompt:  Given the following policy and user feedback, which steps, if any, were correct? Return an ordered list of integers of the steps that are good as is. 
+Policy: *INSERT_POLICY* 
+Feedback: You can remove step 7 and also, be sure to update the system memory each time you plant with the location of the seed to ensure you avoid driving over them 
+
+modifying policy...
+good_steps:  1. Step 7 should be removed.
+2. Update system memory each time you plant with the location of the seed to avoid driving over them.
