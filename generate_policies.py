@@ -16,7 +16,7 @@ class PolicyGenerator:
     ):
         self.logging_directory = logging_directory 
         self.query = self.read(prompt_path)
-        self.settings = toml.load(config_path)  
+        self.settings = toml.load(config_path)
         self.plot_bounds = np.genfromtxt(plot_bounds_path)
         self.current_policy = None 
         self.validPolicy = False 
@@ -37,6 +37,7 @@ class PolicyGenerator:
     def verify_policy(self,policy): 
         #ask the user if they approve of this policy 
         #print("policy verification result:",self.conversational_interface.ask_policy_verification(policy))
+        print("Policy: ", policy)
         if self.conversational_interface.ask_policy_verification(policy):
             self.validPolicy = True 
             print("Found a valid policy approved by the human!")
@@ -103,7 +104,7 @@ class PolicyGenerator:
         with open("tmp.txt","w") as f:
             f.write(llm_result)
             f.close()
-        ''' 
+        '''       
         constraints = {} 
         #if "?" not in llm_result:
         i0 = llm_result.index("{"); i1 = llm_result.index("}")

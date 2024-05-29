@@ -12,6 +12,7 @@ def encode_image(image_path):
 def generate_with_openai(prompt, max_retries = 5, retry_delay = 10, n_predict=2048, temperature=0.9, top_p=0.9, image_path=None):
     attempts = 0 
     openai_api_key = os.getenv("openai_key")
+    #print(f'OpenAI key: {openai_api_key}')
     if image_path is None:
         headers = {
             "Content-Type": "application/json",

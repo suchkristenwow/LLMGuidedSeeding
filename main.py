@@ -93,11 +93,11 @@ class ExperimentRunner:
                 tee_command, shell=True, env=os.environ, cwd=cwd, preexec_fn=os.setsid
             )
             logging.info(
-                f"Process '{process_name}' launched with command: {tee_command}"
+                f"Process '{process_name}' launched with command: {tee_command} \n"
             )
 
         except OSError as e:
-            logging.error(f"Error launching process '{process_name}': {e}")
+            logging.error(f"Error launching process '{process_name}': {e} \n")
 
         return process 
     
@@ -156,11 +156,13 @@ class ExperimentRunner:
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
+        print()
         os.makedirs(logs_dir_absolute, exist_ok=True)
         prompt_path = os.path.abspath(self.args.prompt)
         config_path = os.path.abspath(self.args.config)
         bounds_path = os.path.abspath(self.args.plot_bounds_path)
         print("this is config path: ",config_path)
+        print()
         # Split the command into a list of arguments
         #TO DO: LOAD IN PLOT BOUNDS FROM USER INTERFACE 
         launch_command = [
@@ -178,6 +180,7 @@ class ExperimentRunner:
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
+        print()
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
@@ -196,6 +199,7 @@ class ExperimentRunner:
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
+        print()
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
@@ -244,8 +248,8 @@ if __name__ == "__main__":
     config['prompt_file'] = os.path.join(os.path.expanduser("~"), config['prompt_file'])
     config['logging_directory'] = os.path.join(os.path.expanduser("~"), config['logging_directory'])
     config['commonObj_path'] = os.path.join(os.path.expanduser("~"), config['commonObj_path'])
-
-
+    print(config['commonObj_path'])
+    print()
     parser = argparse.ArgumentParser(description="Experiment Runner")
     parser.add_argument(
         "--config",
