@@ -1,0 +1,162 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+.txt-box {
+  width: 100%;
+  min-width: 400px;
+  max-width: 700px;
+  padding: 10px; 
+  box-sizing: border-box; 
+  border-radius: 10px;
+}
+
+/* .chatArea {
+  display: flex;
+  flex-direction: column;
+  height: 50vh;
+  background: #f0ece5;
+  padding: 20px;
+  width: 80%;
+  margin: 0 auto; 
+  border-radius: 10px;
+} */
+
+.chatArea {
+  display: flex;
+  flex-direction: column;
+  background: #f0ece5;
+  padding: 20px;
+  width: 80%;
+  margin: 0 auto;
+  border-radius: 10px;
+  max-height: calc(50vh - 20px); /* Set max height to half of the viewport height minus padding */
+  overflow: hidden; /* Hide overflow initially */
+}
+
+.chatBox {
+  flex-grow: 1; /* Allow the chat box to grow and take up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling for the chat box */
+}
+
+.chat {
+  margin: 1rem;
+  padding:1rem 2rem;
+  font-size:1.2rem;
+  display: flex;
+  align-items: flex-start;
+  text-align: justify;
+  padding: 0px 12px;
+  font-size: 1.25rem;
+  background: #d4ecb4;
+  border-radius: 5px;
+}
+
+.chatFooter textarea, button {
+  vertical-align: text-bottom;
+}
+.incoming {
+  background: #eedcac
+}
+
+.chatFooter {
+  display: flex;
+  justify-content: center;
+  margin-top: auto; /* Push the footer to the bottom */
+}
+
+/* .chatFooter textarea {
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  resize: none;
+  padding: 16px;
+} */
+
+.chatFooter textarea {
+  flex-grow: 1; /* Take up remaining space in the footer */
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  resize: none;
+  padding: 16px;
+}
+
+.chatFooter button {
+  background-image: url(send-button.png);
+    background-size: 100%;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    width: 60px;
+    height: 60px;
+    border-style: groove;
+    border-width: .5px; 
+    border-radius: 10px;
+    box-shadow: 1px 1px 1px rgba(0,0,0,.2);
+    padding: 10px;
+}
+
+.imageStream button {
+  background-size: 100%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  width: 60px;
+  height: 60px;
+  border-style: groove;
+  border-width: .5px; 
+  border-radius: 10px;
+  box-shadow: 1px 1px 1px rgba(0,0,0,.2);
+  padding: 10px;
+}
+
+.imageStream button img {
+  width: 30px; /* Adjust the width of the image */
+  height: 30px; /* Adjust the height of the image */
+}
+
+.imageStream img, button {
+  vertical-align: text-bottom;
+}
+
+.buttonContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
