@@ -1,0 +1,58 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/d50ebfbe-8127-4ff5-a201-8e489f1121c9/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+llm_result: {"avoid": "planted area, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+results_str:  {"avoid": "planted area, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+constraints:  {'avoid': 'planted area, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+Policy:  1. Initialize the robot's system and check its current position using lidar-inertial odometry and GPS.
+
+2. Compare the robot's current position with the operational bounds ("plot_bounds"). 
+
+3. If the robot is found outside the plot_bounds, plan the shortest route to enter the plot bounds.
+
+4. Once inside the plot_bounds, enable the robot's RGB cameras to observe landmarks and any potential obstacles such as "conmods" and previously "planted area".
+
+5. If a landmark or obstacle is detected, calculate the robot's trajectory to avoid it while maintaining the given 1mx1m grid pattern.
+
+6. If no landmarks or obstacles are found, the robot can start planting seeds according to the 1mx1m grid pattern. Make sure to record each planted location in the system memory.
+
+7. As the robot progresses through the grid, periodically check for landmarks or obstacles again using the RGB cameras. If any are detected, repeat step 5.
+
+8. Continue this process of observing, avoiding obstacles, and planting seeds until the entire area within the plot bounds has been covered.
+
+9. If a landmark in the 'avoid' list such as "conmods" or "planted area" cannot be located, inform the user by saying, "I can't find {landmark}, where should I look?"
+
+10. After the entire area within the plot bounds has been covered, confirm the completion of the task to the user and provide the list of all planted locations.
+
+11. Shutdown the robot's system.
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Initialize the robot's system and check its current position using lidar-inertial odometry and GPS.
+
+2. Compare the robot's current position with the operational bounds ("plot_bounds"). 
+
+3. If the robot is found outside the plot_bounds, plan the shortest route to enter the plot bounds.
+
+4. Once inside the plot_bounds, enable the robot's RGB cameras to observe landmarks and any potential obstacles such as "conmods" and previously "planted area".
+
+5. If a landmark or obstacle is detected, calculate the robot's trajectory to avoid it while maintaining the given 1mx1m grid pattern.
+
+6. If no landmarks or obstacles are found, the robot can start planting seeds according to the 1mx1m grid pattern. Make sure to record each planted location in the system memory.
+
+7. As the robot progresses through the grid, periodically check for landmarks or obstacles again using the RGB cameras. If any are detected, repeat step 5.
+
+8. Continue this process of observing, avoiding obstacles, and planting seeds until the entire area within the plot bounds has been covered.
+
+9. If a landmark in the 'avoid' list such as "conmods" or "planted area" cannot be located, inform the user by saying, "I can't find {landmark}, where should I look?"
+
+10. After the entire area within the plot bounds has been covered, confirm the completion of the task to the user and provide the list of all planted locations.
+
+11. Shutdown the robot's system.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+none
+verifying the policy; this is the llm result: Your request is missing the feedback from the user on a policy. Could you please provide the feedback so I can help accurately determine the user's approval?
+Updating feedback!
+building policy...

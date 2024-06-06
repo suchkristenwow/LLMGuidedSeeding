@@ -17,6 +17,7 @@ class PolicyGenerator:
         self.logging_directory = logging_directory 
         self.query = self.read(prompt_path)
         self.settings = toml.load(config_path)
+        # is this supposed to ge
         self.plot_bounds = np.genfromtxt(plot_bounds_path)
         self.current_policy = None 
         self.validPolicy = False 
@@ -40,6 +41,7 @@ class PolicyGenerator:
         print("Policy: ", policy)
         if self.conversational_interface.ask_policy_verification(policy):
             self.validPolicy = True 
+            
             print("Found a valid policy approved by the human!")
             with open(os.path.join(self.logging_directory,"finalPolicy.txt"),"w") as f:
                 f.write(policy)
@@ -83,6 +85,7 @@ class PolicyGenerator:
             with open("prompts/modify_policy.txt","r") as f: 
                 prompt = f.read() 
             enhanced_prompt = prompt.replace("*INSERT_PROMPT*",self.query)
+            print(constraints)
             enhanced_prompt = prompt.replace("*INSERT_CONSTRAINT_DICTIONARY*",constraints)
             enhanced_prompt = prompt.replace("*INSERT_POLICY*",self.current_policy)
             enhanced_prompt = prompt.replace("*INSERT_FEEDBACK*",self.feedback)
@@ -91,14 +94,16 @@ class PolicyGenerator:
             modified_policy = generate_with_openai(enhanced_prompt)
             print("modified_policy: ",modified_policy)
             self.current_policy = modified_policy 
+        return self.current_policy
 
     def parse_prompt(self): 
         print("parsing prompt to get constraints ...")
         with open("prompts/get_prompt_constraints.txt","r") as f:
             constraints_prompt = f.read()
         enhanced_query = constraints_prompt.replace("*INSERT_QUERY*",self.query)
+        print(f"Enhanced Query: {enhanced_query}\n")
         llm_result = generate_with_openai(enhanced_query) 
-        print("llm_result:",llm_result)
+        print(f"llm_result: {llm_result}\n")
         '''
         #Debug
         with open("tmp.txt","w") as f:
@@ -106,7 +111,8 @@ class PolicyGenerator:
             f.close()
         '''       
         constraints = {} 
-        #if "?" not in llm_result:
+        # if "?" not in llm_result.
+        # I think I got a result without a "{}", so we might guard against that
         i0 = llm_result.index("{"); i1 = llm_result.index("}")
         parsed_results = llm_result[i0:i1+1]
         constraints = dictify(parsed_results)
@@ -123,6 +129,7 @@ class PolicyGenerator:
                 if self.policy_iters == 0:
                     policy = self.build_policy(constraints)
                 #3. Verfiy with user 
+                
                 self.verify_policy(policy)
                 #4. Integrate user feedback 
                 if not self.validPolicy:
@@ -169,7 +176,7 @@ if __name__ == "__main__":
     # Parse the command-line arguments
     args = parser.parse_args() 
     
-    print("initting the Policy Generator with these arguments: ",args)
+    print(f"initting the Policy Generator with these arguments: \n{args}\n")
 
     pg = PolicyGenerator(
         prompt_path=args.prompt_path,

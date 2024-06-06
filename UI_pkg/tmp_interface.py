@@ -1,18 +1,27 @@
 import os 
 from LLMGuidedSeeding_pkg import * 
+import requests
 
 class ConversationalInterface:
     def __init__(
         self):
         self.this =  1 
         self.feedback = None 
+        self.backend_url = 'http://127.0.0.1:5000/backend/process_message'
 
     def ask_human(self,content):
         '''
-        This function ports text from the robot to the interface 
+        Make a post request to the backend flask server with the content we want to display to the human
         '''
         print("Question: ",content)
+        payload = {'message': content}
+        response = requests.post(self.backend_url, json = payload)
+        if response.ok:
+            print('Feedback sent to backend successfully! \n')
+        else:
+            print(f'Error sending feedback: {response.text} \n' )
     
+
     def get_human_feedback(self):
         '''
         This function ports text from the interface to the robot
@@ -23,8 +32,9 @@ class ConversationalInterface:
         '''
         feedback = input("Feedback: ")
         self.feedback = feedback
-        return feedback 
+        return feedback
     
+        
     def ask_policy_verification(self,policy):
         '''
         This function enhances the policy for verification by the human 

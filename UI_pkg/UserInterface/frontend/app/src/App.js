@@ -6,33 +6,6 @@ import './App.css';
 // https://www.youtube.com/watch?v=Bv8FORu-ACA
 // https://www.youtube.com/watch?v=me-BX6FtA9o
 
-// function WelcomeMessage() {
-//   const [message, setMessage] = useState('');
-//   const [loading, setLoading] = useState(true);
-//   useEffect(() => {
-//     const url = "http://127.0.0.1:5000"// "/"; // I've tried to proxy this url in package.json, but it doesn't work 
-//     fetch(url)
-//       .then(response => response.json())
-//       .then(data => {
-//         setMessage(data.message);
-//         setLoading(false);
-//          console.log(data);
-//       })
-//       .catch(error => {
-//         console.error('Error fetching welcome message:', error);
-//       });
-//   }, []);
-// if (loading && !message) {
-//     return <p>Oops. Something's wrong</p>;
-// }
-// if (!loading && !message) {
-//     return <p>Oops. Something`s wrong</p>;
-// }
-// return (
-//   <p>{message}</p>
-// );
-// }
-
 function ImageStream() {
   const [paused, setPaused] = useState(false)
   const [drawing, setDrawing] = useState(false) 
@@ -109,16 +82,50 @@ function Chat() {
   const [userMessage, setUserMessage] = useState('');
   const [messages, setMessages] = useState([]);
 
+  
+
   const handleChat = () => {
     if (userMessage.trim() !== '') {
       setMessages(prevMessages => [...prevMessages, { text: userMessage, type: "outgoing" }]);
       setUserMessage('');
 
-      setTimeout(() => {
-        setMessages(prevMessages => [...prevMessages, {text: "Thinking...", type: "incoming"}])
-      }, 100);
-    }
-  };
+     
+
+      // generateResponse();
+
+      // Send user message to Flask server
+    fetch('/backend/process_message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: userMessage }),
+    })
+    .then(response => {
+      if (response.ok) {
+        // Handle successful response
+        return response.json();
+      }
+      throw new Error('Network response was not ok.');
+    })
+    .then(data => {
+  
+      setMessages(prevMessages => [...prevMessages, { text: data.message, type: "incoming" }]);
+      
+      // const updatedMessages = [...prevMessages];
+      // updatedMessages[thinkingMessageIndex] = { text: data.message, type: "incoming" };
+      // return updatedMessages;
+      })
+    .catch(error => {
+      // Handle error
+      console.error('There was a problem with the fetch operation:', error);
+    });
+  }
+};
+
+   
+
+
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {

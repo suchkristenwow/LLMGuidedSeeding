@@ -1,0 +1,12 @@
+1. Verify the current location of the robot using the lidar-inertial odometry and GPS. If the robot is outside the plot bounds, navigate to the closest edge of the bounds.
+2. Initialize an empty list in the system memory to store the coordinates of the areas where the robot has planted seeds. This list will be referred to as the "Planted Locations List".
+3. Plan a grid-based path inside the operational bounds, taking into account the 1m x 1m pattern offset specified in the constraint dictionary.
+4. Begin navigating along the planned path.
+5. Before moving to each grid point, check the "avoid" list in the constraint dictionary. If the grid point falls within a planted area or any conmods (as per the RGB cameras), recalculate the path to avoid these locations.
+6. At each valid grid point, perform the following operations:
+   a. Plant a seed at the current location.
+   b. Add the coordinates of the current location to the Planted Locations List in the system memory.
+7. Continue the process of navigation and planting until all valid grid points within the plot bounds have been covered.
+8. Once all valid points have been covered, stop navigation and inform the user about the completion of the task.
+9. If at any point during the operation the robot encounters an error or an unknown landmark, pause the operation and inform the user about the situation for further direction or context.
+10. If the robot encounters a situation where it can't avoid the areas specified in the "avoid" list, inform the user about the problem and ask for further direction.

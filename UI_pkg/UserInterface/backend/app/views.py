@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, Response, render_template
+from flask import Blueprint, jsonify, Response, request, render_template
 import json
 import cv2 as cv
 import numpy as np
@@ -8,13 +8,9 @@ import time
 import threading
 from cv_bridge import CvBridge, CvBridgeError
 from .transform import CamProjector
+#from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai
 
 app_routes = Blueprint('app_routes', __name__)
-
-@app_routes.route('/')
-def welcome():
-    """Welcome message if someone ever finds their way to this backend"""
-    return jsonify({"message": "Welcome to the LLM Guided Seeding Interface."})
 
 # initialize frame and _frame. _frame must be a png so that imencode.tobytes() can be called properly
 _frame = open('backend/app/init_callback_img.png', 'rb').read()
@@ -28,6 +24,7 @@ points = []
 drawing = None
 bridge = CvBridge()
 
+################### Utility functions for the backend ##########################
 def image_callback(data):
     """Hook function to pull out our frames from Rospy.Subscriber"""
     global frame, _frame, cv_image #frame_count
@@ -45,7 +42,6 @@ def lidar_callback(data):
     #print("Lidar Data:")
     #print(data.data)
     
-
 def gen():
     """Video streaming generator function."""
     global _frame, paused_frame
@@ -55,20 +51,7 @@ def gen():
         time.sleep(0.1)
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + _frame + b'\r\n')
-        
-            
-@app_routes.route('/backend/image_stream')
-def image_stream():
-    """Video streaming route. Put this in the html or css that you'd like to display it"""
-    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app_routes.route('/backend/pause')
-def pause():
-    """Endpoint to serve the paused frame."""
-    global paused_frame, _frame
-    paused_frame = _frame
-    return Response(paused_frame, mimetype='image.jpeg')
-    
 # Function to continuously update the OpenCV window
 def update_window():
     global cv_image
@@ -102,6 +85,21 @@ def draw_polylines(event, x, y, flags, param):
         # points.append([x,y])
         points = []
         drawing_frame = cv.UMat(og_drawing_frame.copy())
+            
+################## App Routes #####################
+@app_routes.route('/backend/image_stream')
+def image_stream():
+    """Video streaming route. Put this in the html or css that you'd like to display it"""
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app_routes.route('/backend/pause')
+def pause():
+    """Endpoint to serve the paused frame."""
+    global paused_frame, _frame
+    paused_frame = _frame
+    return Response(paused_frame, mimetype='image.jpeg')
+    
+
 
 @app_routes.route('/backend/sketch_boundary')
 def drawing():
@@ -150,4 +148,10 @@ def index():
     """Video streaming home page from the Backend with a simple HTML."""
     return render_template('player2.html')
 
+@app_routes.route('/backend/process_message', methods=['POST'])
+def process_message():
+    data = request.get_json()
+    print(data)
+    print()
 
+    return jsonify(data)

@@ -1,0 +1,21 @@
+1. First, check if the robot is located within the operational bounds described by the variable "plot_bounds". If the robot is outside the bounds, plan the shortest route to the nearest point within the bounds.
+
+2. Once inside the operational area, start with the initial point for planting. Consider this as the starting point of the 1mx1m grid defined in the "pattern" and "pattern_offset" parameters.
+
+3. Check if the robot has seeds available for planting. If not, notify the user "I have run out of seeds, please refill." and wait for user input to continue.
+
+4. If seeds are available, proceed to plant the seed at the initial point and register this location in the system memory as a planted location.
+
+5. After planting, plan the route to the next point in the grid, which should be 1m apart in the straight line.
+
+6. While planning the route to the next point, avoid all the areas already planted and any conmods identified in the environment, as specified in the 'avoid' parameter. Utilize the robot's RGB cameras, lidar-inertial odometry, and GPS to ensure this.
+
+7. Repeat steps 3 to 6 until all points in the grid within the bounded area are covered. If there are any obstacles in the path, reroute and continue with the process.
+
+8. If the robot encounters a landmark that it cannot identify or locate, ask the user for assistance by stating, "I can't find {landmark}, where should I look?"
+
+9. Once all the points in the grid within the bounded area have been covered, confirm the completion of the task to the user, "Task completed, all seeds in the 1mx1m grid within the plot have been planted."
+
+10. Maintain the list of all the planted locations in the system memory for future reference or to share with the user if requested.
+
+Remember to ensure that the robot stays within the bounds of the operation area throughout the task.
