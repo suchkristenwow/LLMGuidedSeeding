@@ -8,6 +8,8 @@ import time
 import threading
 from cv_bridge import CvBridge, CvBridgeError
 from .transform import CamProjector
+from . import socketio
+
 #from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai
 
 app_routes = Blueprint('app_routes', __name__)
@@ -155,3 +157,10 @@ def process_message():
     print()
 
     return jsonify(data)
+
+###################### websocket ###################3
+@socketio.on('message')
+def handle_message(message):
+    print(f'Received message: {message} \n')
+    # Process message and send response if needed
+    socketio.send(f'Response from server: {message}')

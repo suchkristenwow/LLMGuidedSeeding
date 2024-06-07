@@ -1,8 +1,9 @@
 // useState: hook to manage the state of the img source
 // useEffect: hook to fetch the image when the component mounts
-import React, { useState,useRef, useReducer, useEffect} from 'react';
+import React, { useState, useRef, useReducer, useEffect} from 'react';
 // import axios from 'axios';
 import './App.css';
+import io from 'socket.io-client'
 // https://www.youtube.com/watch?v=Bv8FORu-ACA
 // https://www.youtube.com/watch?v=me-BX6FtA9o
 
@@ -78,54 +79,31 @@ function ImageStream() {
   )
   }
 
-function Chat() {
+function Chat({socket}) {
   const [userMessage, setUserMessage] = useState('');
   const [messages, setMessages] = useState([]);
+   // Set up event listener for incoming messages
+   useEffect(() => {
+    socket.on('message', message => {
+      //console.log('Server Response:', message);
+      setMessages(prevMessages => [...prevMessages, { text: message, type: 'incoming' }]);
+    });
 
+    // Clean up event listener when component unmounts
+    return () => {
+      socket.off('message'); // Remove the event listener
+    };
+  }, []); // Only run this effect when 'socket' changes
   
-
   const handleChat = () => {
     if (userMessage.trim() !== '') {
-      setMessages(prevMessages => [...prevMessages, { text: userMessage, type: "outgoing" }]);
-      setUserMessage('');
-
-     
-
-      // generateResponse();
-
-      // Send user message to Flask server
-    fetch('/backend/process_message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: userMessage }),
-    })
-    .then(response => {
-      if (response.ok) {
-        // Handle successful response
-        return response.json();
-      }
-      throw new Error('Network response was not ok.');
-    })
-    .then(data => {
-  
-      setMessages(prevMessages => [...prevMessages, { text: data.message, type: "incoming" }]);
       
-      // const updatedMessages = [...prevMessages];
-      // updatedMessages[thinkingMessageIndex] = { text: data.message, type: "incoming" };
-      // return updatedMessages;
-      })
-    .catch(error => {
-      // Handle error
-      console.error('There was a problem with the fetch operation:', error);
-    });
+      socket.emit('message', userMessage)
+      setMessages(prevMessages => [...prevMessages, {text: userMessage,type: "outgoing"}]);   
+      //socket.disconnect();
+      setUserMessage('');
+    }
   }
-};
-
-   
-
-
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
@@ -137,6 +115,7 @@ function Chat() {
   const handleChange = (event) => {
     setUserMessage(event.target.value);
   };
+
 
   return (
      <div className= "chatArea">
@@ -156,13 +135,14 @@ function Chat() {
 }
 
 function App() { 
+  const socket = io(); 
   return (
     <div className="App" style={{ backgroundColor: 'white', height: '100vh' }}>
       <div className="videoArea">
         {/* <WelcomeMessage /> */}
         <ImageStream />
       </div>
-        <Chat />
+        <Chat socket = {socket}/>
       
 
     </div>
