@@ -98,7 +98,7 @@ function Chat({socket}) {
   const handleChat = () => {
     if (userMessage.trim() !== '') {
       
-      socket.emit('message', userMessage)
+      socket.emit('outgoing', userMessage)
       setMessages(prevMessages => [...prevMessages, {text: userMessage,type: "outgoing"}]);   
       //socket.disconnect();
       setUserMessage('');

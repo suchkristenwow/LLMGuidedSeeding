@@ -160,7 +160,13 @@ def process_message():
 
 ###################### websocket ###################3
 @socketio.on('message')
-def handle_message(message):
+def handle_messsage(message):
     print(f'Received message: {message} \n')
     # Process message and send response if needed
     socketio.send(f'Response from server: {message}')
+
+@socketio.on('outgoing')
+def handle_outgoing(message):
+    print(f'Received message: {message} \n')
+    # Process message and send response if needed
+    socketio.emit('outgoing', message)  

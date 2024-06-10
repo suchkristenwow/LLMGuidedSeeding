@@ -1,0 +1,80 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/32c809ca-22fb-45c9-9f66-8066c7722d3f/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid": "planted area, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+
+results_str:  {"avoid": "planted area, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+constraints:  {'avoid': 'planted area, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+Policy:  1. First, check the current location of the robot. If it is outside of the plot bounds, plan the shortest route to enter the bounds, avoiding any conmods and previously planted areas. 
+
+2. Once inside the plot bounds, initiate the mapping function to create a grid pattern of 1mx1m inside the plot bounds. This will serve as the navigation guide for the robot during the planting process.
+
+3. For each grid cell in the created pattern, check if there is a conmod or a previously planted area within it. If there is, mark this cell as 'avoid' and proceed to the next one. 
+
+4. If the grid cell is free of any obstacles, navigate the robot to the center of the cell, always making sure to avoid any conmods or previously planted areas in the process.
+
+5. Once the robot is in the center of a grid cell, initiate the seeding process to plant a seed in the current location.
+
+6. After successfully planting a seed, store this location in the system memory as a planted location.
+
+7. Move to the next grid cell following the same process as outlined in steps 3 to 6.
+
+8. Continue this process until all the grid cells within the plot bounds have been covered.
+
+9. If at any point the robot can't find a clear path to the next grid cell due to obstacles, inform the user: "I can't find a clear path to the next grid cell, where should I look?"
+
+10. Once all the grid cells have been covered, send a notification to the user indicating that the task has been completed successfully. Also, provide a list of all the planted locations for the user's reference. 
+
+Remember to always keep track of the robot's current location and continually update its status in the system memory. The robot should always remain within the plot bounds during the whole process.
+Content: I believe this policy should complete the desired task. What do you think?
+1. First, check the current location of the robot. If it is outside of the plot bounds, plan the shortest route to enter the bounds, avoiding any conmods and previously planted areas. 
+
+2. Once inside the plot bounds, initiate the mapping function to create a grid pattern of 1mx1m inside the plot bounds. This will serve as the navigation guide for the robot during the planting process.
+
+3. For each grid cell in the created pattern, check if there is a conmod or a previously planted area within it. If there is, mark this cell as 'avoid' and proceed to the next one. 
+
+4. If the grid cell is free of any obstacles, navigate the robot to the center of the cell, always making sure to avoid any conmods or previously planted areas in the process.
+
+5. Once the robot is in the center of a grid cell, initiate the seeding process to plant a seed in the current location.
+
+6. After successfully planting a seed, store this location in the system memory as a planted location.
+
+7. Move to the next grid cell following the same process as outlined in steps 3 to 6.
+
+8. Continue this process until all the grid cells within the plot bounds have been covered.
+
+9. If at any point the robot can't find a clear path to the next grid cell due to obstacles, inform the user: "I can't find a clear path to the next grid cell, where should I look?"
+
+10. Once all the grid cells have been covered, send a notification to the user indicating that the task has been completed successfully. Also, provide a list of all the planted locations for the user's reference. 
+
+Remember to always keep track of the robot's current location and continually update its status in the system memory. The robot should always remain within the plot bounds during the whole process.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+that looks great please execute it
+verifying the policy; this is the llm result: True
+Found a valid policy approved by the human!

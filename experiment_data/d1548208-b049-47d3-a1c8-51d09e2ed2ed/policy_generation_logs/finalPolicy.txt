@@ -1,0 +1,19 @@
+1. Start by scanning the current location and surroundings using the RGB cameras and lidar-inertial odometry to get a clear understanding of the environment. Ensure that the robot is within the plot bounds. If the robot starts outside of the plot bounds, plan the shortest route to move inside the bounds.
+
+2. Once inside the bounds, begin by identifying any obstacles (such as 'planted areas' or 'conmods') to be avoided as specified in the 'avoid' key of the constraint dictionary. Create a list of these obstacles in the system memory.
+
+3. Generate a grid with a spacing of 1m x 1m (as given in 'pattern_offset') within the plot bounds. This grid will guide the planting pattern.
+
+4. Start from the current position, and move to the closest unvisited grid point. The path planning should be done in such a way that the robot avoids the obstacles listed in the system memory.
+
+5. Upon reaching a grid point, use the seed planting mechanism to plant a seed. Add this planted grid point to the 'planted areas' list in the system memory.
+
+6. Continue to the next closest unvisited grid point by again planning a path that avoids obstacles. Repeat step 5.
+
+7. If the robot encounters a grid point that is unidentifiable or obstructed by a landmark, inform the user: "I can't find the grid point, where should I look?"
+
+8. Continue this process until all grid points within the plot bounds have been visited and seeds have been planted as per the pattern.
+
+9. Once all grid points have been visited and planted, the task is completed. Inform the user that the task is complete and provide a list of all the planted locations. 
+
+10. Standby for further instructions or tasks.

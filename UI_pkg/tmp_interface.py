@@ -1,26 +1,30 @@
 import os 
 from LLMGuidedSeeding_pkg import * 
-import requests
+import socketio
 
 class ConversationalInterface:
     def __init__(
         self):
         self.this =  1 
         self.feedback = None 
-        self.backend_url = 'http://127.0.0.1:5000/backend/process_message'
+        self.human_response = None
+        self.sio = socketio.Client()
+        
+        @self.sio.on('outgoing')
+        def on_outgoing(data):
+            self.human_response = data
+            print(f"Received message from backend: {data}")
+
+        self.sio.connect('http://localhost:5000')
+        
 
     def ask_human(self,content):
         '''
-        Make a post request to the backend flask server with the content we want to display to the human
+        Emit the GPT content to the bakend through a socket 
         '''
-        print("Question: ",content)
-        payload = {'message': content}
-        response = requests.post(self.backend_url, json = payload)
-        if response.ok:
-            print('Feedback sent to backend successfully! \n')
-        else:
-            print(f'Error sending feedback: {response.text} \n' )
-    
+        # Send a message to the server 
+        self.sio.emit('message', content)   
+
 
     def get_human_feedback(self):
         '''
