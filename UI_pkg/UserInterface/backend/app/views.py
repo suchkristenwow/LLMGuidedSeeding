@@ -9,13 +9,13 @@ import threading
 from cv_bridge import CvBridge, CvBridgeError
 from .transform import CamProjector
 from . import socketio
-
+import os 
 #from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai
 
 app_routes = Blueprint('app_routes', __name__)
 
 # initialize frame and _frame. _frame must be a png so that imencode.tobytes() can be called properly
-_frame = open('backend/app/init_callback_img.png', 'rb').read()
+_frame = open(os.path.abspath(__file__), 'rb').read()
 frame = None
 is_paused = False
 bridge = CvBridge()

@@ -1,0 +1,62 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/d68efffc-2635-4b6b-9924-76e422a3caef/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid":"planted area, conmods","pattern":"grid","pattern_offset":1,"seed":"True"}
+
+results_str:  {"avoid":"planted area, conmods","pattern":"grid","pattern_offset":1,"seed":"True"}
+constraints:  {'avoid': 'planted area, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+Policy:  1. Check the current location of the robot. If the robot is not within the plot bounds, plan the shortest route to the plot bounds and navigate there.
+
+2. Initialize an empty list to keep track of planted locations.
+
+3. Using the RGB cameras, scan the environment for any "planted area" or "conmods" that the robot should avoid. 
+
+4. Based on the identified locations of objects to avoid, generate a grid pattern for the plot that maintains a 1m x 1m distance between points and doesn't intersect with the areas to avoid.
+
+5. Navigate to the first point in the grid, avoiding any planted areas and conmods.
+
+6. Upon reaching the first grid point, plant a seed.
+
+7. Add the current location to the list of planted locations.
+
+8. Navigate to the next point in the grid, again avoiding any planted areas and conmods. 
+
+9. Repeat steps 6-8 until all grid points have been visited and seeds have been planted.
+
+10. If during navigation, the robot cannot locate the next grid point due to obstructions or it being outside of the plot bounds, alert the user: "I can't find the next point in the grid, where should I look?"
+
+11. After all grid points have been visited and seeds have been planted, stop and wait for further instructions. 
+
+12. During the entire process, continuously monitor the plot bounds to ensure the robot remains within them. If the robot finds itself outside of the plot bounds, immediately navigate back within bounds following the shortest route.
+Feedback: Received message from backend: I think that looks wonderful thank you
+enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+nice
+verifying the policy; this is the llm result: True
+Found a valid policy approved by the human!
+Human response: I think that looks wonderful thank you

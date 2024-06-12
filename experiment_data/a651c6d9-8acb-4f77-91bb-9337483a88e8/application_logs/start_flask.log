@@ -1,0 +1,158 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Verify the robot's current position using lidar-inertial odometry and GPS. If the robot is outside the plot bounds, plan and execute the shortest route to the nearest point within the bounds.
+
+2. Begin identifying landmarks via the robot's RGB cameras. The goal is to locate any 'conmods' (Containerized Modular System) and previously planted locations. Use the 'avoid' list from the constraints dictionary.
+
+3. If any 'conmods' or previous planting locations are detected, record their locations in the system memory to ensure the robot avoids these areas when moving and planting.
+
+4. Begin at one corner of the plot bounds and initiate a grid pattern for planting. The grid should be based on the 'pattern_offset' of 1m x 1m from the constraints dictionary.
+
+5. Before moving to each grid point, verify it does not overlap with the 'avoid' list landmarks. If it does, adjust the grid point to the nearest possible location that doesn't conflict with the avoid list and is within the plot bounds.
+
+6. Move to the first validated grid point and if 'seed' boolean from the constraint dictionary is True, plant a seed. Record the location in the system memory for future reference.
+
+7. After planting, update the 'avoid' list in the constraints dictionary to include the new planting location.
+
+8. Repeat steps 5-7 for each grid point within the plot bounds until the entire area has been covered following the 1m x 1m grid pattern.
+
+9. If there are any issues identifying a landmark, notify the user with the message, "I can't find {landmark}, where should I look?" and wait for further instructions.
+
+10. Once all grid points within the plot bounds have been covered and seeds planted where required, confirm task completion to the user. 
+
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Check the current location of the robot using lidar-inertial odometry and GPS.
+2. If the robot is outside the plot bounds, calculate the shortest path to enter the plot and follow this path.
+3. Once within the plot bounds, initialize an empty list to track seeded locations.
+4. Identify all existing 'planted area' and 'conmods' within the plot bounds using the robot's RGB cameras.
+5. Add these identified locations to a list of areas to avoid.
+6. Plan a grid pattern within the plot bounds, taking into account the 'pattern_offset' of 1 meter. The pattern should be planned in such a way that it avoids all locations in the 'avoid' list.
+7. Start navigating through the planned grid pattern. At each grid intersection:
+   - Check if this location is within the 'avoid' areas using the RGB cameras and GPS.
+   - If not, plant a seed at this location.
+   - Add the seeded location to the seeded locations list.
+8. Continue this process until the entire grid pattern has been traversed and seeds have been planted at all safe grid intersections.
+9. If there's an object in the 'avoid' list that obstructs the planned route, calculate a detour around the object and continue with the seeding process.
+10. Update the 'avoid' list in real time as new 'planted area' and 'conmods' are encountered.
+11. Once the entire grid has been covered and seeding process is complete, store the seeded locations list for future reference.
+12. Report the completion of the task to the user with a summary of the operation including the total area covered and number of seeds planted.
+13. If at any point, the robot can't find a clear path due to obstructions, alert the user and ask for further instructions. 
+
+Received message: I believe this policy should complete the desired task. What do you think?
+1. First, check if the robot is within the defined plot boundaries. If not, plan the shortest route inside the plot boundaries using the lidar-inertial odometry and GPS for localization.
+
+2. Define a 1m x 1m grid pattern within the plot boundaries according to the 'pattern' and 'pattern_offset' from the constraint dictionary.
+
+3. Before starting to move, check the immediate environment for any landmarks to avoid, in this case "conmods" and "planted area", using the robot's RGB cameras.
+
+4. If any of the landmarks from the "avoid" list are detected, plan a path that avoids these objects while maintaining the grid pattern.
+
+5. Start moving along the planned path.
+
+6. If the 'seed' boolean is True, plant seeds at every intersection of the grid. As the robot plants each seed, record the location in the system memory to avoid these areas in the future.
+
+7. Continually check the immediate environment for any "conmods" or "planted area" to avoid.
+
+8. If an unavoidable object is detected on the path, stop and inform the user: "I can't avoid {object}, where should I look?".
+
+9. Take the user's direction and re-plan the path accordingly.
+
+10. Continue this process until the entire grid within the plot boundaries has been covered and seeded.
+
+11. After completing the task, provide a final report to the user including the total number of seeds planted and the coordinates of each planted location. 
+
+Received message: thanks that works 
+
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Check the initial location of the robot. If it is outside the plot bounds, plan and execute the shortest route possible to the first grid coordinate inside the bounds.
+
+2. Once inside the plot bounds, begin with the first grid coordinate (considering pattern offset of 1m). Check for any objects in the 'avoid' list in this area.
+
+3. If any objects from the 'avoid' list (in this case, 'planted areas, conmods') are detected within the 1m vicinity of the grid point, move to the next grid coordinate and repeat step 2.
+
+4. If no objects from the 'avoid' list are detected in the 1m vicinity of the grid point, proceed with planting a seed at the grid coordinate. 
+
+5. Add the current location to the system memory under 'planted locations'.
+
+6. Move to the next grid point, considering the 1m x 1m pattern offset and repeat steps 2 through 5. 
+
+7. Continue this process until all grid points within the plot bounds have been covered.
+
+8. If the robot encounters a landmark or object it cannot identify, pause the task and notify the user saying, "I can't find {landmark}, where should I look?"
+
+9. Based on user feedback, identify the unknown landmark or object and update the 'avoid' list, if necessary. Then, resume the task from where it was paused.
+
+10. After all grid points within the plot bounds have been covered and seeded (where possible), conclude the task and report back to the user. 
+
+Received message: whoooooooooo hoooooo that worked and thank you so much 
+
+Received message: I believe this policy should complete the desired task. What do you think?
+1. First, verify if the robot is within the plot bounds. If not, calculate the shortest path to the plot bounds, and navigate to that location.
+
+2. When inside the plot, start by observing the surroundings using RGB cameras to locate any visible conmods or previously planted areas. 
+
+3. If conmods or previously planted areas are detected, mark these areas in the system memory as areas to avoid.
+
+4. Initiate grid-based path planning with a 1m x 1m pattern offset, as specified in the constraint dictionary. 
+
+5. Start navigating along the planned path. While moving, constantly update the surroundings' map using lidar-inertial odometry and RGB cameras.
+
+6. Avoid driving over any conmods or previously planted areas, as marked in the system memory. If an obstacle is detected on the planned path, recalculate the path to avoid the obstacle.
+
+7. At each grid point, pause and plant a seed. Record the planting location in the system memory to ensure the robot avoids driving over these areas in the future.
+
+8. Continue this process until all grid points within the plot bounds have been visited and seeds have been planted.
+
+9. Once all seeds are planted, confirm the completion of the task to the user, providing a report of the total planted area and the number of seeds used.
+
+10. If the robot is unable to locate a grid point due to the presence of a conmod or previously planted area, notify the user by saying: "I can't reach a grid point due to the presence of a conmod or previously planted area, should I adjust the grid or avoid the area?"
+
+11. Wait for the user's input and adjust the task execution as per their guidance.
+
+12. If the robot encounters any other issues or uncertainties during the task execution, pause the task and ask the user for further instructions.
+
+13. Upon completion of the task, return to the starting point or a designated safe point as directed by the user.
+
+14. Turn off the seed planting system and notify the user that the task has been completed, providing a final report on the task, including any obstacles encountered and how they were handled. 
+
+Received message: I believe this policy should complete the desired task. What do you think?
+1. First, use the robot's GPS and lidar-inertial odometry to verify the current location of the robot. If the robot is outside the plot bounds, plan the shortest path to move inside the bounds.
+2. With the robot's RGB cameras, observe the environment to identify any landmarks which are to be avoided such as "previously planted areas" and "conmods" as per the constraint dictionary.
+3. Calculate the grid pattern with 1m offset as specified in the "pattern_offset" in the constraint dictionary. Ensure the grid pattern fits within the plot bounds and does not overlap with any of the avoidable landmarks.
+4. Begin navigation along the first row of the grid. During this process, continuously monitor the immediate environment using the RGB cameras to ensure there are no avoidable landmarks in the robot's path. 
+5. Once the robot reaches the first point on the grid, prepare to plant a seed. Confirm that the location doesn't overlap with any "avoid" landmarks.
+6. If the location is clear, plant the seed and update the list of "previously planted areas" in the system memory.
+7. If the location is not clear, find the next closest location on the grid that is clear of avoidable landmarks and navigate to that location.
+8. Repeat steps 5 to 7 until the entire grid has been covered and seeds have been planted in all appropriate locations.
+9. If during navigation or planting, a goal landmark cannot be found or identified, inform the user with a message "I can't find {landmark}, where should I look?" and wait for further instruction.
+10. Once all seeds have been planted, return the robot to the starting location or a designated endpoint, making sure to avoid all "avoid" landmarks.
+11. Lastly, provide a summary of the operation, including a map of all planted locations and any obstacles that were encountered and avoided. 
+
+Received message: I believe this policy should complete the desired task. What do you think?
+1. First, check the current robot position. If the robot is outside the plot bounds, plan the shortest route to move inside the plot bounds.
+
+2. Now, initiate a loop to start the seeding process. This loop will continue until the entire area within the plot bounds is covered.
+
+3. For each iteration in the loop, utilize the lidar-inertial odometry and GPS to accurately locate the robot's position within the plot bounds.
+
+4. Then, use the RGB camera to identify any objects within the immediate environment. Compare these objects with the 'avoid' list from the constraint dictionary. 
+
+5. If any objects from the 'avoid' list are identified within the immediate environment, plan a path to avoid these objects while still following the 1m x 1m grid pattern.
+
+6. If there are no objects from the 'avoid' list in the immediate environment, proceed to the next step in the grid pattern.
+
+7. Once the robot reaches the next point in the grid pattern, check the system memory to ensure this area has not been previously planted. If it has been planted, return to step 3 to move to the next location.
+
+8. If the area has not been planted, plant a seed at this location. 
+
+9. After planting a seed, record this location in the system memory to ensure it will be avoided in future iterations.
+
+10. Then, return to step 3 to continue the process for the next grid point. 
+
+11. If the robot encounters a landmark in the 'goal_lms' that can't be located in the immediate environment, notify the user by saying, "I can't find {landmark}, where should I look?"
+
+12. Once all the points in the grid pattern within the plot bounds have been covered, the task is complete. Confirm completion of the task and standby for further instructions.
+
+Remember, throughout this process, all actions are done while respecting the operational bounds and avoiding the areas listed in the constraint dictionary. 
+

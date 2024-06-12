@@ -1,0 +1,23 @@
+1. Check the current location of the robot. If the robot is not within the plot bounds, plan the shortest route to the plot bounds and navigate there.
+
+2. Initialize an empty list to keep track of planted locations.
+
+3. Using the RGB cameras, scan the environment for any "planted area" or "conmods" that the robot should avoid. 
+
+4. Based on the identified locations of objects to avoid, generate a grid pattern for the plot that maintains a 1m x 1m distance between points and doesn't intersect with the areas to avoid.
+
+5. Navigate to the first point in the grid, avoiding any planted areas and conmods.
+
+6. Upon reaching the first grid point, plant a seed.
+
+7. Add the current location to the list of planted locations.
+
+8. Navigate to the next point in the grid, again avoiding any planted areas and conmods. 
+
+9. Repeat steps 6-8 until all grid points have been visited and seeds have been planted.
+
+10. If during navigation, the robot cannot locate the next grid point due to obstructions or it being outside of the plot bounds, alert the user: "I can't find the next point in the grid, where should I look?"
+
+11. After all grid points have been visited and seeds have been planted, stop and wait for further instructions. 
+
+12. During the entire process, continuously monitor the plot bounds to ensure the robot remains within them. If the robot finds itself outside of the plot bounds, immediately navigate back within bounds following the shortest route.

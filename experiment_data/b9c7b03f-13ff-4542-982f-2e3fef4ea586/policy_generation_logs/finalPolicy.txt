@@ -1,0 +1,21 @@
+1. Verify the robot's initial location. If it's outside the plot bounds, identify the shortest route into the bounds and move the robot accordingly. 
+
+2. Observe the surroundings using the RGB camera to recognize the 'planted areas' and 'conmods' that need to be avoided as per the constraint dictionary. 
+
+3. Using lidar-inertial odometry and GPS, maintain a real-time position of the robot within the plot bounds.
+
+4. Start the seeding process following the 'grid' pattern as per the constraint dictionary. 
+
+5. Move the robot to the starting point of the plot, and initiate the planting of seeds. Record the position of the first planted area in the system memory.
+
+6. Using the 'pattern_offset' of 1m from the constraint dictionary, move the robot 1m from the first planted area, following the grid pattern, avoiding 'planted areas' and 'conmods' as per the constraints.
+
+7. Plant the seeds at the new position and add the new planting location to the system memory.
+
+8. Repeat steps 6 and 7 until the robot has covered the entire plot following the 'grid' pattern, ensuring it avoids 'planted areas' and 'conmods'.
+
+9. If at any point the robot is unable to find a clear path due to 'planted areas' or 'conmods', request assistance from the user with the message: "I can't find a clear path, where should I look?"
+
+10. Once the task is completed, confirm completion with the user, and provide them with the list of all planted locations from the system memory. 
+
+11. Standby for further instructions.

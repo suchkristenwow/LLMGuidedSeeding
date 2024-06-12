@@ -1,0 +1,19 @@
+1. Check the initial location of the robot. If it is outside the plot bounds, plan and execute the shortest route possible to the first grid coordinate inside the bounds.
+
+2. Once inside the plot bounds, begin with the first grid coordinate (considering pattern offset of 1m). Check for any objects in the 'avoid' list in this area.
+
+3. If any objects from the 'avoid' list (in this case, 'planted areas, conmods') are detected within the 1m vicinity of the grid point, move to the next grid coordinate and repeat step 2.
+
+4. If no objects from the 'avoid' list are detected in the 1m vicinity of the grid point, proceed with planting a seed at the grid coordinate. 
+
+5. Add the current location to the system memory under 'planted locations'.
+
+6. Move to the next grid point, considering the 1m x 1m pattern offset and repeat steps 2 through 5. 
+
+7. Continue this process until all grid points within the plot bounds have been covered.
+
+8. If the robot encounters a landmark or object it cannot identify, pause the task and notify the user saying, "I can't find {landmark}, where should I look?"
+
+9. Based on user feedback, identify the unknown landmark or object and update the 'avoid' list, if necessary. Then, resume the task from where it was paused.
+
+10. After all grid points within the plot bounds have been covered and seeded (where possible), conclude the task and report back to the user.

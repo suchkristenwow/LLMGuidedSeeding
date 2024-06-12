@@ -1,0 +1,60 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/2e4add2d-ea37-4464-8b09-aae3cf962b4c/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid":"conmods and previously planted area", "pattern":"grid", "pattern_offset":1, "seed":"True"}
+
+results_str:  {"avoid":"conmods and previously planted area", "pattern":"grid", "pattern_offset":1, "seed":"True"}
+constraints:  {'avoid': 'conmods and previously planted area', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+Policy:  1. First, verify if the robot is within the plot bounds. If not, calculate the shortest path to the plot bounds, and navigate to that location.
+
+2. When inside the plot, start by observing the surroundings using RGB cameras to locate any visible conmods or previously planted areas. 
+
+3. If conmods or previously planted areas are detected, mark these areas in the system memory as areas to avoid.
+
+4. Initiate grid-based path planning with a 1m x 1m pattern offset, as specified in the constraint dictionary. 
+
+5. Start navigating along the planned path. While moving, constantly update the surroundings' map using lidar-inertial odometry and RGB cameras.
+
+6. Avoid driving over any conmods or previously planted areas, as marked in the system memory. If an obstacle is detected on the planned path, recalculate the path to avoid the obstacle.
+
+7. At each grid point, pause and plant a seed. Record the planting location in the system memory to ensure the robot avoids driving over these areas in the future.
+
+8. Continue this process until all grid points within the plot bounds have been visited and seeds have been planted.
+
+9. Once all seeds are planted, confirm the completion of the task to the user, providing a report of the total planted area and the number of seeds used.
+
+10. If the robot is unable to locate a grid point due to the presence of a conmod or previously planted area, notify the user by saying: "I can't reach a grid point due to the presence of a conmod or previously planted area, should I adjust the grid or avoid the area?"
+
+11. Wait for the user's input and adjust the task execution as per their guidance.
+
+12. If the robot encounters any other issues or uncertainties during the task execution, pause the task and ask the user for further instructions.
+
+13. Upon completion of the task, return to the starting point or a designated safe point as directed by the user.
+
+14. Turn off the seed planting system and notify the user that the task has been completed, providing a final report on the task, including any obstacles encountered and how they were handled.
+Feedback: 

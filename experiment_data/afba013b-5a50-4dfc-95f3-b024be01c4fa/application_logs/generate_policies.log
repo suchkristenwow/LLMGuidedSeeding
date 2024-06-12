@@ -1,0 +1,52 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/afba013b-5a50-4dfc-95f3-b024be01c4fa/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid":"conmods and previous planting locations","pattern":"grid","pattern_offset":1,"seed":"True"}
+
+results_str:  {"avoid":"conmods and previous planting locations","pattern":"grid","pattern_offset":1,"seed":"True"}
+constraints:  {'avoid': 'conmods and previous planting locations', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+Policy:  1. Verify the robot's current position using lidar-inertial odometry and GPS. If the robot is outside the plot bounds, plan and execute the shortest route to the nearest point within the bounds.
+
+2. Begin identifying landmarks via the robot's RGB cameras. The goal is to locate any 'conmods' (Containerized Modular System) and previously planted locations. Use the 'avoid' list from the constraints dictionary.
+
+3. If any 'conmods' or previous planting locations are detected, record their locations in the system memory to ensure the robot avoids these areas when moving and planting.
+
+4. Begin at one corner of the plot bounds and initiate a grid pattern for planting. The grid should be based on the 'pattern_offset' of 1m x 1m from the constraints dictionary.
+
+5. Before moving to each grid point, verify it does not overlap with the 'avoid' list landmarks. If it does, adjust the grid point to the nearest possible location that doesn't conflict with the avoid list and is within the plot bounds.
+
+6. Move to the first validated grid point and if 'seed' boolean from the constraint dictionary is True, plant a seed. Record the location in the system memory for future reference.
+
+7. After planting, update the 'avoid' list in the constraints dictionary to include the new planting location.
+
+8. Repeat steps 5-7 for each grid point within the plot bounds until the entire area has been covered following the 1m x 1m grid pattern.
+
+9. If there are any issues identifying a landmark, notify the user with the message, "I can't find {landmark}, where should I look?" and wait for further instructions.
+
+10. Once all grid points within the plot bounds have been covered and seeds planted where required, confirm task completion to the user.
+Feedback: 

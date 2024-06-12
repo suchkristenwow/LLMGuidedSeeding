@@ -8,13 +8,12 @@ from flask_socketio import SocketIO
 
 
 
+
 socketio = SocketIO()
 
 
 def create_app():
     application = Flask(__name__)
-    
-
     CORS(application)
 
     socketio.init_app(application)

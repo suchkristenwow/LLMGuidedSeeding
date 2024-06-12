@@ -9,6 +9,7 @@ import uuid
 import shutil
 import numpy as np 
 import os
+import time
 
 class ExperimentRunner:
     def __init__(self, args):
@@ -22,6 +23,7 @@ class ExperimentRunner:
         self.policyGeneration_process = None
         self.policyRehearsal_process = None 
         self.policyExecution_process = None 
+        self.flask_backend = None
         
         logging.basicConfig(
             level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -42,7 +44,7 @@ class ExperimentRunner:
         os.makedirs(logging_dir, exist_ok=True)
         os.makedirs(logging_dir + "/application_logs", exist_ok=True)
         full_path = os.path.abspath(logging_dir)
-        logging.info(f"Created experiment directory at {full_path}")
+        logging.info(f"Created experiment directory at {full_path} \n")
 
     def copy_logs_and_data(self, base_destination_dir):
         """
@@ -139,7 +141,7 @@ class ExperimentRunner:
             os.killpg(os.getpgid(self.explore_process.pid), signal.SIGTERM)
             self.explore_process = None
         '''
-    
+        print(self.running_processes)
         for process in self.running_processes:
             logging.info(f"Terminating process {process.pid}...")
             if process.poll() is None:  # Check if the process is still running
@@ -151,6 +153,12 @@ class ExperimentRunner:
                 #     process.kill()  # Force termination if it doesn't respond
                 #     process.wait()  # Wait for the killing to complete
                 # logging.info(f"Process {process.pid} terminated.")
+
+        # manually shutdown the Flask app
+        print(f'Terminating backend PID: {self.flask_backend.pid} \n')
+        os.killpg(os.getpgid(self.flask_backend.pid), signal.SIGTERM) #terminate gracefully, signal.SIGKILL : kill forcefully
+
+   
     
     def launch_policy_gen(self):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
@@ -198,8 +206,8 @@ class ExperimentRunner:
     def launch_policy_execution(self,policy):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
-        print("Explore logs dir", logs_dir_absolute)
-        print()
+        print(f'Explore logs dir {logs_dir_absolute} \n')
+        
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
@@ -214,8 +222,31 @@ class ExperimentRunner:
         #explore_runner_dir = os.path.abspath(os.path.join("../"))
         self.policyExecution_process = self.start_process_with_terminal(launch_command, "execute_policy", cwd=os.getcwd())
 
+    def launch_flask_app(self):
+        log_file_path = os.path.join(self.uuid_logging_dir,"application_logs", "flask_server.log")
+        log_file_path_abs = os.path.abspath(log_file_path)
+        print(f'Explore log file: {log_file_path_abs} \n')
+        
+        app_dir = os.path.join("UI_pkg", "UserInterface", "backend")
+        app_path = os.path.join(app_dir, "application.py")
+
+        launch_command = [
+            "python", app_path,
+            "--logging_file", log_file_path_abs
+        ]
+        
+        self.flask_backend = self.start_process_with_terminal(launch_command, "flask_server", cwd = os.getcwd())
+        time.sleep(2) # wait three seconds for the flask app to launch
+        
+        
+
     def run(self):
+        
         self.create_logging_directory() 
+        # Launch Servers
+        self.launch_flask_app()
+        
+
         #launch the robot 
         self.launch_policy_gen()
         #rehearsed_policy = self.launch_policy_rehearsal(policy)
@@ -243,13 +274,12 @@ def setup_signal_handling(runner):
 
 if __name__ == "__main__":
     # os and user agnostic edits to TOML file
-    config_path = "configs/example_config.toml"
+    config_path = os.path.join("configs","example_config.toml")
     config = toml.load(config_path)
     config['prompt_file'] = os.path.join(os.path.expanduser("~"), config['prompt_file'])
     config['logging_directory'] = os.path.join(os.path.expanduser("~"), config['logging_directory'])
     config['commonObj_path'] = os.path.join(os.path.expanduser("~"), config['commonObj_path'])
-    print(config['commonObj_path'])
-    print()
+
     parser = argparse.ArgumentParser(description="Experiment Runner")
     parser.add_argument(
         "--config",
@@ -280,3 +310,9 @@ if __name__ == "__main__":
     runner = ExperimentRunner(args)  # Pass the config file from arguments
     setup_signal_handling(runner)
     runner.run()
+
+
+
+
+
+
