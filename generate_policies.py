@@ -122,7 +122,7 @@ class PolicyGenerator:
     def gen_policy(self): 
         #1. Identify constraints and goal landmarks from the prompt 
         constraints = self.parse_prompt()
-        print("constraints: ",constraints)
+        print(f'constraints: {constraints} \n')
         while not self.validPolicy:
             if self.policy_iters < self.max_policy_iters:
                 #2. Come up with policy

@@ -1,0 +1,227 @@
+
+> llm-guided-seeder-interface@0.1.0 start
+> react-scripts start
+
+Starting the development server...
+
+Compiled successfully!
+
+You can now view llm-guided-seeder-interface in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.50.145:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKNbP.0&sid=aVFSQ2VAmxJMrqJLAAAC from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKNal&sid=aRTeckWgwJNGxiA_AAAD from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKPe3&sid=aVFSQ2VAmxJMrqJLAAAC from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKPe3.0&sid=aRTeckWgwJNGxiA_AAAD from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKPqR from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKPwH from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKQ5- from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKQPA from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKR2e from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKRZa from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKSGs from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKSno from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKTV3 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKU00 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKUjH from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKVEE from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKVxV from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKWSR from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKX9i from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKXgf from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKYNw from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKYut from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKZc8 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKa76 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKaqM from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKbLL from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKc2a from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKcZZ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKdGn from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKdnm from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKeU_ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKe_- from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKfjE from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKgEC from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKgxS from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKhSQ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKi9g from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKige from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKjNt from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKjus from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKkc5 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKl74 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKlqJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKmLI from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKn2X from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKnZV from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKoGm from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKonj from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKpU- from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKp_x from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKqjC from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKrE8 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKrxQ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKsSM from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKt9d from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKtgZ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKuNr from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKuun from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKvc4 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKw70 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKwqH from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKxLE from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKy2V from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKyZR from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKzGi from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IKznf from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IK-Uw from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IK-_t from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IK_j7 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0IL0E5 from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+

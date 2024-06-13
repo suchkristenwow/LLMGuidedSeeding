@@ -1,0 +1,25 @@
+1. Confirm the robot is within the plot bounds. If not, plan the shortest route to the nearest point inside the plot bounds.
+
+2. Analyze the RGB camera data to recognize landmarks within the environment, focusing on any identified in the 'avoid' list, in this case, 'previously planted areas' and 'conmods'.
+
+3. Use the LIDAR-inertial odometry and GPS to determine the robot's precise location and orientation within the plot.
+
+4. Begin to construct a navigational plan to move in a 1m x 1m grid pattern as specified in the 'pattern' and 'pattern_offset' fields in the constraint dictionary.
+
+5. As part of this plan, ensure that the robot avoids driving over areas identified in the 'avoid' list by incorporating these into the navigational plan.
+
+6. Before moving, cross-reference the navigational plan with the GPS, LIDAR-inertial odometry, and RGB camera data to ensure the path is clear and avoids the specified areas.
+
+7. If the path is clear, proceed to the first point in the grid pattern within the plot bounds.
+
+8. At each grid point, if the 'seed' boolean is True, plant a seed. Record the GPS coordinates of the planted location in system memory to keep track of all the planted locations.
+
+9. After planting a seed, plan the route to the next point in the grid, again ensuring the route does not pass over any 'avoid' areas and previously planted locations.
+
+10. Repeat steps 7-9 until the entire grid within the plot bounds has been covered and seeds have been planted at each grid point.
+
+11. Once all seeds have been planted, store the completed task and all planted locations in system memory for future reference.
+
+12. If at any point, a path cannot be plotted due to the presence of an 'avoid' object, inform the user with a message such as, "I can't find a path due to the presence of {landmark}, where should I look?"
+
+13. If instructed by the user to replan the path, go back to step 4. If no instruction is given, hold the position and await further instruction.

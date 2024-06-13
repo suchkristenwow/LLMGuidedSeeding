@@ -1,0 +1,64 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/1ed1316c-deec-453a-85a6-bf00a06a378c/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid": "planted areas, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+
+results_str:  {"avoid": "planted areas, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+constraints:  {'avoid': 'planted areas, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+Policy:  1. First, initialize a list in the system memory to keep track of all the planted locations. Let's call this list "planted_locations".
+
+2. Verify the robot's current location. If the robot is outside the plot bounds, plan the shortest route possible to enter the plot bounds without crossing any 'avoid' areas defined in the constraints dictionary.
+
+3. Once inside the plot bounds, observe the environment using the RGB cameras to identify the current landmarks in relation to the robot's position, and also the 'avoid' areas like 'planted areas' and 'conmods'.
+
+4. Use the LIDAR-Inertial Odometry and GPS systems to verify the robot's position and orientation in relation to these landmarks and 'avoid' areas.
+
+5. Generate a grid path within the plot bounds using the 'pattern' and 'pattern_offset' from the constraint dictionary, making sure that the grid does not overlap with any 'avoid' areas and does not exceed the plot bounds.
+
+6. Plan the robot's route according to the generated grid, with a focus on minimizing the distance traveled.
+
+7. Start following the planned route.
+
+8. When the robot reaches a grid point, plant a seed and add the coordinates of the planted seed to the "planted_locations" list.
+
+9. After planting, move to the next grid point along the planned route. Use the robot's localization systems to continuously verify its position.
+
+10. Repeat steps 8 and 9 until all grid points within the plot bounds are covered and seeds have been planted at each point.
+
+11. If at any point the robot cannot locate a 'goal_lms' landmark, alert the user by saying "I can't find {landmark}, where should I look?"
+
+12. Once all seeds have been planted, confirm the completion of the task to the user. Also provide the total count and list of "planted_locations".
+
+13. Stand by for further instructions or shutdown.
+Feedback: Received message from backend: Looks great you did amazing!
+enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+I like it
+verifying the policy; this is the llm result: True
+Found a valid policy approved by the human!
+Human response: Looks great you did amazing!

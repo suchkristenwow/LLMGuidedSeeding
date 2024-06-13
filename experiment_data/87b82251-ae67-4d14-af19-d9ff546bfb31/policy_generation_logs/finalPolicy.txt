@@ -1,0 +1,23 @@
+1. Begin by checking your current location. Use your lidar-inertial odometry and GPS to determine your coordinates.
+
+2. Next, check if you are within the plot bounds. If not, determine the shortest route to the plot and travel there.
+
+3. Once within the plot, begin observing the surroundings using your RGB cameras. Identify any conmods and previously planted areas that are within your immediate environment.
+
+4. If you find any conmods or previously planted areas, mark them on your internal map. This will help you avoid these areas while navigating within the plot.
+
+5. With the internal map updated, create a grid pattern for planting seeds. This grid should have a separation of 1m between each planting point, as specified in the 'pattern_offset' value. Ensure that the grid aligns with the plot bounds and avoids marked areas.
+
+6. Start at the first point of your created grid. Check your surrounding to ensure that you are not close to any previously planted area or conmods. If the location is safe, plant a seed.
+
+7. Record the coordinates of the planted seed in the system memory.
+
+8. Move to the next point on your grid, ensuring that you do not drive over any conmods or previously planted areas.
+
+9. Repeat steps 6 to 8 until you have finished planting on all points in your grid. Make sure to record all planted locations in the system memory.
+
+10. After you've planted all the seeds, send a completion signal to the user indicating that the task is done.
+
+11. Maintain the list of all planted locations in the system memory for future reference and to avoid replanting in those areas.
+
+Note: If during the task, you are unable to locate any objects specified under 'avoid' or 'goal_lms', ask the user for guidance with the message "I can't find {landmark}, where should I look?".

@@ -1,0 +1,25 @@
+1. Check the current position of the robot in relation to the plot bounds. If the robot is outside of the plot bounds, plan and execute the shortest route possible to be inside the bounds.
+
+2. Once inside the plot bounds, initiate the 'avoid' protocol in the robot's navigation system to avoid previously planted areas and any conmods.
+
+3. Begin scanning for any conmods or previously planted areas within the plot using the RGB cameras and lidar-inertial odometry. If any are detected, mark their positions in the system memory for avoidance.
+
+4. Implement a 'grid' pattern for planting seeds with a 'pattern_offset' of 1 meter, as per the constraints dictionary.
+
+5. Move to the starting position of the grid pattern, which would be one corner of the plot. Confirm that this starting position is free of any conmods or previously planted areas.
+
+6. Plant the first seed at the starting position and add the coordinates of this location to the system memory.
+
+7. Navigate to the next grid point, which is 1 meter apart from the previous point in line with the 'pattern_offset'. Make sure to follow the 'avoid' protocol during navigation.
+
+8. Before planting the seed, check that the current grid point doesn't overlap with any conmods or previously planted areas.
+
+9. If the grid point is free, plant the seed and add this location to the system memory. If not, move to the next grid point and repeat the process.
+
+10. Continue this process of navigation and planting in the grid pattern until all the seeds are planted or the entire plot has been covered.
+
+11. If all seeds are planted before the entire plot is covered, terminate the task and update the user. If the entire plot is covered before all seeds are planted, notify the user and seek further instructions.
+
+12. Upon completion of the task, save all the planting locations in the system memory for future reference and avoidance.
+
+13. Report task completion and all relevant data to the user, including the number of seeds planted, area covered, and any obstacles encountered.

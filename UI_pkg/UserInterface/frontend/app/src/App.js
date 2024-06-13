@@ -1,6 +1,6 @@
 // useState: hook to manage the state of the img source
 // useEffect: hook to fetch the image when the component mounts
-import React, { useState, useRef, useReducer, useEffect} from 'react';
+import React, { useState, useEffect} from 'react';
 // import axios from 'axios';
 import './App.css';
 import io from 'socket.io-client'
@@ -39,7 +39,7 @@ function ImageStream() {
     // if not in drawing mode switch to drawing mode
     const newUrl = (paused && drawing) ? "http://127.0.0.1:5000/backend/pause":"http://127.0.0.1:5000/backend/sketch_boundary"; 
     setUrl(newUrl)
-    setDrawing(drawing => !drawing)
+    setDrawing(drawing => !drawing) 
     if (drawing){
       fetch("http://127.0.0.1:5000/backend/sketch_boundary")
       .then(response => {
@@ -86,6 +86,7 @@ function Chat({socket}) {
    useEffect(() => {
     socket.on('message', message => {
       //console.log('Server Response:', message);
+      // const formattedMessage = message.replace(/\n/g, '<br>');
       setMessages(prevMessages => [...prevMessages, { text: message, type: 'incoming' }]);
     });
 
@@ -105,12 +106,12 @@ function Chat({socket}) {
     }
   }
 
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault(); // Prevents the default behavior of the Enter key
-      handleChat(); // Calls the handleChat function if Enter key is pressed
-    }
-  };
+  // const handleKeyPress = (event) => {
+  //   if (event.key === 'Enter') {
+  //     event.preventDefault(); // Prevents the default behavior of the Enter key
+  //     handleChat(); // Calls the handleChat function if Enter key is pressed
+  //   }
+  // };
 
   const handleChange = (event) => {
     setUserMessage(event.target.value);
