@@ -47,8 +47,10 @@ class PolicyGenerator:
                 f.write(policy)
         else: 
             print("Updating feedback!")
+            
             self.feedback = self.conversational_interface.feedback
-
+            print(f'feedback:  {self.feedback}')
+            
     def build_policy(self,constraints): 
         print("building policy...")
         if self.feedback is None and self.current_policy is None: 
@@ -137,7 +139,10 @@ class PolicyGenerator:
             else:
                 raise Exception("Cannot come up with an acceptable policy :(")
             self.policy_iters += 1 
-        print(f'Human response: {self.conversational_interface.human_response}')
+        #print(f'Human response: {self.conversational_interface.human_response}')
+
+
+
         code =  code_gen(self.policy)
 
         

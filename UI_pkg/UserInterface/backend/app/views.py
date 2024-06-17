@@ -23,6 +23,7 @@ cv_image = None
 paused_frame = None
 drawing_frame = None
 points = []
+
 drawing = None
 bridge = CvBridge()
 
@@ -105,7 +106,7 @@ def pause():
 
 @app_routes.route('/backend/sketch_boundary')
 def drawing():
-    global cv_image,og_drawing_frame, drawing_frame, paused_frame, points
+    global cv_image, og_drawing_frame, drawing_frame, paused_frame, points
 
     og_drawing_frame = cv_image
     drawing_frame = cv.UMat(og_drawing_frame.copy())
@@ -130,9 +131,16 @@ def drawing():
             break
     # Clean up
     cv.destroyAllWindows()
-    #print(points)
-    #return Response(paused_frame, mimetype='multipart/x-mixed-replace; boundary=frame')
-    #return Response(drawing_frame, mimetype='image.jpeg')
+
+
+    camera_tf = [0.152758, 0.00, 0.0324, 0,0,0] # [0.152758, 0.00, 0.0324, 0,0,0]
+    robot_pose = [0,0,0,0,0,0]
+
+    cam_projector = CamProjector(1, camera_pose=camera_tf, robot_pose=robot_pose)
+    sketch_proj = np.array([cam_projector.project(c) for c in points])[:,:3]
+    # send the projected sketch points to the client side
+    handle_points(sketch_proj)
+    #return Response(paused_frame, mimetype='image.jpeg')
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app_routes.route('/backend/proj_sketch')
@@ -148,7 +156,7 @@ def proj_sketch():
 @app_routes.route('/backend/player')
 def index():
     """Video streaming home page from the Backend with a simple HTML."""
-    return render_template('player2.html')
+    return render_template('player.html')
 
 @app_routes.route('/backend/process_message', methods=['POST'])
 def process_message():
@@ -163,10 +171,14 @@ def process_message():
 def handle_messsage(message):
     print(f'Received message: {message} \n')
     # Process message and send response if needed
-    socketio.send(f'Response from server: {message}')
+    socketio.send(message)
 
 @socketio.on('outgoing')
 def handle_outgoing(message):
     print(f'Received message: {message} \n')
     # Process message and send response if needed
     socketio.emit('outgoing', message)  
+
+@socketio.on('sketch_proj_points')
+def handle_points(sketch_proj):
+    socketio.emit('sketch_proj_points', sketch_proj)

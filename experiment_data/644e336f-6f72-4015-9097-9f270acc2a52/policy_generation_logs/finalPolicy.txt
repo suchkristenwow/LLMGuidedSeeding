@@ -1,0 +1,25 @@
+1. Check the current location of the robot. If the robot is outside the plot_bounds, plan and execute the shortest route possible to be inside the bounds.
+
+2. Establish the 1mx1m grid pattern based on the provided 'pattern_offset' within the plot_bounds. This grid will guide the seeding process.
+
+3. Initialize an empty list to record all the planted locations for tracking and avoiding in future steps.
+
+4. Start from the first point in the planned grid pattern.
+
+5. Use RGB cameras to scan the immediate environment for 'planted areas' and 'conmods', as indicated in the 'avoid' key in the constraint dictionary.
+
+6. If any 'planted areas' or 'conmods' are detected in the immediate vicinity of the current point, mark the point as 'avoid' and move to the next point in the grid pattern.
+
+7. If no 'planted areas' or 'conmods' are detected, execute the planting procedure at the current point. 
+
+8. Add the coordinates of the newly planted area to the list of planted locations.
+
+9. Move to the next point in the grid pattern using lidar-inertial odometry and GPS for navigation.
+
+10. Repeat steps 5 to 9 until all points in the grid pattern within the plot_bounds have been covered.
+
+11. If there's any issue or uncertainty at any point during the execution, interface with the human for more direction or context.
+
+12. Once all points in the grid pattern have been covered and the planting task is completed, notify the user and provide the list of all the planted locations for reference and verification.
+
+Please note that this policy maintains a safe distance from 'planted areas' and 'conmods', ensures seeding is done in a 1mx1m grid pattern, and keeps track of all planted locations as specified in the constraint dictionary and the given prompt.

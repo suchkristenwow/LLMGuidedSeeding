@@ -48,6 +48,7 @@ class ConversationalInterface:
         preface = "I believe this policy should complete the desired task. What do you think?"
         enhanced_prompt = preface + "\n" + policy 
         self.ask_human(enhanced_prompt)
+        # wait for the user response. 
         while not self.human_response:
             time.sleep(1)
             print('Waiting for human response from backend')

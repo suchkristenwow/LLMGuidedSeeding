@@ -1,0 +1,112 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/9a3b76bd-de6d-4a4e-bc12-48935ac5e57c/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid": "conmods and planted areas", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+
+results_str:  {"avoid": "conmods and planted areas", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+constraints: {'avoid': 'conmods and planted areas', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True} 
+
+building policy...
+feedback is none!
+Policy:  1. First, verify the current location of the robot with respect to the given operational bounds. If the robot is outside the plot bounds, calculate the shortest route to the nearest boundary point and move there. 
+
+2. Start by creating a grid map of the operational plot area with a grid size of 1m x 1m using the 'pattern' and 'pattern_offset' from the constraint dictionary.
+
+3. Start at the first point in the grid. Check if there are any obstacles such as 'conmods' or 'planted areas' using the RGB cameras. If found, mark these areas as 'to avoid' in the system memory.
+
+4. If no obstacles are detected, proceed to plant seeds at the current grid location. Add the location to a list in the system memory marked as 'planted locations'.
+
+5. Update the grid map to indicate that the current grid has been visited and planted.
+
+6. Calculate the path to the next grid location avoiding any areas marked as 'to avoid' using the robot's localization capabilities.
+
+7. Move to the next grid location.
+
+8. Repeat steps 3-7 until all feasible grid locations within the plot boundaries have been visited and planted, where possible.
+
+9. If there is a grid point where planting is not possible due to obstacles, inform the user: "I can't plant at grid point {grid_point}, because of the presence of {obstacle}. Where should I plant in this case?"
+
+10. If the 'seed' variable is set to False at any point or the robot runs out of seeds, stop the planting process, update the grid map and inform the user about the situation.
+
+11. Once all the feasible grid points have been visited, inform the user about the completion of the task, and provide the list of all the planted locations.
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+Can you add a step 12 where you return to the starting position of the robot
+
+verifying the policy; this is the llm result: False
+Updating feedback!
+building policy...
+{'avoid': 'conmods and planted areas', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
