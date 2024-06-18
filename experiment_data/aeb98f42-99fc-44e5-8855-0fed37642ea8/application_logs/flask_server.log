@@ -1,0 +1,25 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. First, the robot should check its current location in relation to the defined "plot_bounds". If it is outside of these bounds, it should use its GPS and lidar-inertial odometry systems to plan the shortest possible route inside the plot.
+
+2. Once inside the plot bounds, the robot should initialize a new list in its system memory, called "planted_locations". This list will keep track of all the areas where the robot has planted seeds.
+
+3. Next, the robot should use its RGB cameras to observe the environment and look for any pre-existing "planted areas" or "conmods" to avoid as per the "avoid" constraint in the dictionary. These identified areas should also be recorded in the system memory to avoid them in the future.
+
+4. The robot should now begin the planting process following a "grid" pattern with "1m" offset as per the 'pattern' and 'pattern_offset' constraints.
+
+5. The robot should make sure to avoid the areas already planted or identified to be avoided. If such an area is encountered, the robot should calculate a new path that maintains the grid pattern but avoids the marked areas.
+
+6. For each grid cell, the robot will check whether it is free from planted areas and conmods. If it is, the robot will proceed to plant seeds there and add the location to the "planted_locations" list in the system memory.
+
+7. The robot will then move to the next grid cell, following the 1m x 1m pattern. It should use its RGB cameras, GPS, and lidar-inertial odometry systems to ensure accurate positioning and navigation.
+
+8. The robot will repeat steps 5 to 7 until it has covered the entire plot area defined by the "plot_bounds", adhering to the grid pattern and the specified constraints.
+
+9. If at any point, the robot is unable to locate a suitable location for planting, it should notify the user with a message, "I can't find a suitable spot for planting within the plot bounds, what should I do next?"
+
+10. Once all the suitable grid locations within the plot bounds have been planted with seeds, the robot should notify the user that the task is complete. The robot should also provide the list of all planted locations from the system memory for the user's reference. 
+
+2024-06-17 15:25:30,201 - WARNING -  * Debugger is active!
+2024-06-17 15:25:30,202 - INFO -  * Debugger PIN: 731-273-360

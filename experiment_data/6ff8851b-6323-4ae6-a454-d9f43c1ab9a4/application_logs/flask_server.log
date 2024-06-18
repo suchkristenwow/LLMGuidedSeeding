@@ -1,0 +1,25 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Firstly, check the current location of the robot relative to the 'plot_bounds'. If it is outside, plan the shortest route possible to move inside the bounds.
+
+2. Once inside the bounds, initialize an empty list in the system memory to keep track of all the planted locations.
+
+3. Start scanning the environment with the RGB camera and lidar-inertial odometry to identify and locate the 'avoid' objects, which in this case are 'planted areas' and 'conmods'. 
+
+4. Start moving along the planned 'grid' pattern with 'pattern_offset' of 1m. This means the robot will plant a seed every 1m in both x and y directions, forming a grid pattern.
+
+5. Before moving to each point, validate that it does not fall within the vicinity of the 'avoid' objects. If the planned point conflicts with an 'avoid' object, adjust the route or find a new point according to the pattern and offset.
+
+6. After validation of each point, if the 'seed' boolean is 'True', plant a seed at that point.
+
+7. Once a seed has been planted, add this location to the list of 'planted locations' in the system memory.
+
+8. Continue this process for the entire 'plot_bounds'. 
+
+9. If a situation arises where it's not possible to follow the 'grid' pattern due to the presence of 'avoid' objects, inform the user: "The grid pattern cannot be followed due to the presence of 'avoid' objects. Do you want me to adjust the pattern or choose a different pattern?"
+
+10. Upon completion of the task, inform the user: "Planting task has been successfully completed following the grid pattern. All planted locations are stored in the system memory." 
+
+2024-06-17 15:51:22,650 - WARNING -  * Debugger is active!
+2024-06-17 15:51:22,651 - INFO -  * Debugger PIN: 731-273-360

@@ -4,10 +4,16 @@ import cv2 as cv
 import numpy as np
 import rospy
 from sensor_msgs.msg import Image as SensorImage
+from sensor_msgs.msg import PointCloud2
+
+import sensor_msgs.point_cloud2 as pc2
 import time
 import threading
 from cv_bridge import CvBridge, CvBridgeError
 from .transform import CamProjector
+import open3d as o3d
+import csv
+
 from . import socketio
 import os 
 #from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai
@@ -15,22 +21,22 @@ import os
 app_routes = Blueprint('app_routes', __name__)
 
 # initialize frame and _frame. _frame must be a png so that imencode.tobytes() can be called properly
-_frame = open(os.path.abspath(__file__), 'rb').read()
-frame = None
+_frame, frame, paused_frame = open(os.path.abspath(__file__), 'rb').read(), None, None
+cv_image, paused_cv_image = None, None
+pc_msg, paused_pc_msg = None, None
+
 is_paused = False
 bridge = CvBridge()
-cv_image = None
-paused_frame = None
+
 drawing_frame = None
 points = []
-
 drawing = None
 bridge = CvBridge()
 
 ################### Utility functions for the backend ##########################
 def image_callback(data):
     """Hook function to pull out our frames from Rospy.Subscriber"""
-    global frame, _frame, cv_image #frame_count
+    global frame, _frame, cv_image 
     if frame is not None and _frame is not None:
         frame = cv.cvtColor(frame, cv.COLOR_RGB2BGR)
         #_frame = cv2.imencode('.jpg', cv2.resize(frame, (400,225)))[1].tobytes()
@@ -38,34 +44,34 @@ def image_callback(data):
         #_frame = cv2.cvtColor(_frame,cv2.COLOR_BGR2RGB)
     cv_image = bridge.imgmsg_to_cv2(data)
     frame = np.frombuffer(data.data, dtype=np.uint8).reshape(data.height, data.width, -1)
-    #frame_count += 1
+ 
 
 def lidar_callback(data):
-    return None
-    #print("Lidar Data:")
-    #print(data.data)
+    """Hook function to pull out out LiDAR from Rospy.Subscriber"""
+    global pc_msg
+    pc_msg = data
+   
     
 def gen():
     """Video streaming generator function."""
-    global _frame, paused_frame
-
+    global _frame
     while True:
         # The time delay value should be equal to the 1/FPS value
         time.sleep(0.1)
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + _frame + b'\r\n')
 
-# Function to continuously update the OpenCV window
 def update_window():
+    """Continously update the OpenCV window"""
     global cv_image
     while True:
         cv.imshow("Video 1", cv_image)
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
 
-# logic for our callback: Hold down the left click to drop points as you move the mouse
 def draw_polylines(event, x, y, flags, param):
-    global drawing, drawing_frame,  points # we have to run the global call again in this function
+    """logic for our callback: Hold down the left click to drop points as you move the mouse"""
+    global drawing, drawing_frame, points # we have to run the global call again in this function
     if event == cv.EVENT_LBUTTONDOWN:
         drawing = True
     elif event == cv.EVENT_MOUSEMOVE:
@@ -88,7 +94,63 @@ def draw_polylines(event, x, y, flags, param):
         # points.append([x,y])
         points = []
         drawing_frame = cv.UMat(og_drawing_frame.copy())
-            
+
+def project_sketch(sketch_points: list, paused_pc_message: PointCloud2) -> o3d.geometry.PointCloud:
+    """
+    Given pixel coordinates from a sketch and the point cloud data at the time of the sketch, project the sketch points into the point cloud data
+
+    Args:
+        points (np.ndarray): The sketched pixel coordinates to be processed as a NumPy array.
+        paused_pc_msg (pc2.PointCloud2): The environments point cloud data collected in the function pause..
+
+    Returns:
+        projected_pcd: (o3d.geometry.PointCloud)
+    """
+
+    cam_projector = CamProjector(1, camera_pose = [0.152758, 0.00, 0.0324, 0,0,0], robot_pose = [0,0,0,0,0,0]) # scaling factor of 1
+    sketch_proj = np.array([cam_projector.project(c) for c in sketch_points])[:,:3]
+    
+    generator = pc2.read_points(paused_pc_message, skip_nans = True, field_names = ("x", "y","z")) # iterator object
+    msg_points = np.array([point for point in generator])
+
+    # create point clouds -> Points are the msg_points. Since we are only writing to a csv we do not need color
+    world_pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(msg_points)) # , colors=o3d.utility.Vector3dVector(np.full((msg_points.shape[0], 3), 0.5))
+    sketch_pcd = o3d.geometry.PointCloud(points = o3d.utility.Vector3dVector(sketch_proj)) # , colors = o3d.utility.Vector3dVector(np.full((sketch_proj.shape[0], 3), 0.5))
+
+    # Origin point in point cloud
+    origin_pcd = o3d.geometry.PointCloud(points =o3d.utility.Vector3dVector(np.array([[0,0,0]])))
+    
+    # Project world points to the unit sphere
+    world_distances = np.array(world_pcd.compute_point_cloud_distance(origin_pcd)) + .00001
+    world_unit = np.asarray(world_pcd.points) / world_distances[:,None] 
+ 
+    # Project sketch points to the unit sphere
+    sketch_distances = np.array(sketch_pcd.compute_point_cloud_distance(origin_pcd)) + .0001
+    sketch_unit = np.asarray(sketch_pcd.points) / sketch_distances[:,None]
+
+    # Calculate the index of the closest world point to each sketch point
+    pcd_distances = np.sqrt(np.sum((world_unit - sketch_unit[:,np.newaxis,:])  ** 2, axis=2))
+    closest_ind = np.argmin(pcd_distances, axis = 1)
+
+    # Select the closest world point
+    return o3d.geometry.PointCloud(points = o3d.utility.Vector3dVector(np.array(world_pcd.points)[closest_ind]))
+
+    
+
+def write_pcd_to_csv(pcd: o3d.geometry.PointCloud, filename: str) -> None:
+    """
+     Write the incoming point cloud points to a csv 
+    Args:
+        pcd (o3d.geometry.PointCloud): point cloud data to be saved
+        filename (str): name of the file. It should end with .csv
+    Returns:
+        None: This function does not return any value, but it saves the pcd as a csv file.
+    """
+    with open(filename, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        for point in pcd.points:
+            csvwriter.writerow(point)
+
 ################## App Routes #####################
 @app_routes.route('/backend/image_stream')
 def image_stream():
@@ -98,32 +160,27 @@ def image_stream():
 @app_routes.route('/backend/pause')
 def pause():
     """Endpoint to serve the paused frame."""
-    global paused_frame, _frame
+    global paused_frame, _frame, paused_pc_msg, pc_msg, paused_cv_image, cv_image
+    paused_pc_msg = pc_msg
     paused_frame = _frame
+    paused_cv_image = cv_image
     return Response(paused_frame, mimetype='image.jpeg')
     
-
-
 @app_routes.route('/backend/sketch_boundary')
 def drawing():
-    global cv_image, og_drawing_frame, drawing_frame, paused_frame, points
-
+    global cv_image, og_drawing_frame, drawing_frame, paused_frame, points, paused_pc_msg
     og_drawing_frame = cv_image
     drawing_frame = cv.UMat(og_drawing_frame.copy())
 
     cv.namedWindow("Video 1", cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
-    cv.moveWindow("Video 1", 500, 250)
     # Resize the window
-    #cv.resizeWindow("Video 1", 800, 600)  # Adjust the size according to your preference
+    cv.moveWindow("Video 1", 500, 250)
     cv.setMouseCallback('Video 1', draw_polylines)
     
     # Main loop
     while True:
         # Display the window
         cv.imshow("Video 1", drawing_frame)
-        
-        # Check if the window is closed by the user
-        
         # Check for any key pressed, wait for 1 millisecond
         key = cv.waitKey(1) & 0xFF
         # Check if 'x' key is pressed or the window is closed
@@ -131,27 +188,16 @@ def drawing():
             break
     # Clean up
     cv.destroyAllWindows()
-
-
-    camera_tf = [0.152758, 0.00, 0.0324, 0,0,0] # [0.152758, 0.00, 0.0324, 0,0,0]
-    robot_pose = [0,0,0,0,0,0]
-
-    cam_projector = CamProjector(1, camera_pose=camera_tf, robot_pose=robot_pose)
-    sketch_proj = np.array([cam_projector.project(c) for c in points])[:,:3]
-    # send the projected sketch points to the client side
-    handle_points(sketch_proj)
-    #return Response(paused_frame, mimetype='image.jpeg')
-    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app_routes.route('/backend/proj_sketch')
-def proj_sketch():
-    global points
-    camera_tf = [0.152758, 0.00, 0.0324, 0,0,0] # [0.152758, 0.00, 0.0324, 0,0,0]
-    robot_pose = [0,0,0,0,0,0]
-
-    cam_projector = CamProjector(1, camera_pose=camera_tf, robot_pose=robot_pose)
-    sketch_proj = np.array([cam_projector.project(c) for c in points])[:,:3]
-
+    print(f'Types: {type(points)}, {type(paused_pc_msg)}')
+    try:
+        projected_pcd = project_sketch(points, paused_pc_msg)
+        #pcd = o3d.io.read_point_cloud("../../test_data/fragment.pcd")
+        o3d.io.write_point_cloud("projected_pcd.pcd", projected_pcd)
+        print(projected_pcd)
+    except Exception as e:
+        print(f"Function project_sketch failed: {e}")
+    
+    return Response(paused_frame, mimetype='image.jpeg')
 
 @app_routes.route('/backend/player')
 def index():
@@ -179,6 +225,7 @@ def handle_outgoing(message):
     # Process message and send response if needed
     socketio.emit('outgoing', message)  
 
-@socketio.on('sketch_proj_points')
-def handle_points(sketch_proj):
-    socketio.emit('sketch_proj_points', sketch_proj)
+# @socketio.on('sketch_proj_points')
+    # socketio.emit('sketch_proj_points', sketch_proj)
+
+

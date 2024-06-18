@@ -1,0 +1,21 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Types: <class 'list'>, <class 'sensor_msgs.msg._PointCloud2.PointCloud2'>
+PointCloud with 72 points.
+Received message: I believe this policy should complete the desired task. What do you think?
+1. The robot should first use lidar-inertial odometry and GPS for localization to identify its initial position.
+2. If the robot begins outside of the plot bounds, it should plan and execute the shortest route possible to be inside the bounds.
+3. Next, the robot should generate a map of the plot using the camera feed and GPS. It should identify any obstacles such as conmods or previously planted areas and mark them in the map.
+4. Then, the robot should calculate a grid pattern with 1m x 1m offset over the plot map ensuring it avoids the marked obstacles.
+5. The robot should then plan a path following the calculated grid pattern, taking into account the plot bounds and the obstacles.
+6. If the robot is unable to plan a path due to an obstacle not defined in the constraints, it should ask the user for more context or direction.
+7. Once a path has been planned, the robot should start following the path, planting seeds at every grid intersection point.
+8. The robot should maintain a list in the system memory of all the planted locations.
+9. As the robot moves and plants, it should continually update the map and recalculate the path to avoid driving over planted areas.
+10. This process should continue until the entire grid pattern has been planted.
+11. Finally, the robot should confirm the completion of the task and provide a report with the locations of the planted areas and any obstacles encountered. 
+
+Received message: That'll do pig that'll do 
+
+2024-06-18 12:19:55,351 - WARNING -  * Debugger is active!
+2024-06-18 12:19:55,351 - INFO -  * Debugger PIN: 731-273-360

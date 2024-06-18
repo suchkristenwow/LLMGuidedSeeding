@@ -1,0 +1,131 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Check the current robot location with respect to the plot bounds. If the robot is outside the bounds, calculate the shortest path to the inside of the bounds.
+
+2. Update the system memory to mark the current location as the starting point.
+
+3. Identify the direction for the grid pattern to ensure a 1mx1m grid will fit within the plot bounds. The direction can be north-south, or east-west, depending on the shape and size of the plot.
+
+4. Start a loop for the planting task.
+
+5. Within the loop, initiate a seed-planting procedure at the current location. 
+
+6. Update the system memory with the current location as a "planted area".
+
+7. Check for any "avoid" landmarks or objects such as "conmods" or "planted areas" in the immediate environment.
+
+8. If any "avoid" objects are detected within the path or close proximity, reroute the path to maintain a safe distance.
+
+9. Move 1 meter in the designated direction (north, south, east, or west) following the grid pattern, ensuring not to cross the plot bounds.
+
+10. Continue the loop until the entire plot within the bounds has been covered in a 1mx1m grid pattern.
+
+11. If at any point an "avoid" landmark or object is not identifiable in the immediate environment, pause the task and alert the user saying, "I can't find {landmark}, where should I look?"
+
+12. After the entire plot has been covered, update the system memory with the list of all planted locations for future reference and notify the user that the task has been completed. 
+
+Note: If during the task the robot gets outside the plot bounds, it should reposition itself within the bounds following the shortest path and continue with the planting task. 
+
+Types: <class 'list'>, <class 'sensor_msgs.msg._PointCloud2.PointCloud2'>
+Function project_sketch failed: __init__(): incompatible constructor arguments. The following argument types are supported:
+    1. open3d.cpu.pybind.geometry.PointCloud()
+    2. open3d.cpu.pybind.geometry.PointCloud(arg0: open3d.cpu.pybind.geometry.PointCloud)
+    3. open3d.cpu.pybind.geometry.PointCloud(points: open3d.cpu.pybind.utility.Vector3dVector)
+
+Invoked with: kwargs: points=array([[ 4.76462603,  0.20811614,  1.45776868],
+       [ 4.76462603,  0.20811614,  1.45776868],
+       [ 4.51158047,  0.22477159,  1.38247859],
+       [ 4.44889116,  0.24901389,  1.36415708],
+       [ 4.42351437,  0.30208513,  1.35757279],
+       [ 4.3976903 ,  0.32743946,  1.35041595],
+       [ 4.39811373,  0.38179624,  1.35184741],
+       [ 4.43409586,  0.43981186,  1.36415708],
+       [ 3.75916409,  0.44278046,  1.16376555],
+       [ 3.9150517 ,  0.55889702,  1.21443594],
+       [ 3.78941894,  0.61607867,  1.13606989],
+       [ 4.04073763,  0.7881676 ,  1.17206419],
+       [ 4.14704514,  0.89045596,  1.16348982],
+       [ 4.1420064 ,  1.01447368,  1.13165188],
+       [ 4.25160027,  1.12789953,  1.11889851],
+       [ 4.1801796 ,  1.22236812,  1.02072251],
+       [ 4.13344622,  1.31661701,  0.9352091 ],
+       [ 4.11191082,  1.39367104,  0.89251637],
+       [ 4.05509806,  1.45695746,  0.8078782 ],
+       [ 4.41134644,  1.67697775,  0.83510286],
+       [ 4.94248009,  1.94705451,  0.83313251],
+       [ 4.895123  ,  2.03584003,  0.78816146],
+       [ 3.60611248,  1.57587695,  0.51749879],
+       [ 3.71076179,  1.70442402,  0.4638893 ],
+       [ 3.75610638,  1.77806628,  0.39155969],
+       [ 3.63366914,  1.77849638,  0.3116475 ],
+       [ 3.56243038,  1.82156444,  0.23287931],
+       [ 3.55446577,  1.8476181 ,  0.1632258 ],
+       [ 3.49970269,  1.84447718,  0.12437001],
+       [ 3.27603197,  1.74755633,  0.04890456],
+       [ 3.18523645,  1.70241153, -0.01477262],
+       [ 3.06747389,  1.6371814 , -0.04547431],
+       [ 3.02721119,  1.61515534, -0.07670141],
+       [ 3.10646105,  1.63504148, -0.14116094],
+       [ 3.07210588,  1.59296036, -0.13862954],
+       [ 3.45141053,  1.78479731, -0.23352376],
+       [ 3.36559153,  1.69342327, -0.25582328],
+       [ 3.34156084,  1.62753046, -0.28703275],
+       [ 3.7589736 ,  1.71715403, -0.36283529],
+       [ 2.92091799,  1.27002156, -0.3275879 ],
+       [ 2.91609049,  1.20349526, -0.35409391],
+       [ 2.92251611,  1.12302363, -0.35113618],
+       [ 2.62727404,  0.9359979 , -0.33549568],
+       [ 2.77726221,  0.83831382, -0.35048559],
+       [ 2.62574244,  0.73934227, -0.35426992],
+       [ 2.64622521,  0.65821153, -0.35412765],
+       [ 2.65936565,  0.57547462, -0.35327384],
+       [ 4.00968361,  0.74076873, -0.50794625],
+       [ 0.99920046,  0.16579592, -0.0977792 ],
+       [ 3.54334426,  0.34315678, -0.57190251],
+       [ 3.44059348,  0.24816038, -0.55298352],
+       [ 1.22102869,  0.0061175 , -0.09257668],
+       [ 1.22102869,  0.0061175 , -0.09257668],
+       [ 1.24872577, -0.00927847, -0.10560299],
+       [ 4.31692982, -0.18612409, -0.2988466 ],
+       [ 4.34810543, -0.29990599, -0.26644802],
+       [ 4.19496918, -0.36223671, -0.17665103],
+       [ 4.06026125, -0.42828146, -0.09821623],
+       [ 4.17062521, -0.54304367, -0.06264938],
+       [ 5.47541904, -0.8096444 ,  0.01005795],
+       [ 5.16173697, -0.86409861,  0.10362043],
+       [ 5.1415062 , -0.92297536,  0.15271717],
+       [ 5.33629274, -1.02949023,  0.25235981],
+       [ 5.40253019, -1.10545421,  0.35951388],
+       [ 5.24160051, -1.13697398,  0.40165672],
+       [ 5.19055986, -1.16379404,  0.49136728],
+       [ 5.19640732, -1.16218734,  0.54287171],
+       [ 5.15716362, -1.18668461,  0.5397386 ],
+       [ 5.14668322, -1.18299079,  0.58967888],
+       [ 5.10255766, -1.17665768,  0.627828  ],
+       [ 5.17487907, -1.19071782,  0.68614388],
+       [ 5.17487907, -1.19071782,  0.68614388],
+       [ 5.28886509, -1.2153281 ,  0.75183356],
+       [ 5.28886509, -1.2153281 ,  0.75183356],
+       [ 5.0948782 , -1.16930723,  0.77760547],
+       [ 5.0948782 , -1.16930723,  0.77760547],
+       [ 5.05945587, -1.16354346,  0.81499237],
+       [ 4.79158926, -1.10082948,  0.82027018],
+       [ 4.79158926, -1.10082948,  0.82027018],
+       [ 4.89464378, -1.09264195,  0.88529873],
+       [ 4.83445644, -1.047737  ,  0.92241758],
+       [ 4.81476641, -1.04307973,  0.96037996],
+       [ 4.82107592, -1.01351726,  0.96037996],
+       [ 4.8067317 , -1.00969446,  1.00523722],
+       [ 4.76888371, -0.97121799,  1.04507411],
+       [ 4.75458097, -0.93795985,  1.04080164],
+       [ 4.9476037 , -0.94692415,  1.13188589],
+       [ 4.9476037 , -0.94692415,  1.13188589]])
+2024-06-18 12:10:35,928 - WARNING -  * Debugger is active!
+2024-06-18 12:10:35,929 - INFO -  * Debugger PIN: 731-273-360
+2024-06-18 12:13:17,675 - WARNING -  * Debugger is active!
+2024-06-18 12:13:17,675 - INFO -  * Debugger PIN: 731-273-360
+2024-06-18 12:13:45,601 - WARNING -  * Debugger is active!
+2024-06-18 12:13:45,601 - INFO -  * Debugger PIN: 731-273-360
+2024-06-18 12:14:13,548 - WARNING -  * Debugger is active!
+2024-06-18 12:14:13,549 - INFO -  * Debugger PIN: 731-273-360

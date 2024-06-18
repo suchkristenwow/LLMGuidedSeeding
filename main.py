@@ -239,7 +239,7 @@ class ExperimentRunner:
         ]
         
         self.flask_backend = self.start_process_with_terminal(launch_command, "flask_server", cwd = os.getcwd())
-        time.sleep(1) # wait for the flask app to launch
+        time.sleep(2) # wait for the flask app to launch
 
     def launch_react(self):
         log_file_path = os.path.join(self.uuid_logging_dir, "application_logs", "react_server.log")

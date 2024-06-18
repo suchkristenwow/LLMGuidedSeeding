@@ -1,0 +1,60 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/6b10dd2c-b5b6-44b8-93fe-c3dc865772d5/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid":"conmods, planted area","pattern":"grid","pattern_offset":1,"seed":"True"}
+
+results_str:  {"avoid":"conmods, planted area","pattern":"grid","pattern_offset":1,"seed":"True"}
+constraints: {'avoid': 'conmods, planted area', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True} 
+
+building policy...
+feedback is none!
+Policy:  1. Check the initial location of the robot relative to the plot_bounds. If the robot is outside the bounds, plan the shortest path to the nearest point inside the plot_bounds. 
+
+2. Identify the objects listed under 'avoid' in the constraint dictionary in the current environment. If any objects are not found, ask the user for more information on their locations. 
+
+3. Start at one corner of the plot_bounds. If the 'pattern' specified in the constraints dictionary is a 'grid', start navigating in a straight line towards the opposite end of the plot.
+
+4. Every 1 meter (as specified in 'pattern_offset'), stop and plant a seed. Record this location in system memory to avoid it in the future.
+
+5. After planting, check the area within the next 1 meter for any objects listed under 'avoid'. If such an object is found, plan a path around it while staying within the plot_bounds and not crossing over previously planted areas.
+
+6. Continue this process until the end of the row is reached. Then, move 1 meter perpendicular to the previous path, making sure to avoid any objects listed under 'avoid' and previously planted areas. 
+
+7. Repeat steps 3 to 6, moving in the opposite direction for the new row. This creates the grid pattern specified.
+
+8. Continue this process until the entire plot within the plot_bounds is covered.
+
+9. If at any point during this process an object listed under 'avoid' cannot be avoided while staying within the plot_bounds and not crossing over previously planted areas, ask the user for guidance.
+
+10. Once all the seeds are planted in the grid pattern within the plot_bounds, stop and send a completion message to the user.
+enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+That'll do pig that'll do
+verifying the policy; this is the llm result: Your message does not provide specific feedback on a policy, thus I can't definitively say whether you approve or disapprove. I will need more detailed feedback to accurately determine your stance.
+Updating feedback!
+feedback:  That'll do pig that'll do
+building policy...
+{'avoid': 'conmods, planted area', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}

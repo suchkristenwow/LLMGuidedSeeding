@@ -1,0 +1,10 @@
+1. First, validate the current position of the robot. If the robot's current position is outside the plot bounds, calculate the shortest path to enter the plot bounds without violating any constraint.
+2. Once inside the plot bounds, set up a grid pattern with 1m x 1m spacing as per the 'pattern' and 'pattern_offset' in the constraints dictionary.
+3. Initiate the seeding procedure. As per the 'seed' variable, the robot should prepare to drop seeds at each grid intersection.
+4. Before moving to each grid intersection, verify if it falls in a 'planted area' or 'conmod'. If it does, avoid that intersection as per the 'avoid' variable in the constraints dictionary.
+5. If the intersection is not within a 'planted area' or 'conmod', navigate to the intersection and drop a seed. Add this location to the list of 'planted areas'.
+6. Repeat steps 4 and 5 until all intersections of the grid within the plot bounds have been addressed.
+7. If a conflict arises where the robot is unable to navigate to an intersection without violating an 'avoid' constraint, interface with the user for guidance on how to proceed.
+8. After all intersections have been addressed, store the final list of 'planted areas' in system memory for future reference.
+9. Send a completion message to the user, summarizing the task and providing information about any issues encountered or areas not planted due to 'avoid' constraints.
+10. If there are remaining seeds, ask the user for further instructions. If there are no remaining seeds, or upon receiving further instructions, return the robot to its initial position or as directed by the user.

@@ -1,0 +1,18 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Start by verifying the current location of the robot. If the robot is outside the plot bounds, calculate the shortest route to the plot and navigate there.
+2. Once inside the plot bounds, start by identifying any existing 'planted area' or 'conmods' within the plot using the robot's RGB cameras.
+3. Based on the identified objects that need to be avoided, plan a 1m x 1m grid pattern within the plot bounds, ensuring that the grid does not overlap with the 'planted area' and 'conmods'.
+4. If there are certain sections of the plot where the grid pattern cannot be planned due to the presence of 'planted area' or 'conmods', inform the user and ask for further instructions.
+5. Once the grid pattern is planned, start navigating to each point on the grid for planting. If the robot is unable to locate the next point on the grid, ask the user for directions.
+6. Upon reaching each grid point, if the 'seed' boolean is true, plant a seed and record the location in the system memory.
+7. After planting, ensure the robot does not drive over the 'planted area'. Recalculate the path to the next point on the grid if it passes through the 'planted area'.
+8. Continue this process until all points on the grid have been visited and seeded.
+9. Once all points on the grid have been seeded, inform the user of the completion of the task. Provide the user with a list of all planted locations.
+10. Standby for further instructions from the user. 
+
+Types: <class 'NoneType'>
+Types: <class 'generator'>
+2024-06-17 15:36:45,332 - WARNING -  * Debugger is active!
+2024-06-17 15:36:45,333 - INFO -  * Debugger PIN: 731-273-360

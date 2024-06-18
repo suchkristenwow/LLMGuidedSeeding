@@ -1,0 +1,20 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Initialize the robot's localization systems to ensure accurate tracking of position within the operational bounds.
+2. If the robot is outside the plot bounds, calculate the shortest route to enter the plot bounds.
+3. Initialize an empty list in the system memory to store the coordinates of all planted locations.
+4. Identify any conmods (containers of modular equipment) within the operational bounds and store their locations.
+5. Create a grid pattern with 1m x 1m spacing within the operational bounds using the 'pattern' and 'pattern_offset' variables from the constraint dictionary.
+6. Initialize a planting routine, beginning from the first point on the grid. For each point:
+     1. Use lidar-inertial odometry and GPS to check the robot's position relative to the current grid point.
+     2. Check if the route to the current grid point crosses any previously planted locations or conmods.
+     3. If there are obstructions, calculate a detour route to avoid them.
+     4. Once at the grid point, execute the planting sequence if the 'seed' boolean is True. 
+     5. Save the grid point in the planted locations list.
+7. Repeat the planting routine for all points on the grid.
+8. If a grid point cannot be reached without crossing a conmod or previously planted area, notify the user: "I can't reach grid point at {coordinates}, please suggest a new route."
+9. Once all points on the grid have been visited, or an alternative action has been taken as directed by the user, conclude the task. 
+
+2024-06-17 14:43:00,501 - WARNING -  * Debugger is active!
+2024-06-17 14:43:00,501 - INFO -  * Debugger PIN: 731-273-360

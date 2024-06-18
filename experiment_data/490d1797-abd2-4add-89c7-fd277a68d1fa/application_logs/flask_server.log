@@ -1,0 +1,28 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Initialize the system to start the task. Check if the robot is within the plot bounds. If not, calculate and follow the shortest path to enter the plot bounds.
+
+2. Once inside the plot bounds, initiate the 'grid' pattern for planting as per the 'pattern_offset' of 1m, taking care to avoid 'planted area' and 'conmods' as mentioned in the 'avoid' section of the constraint dictionary.
+
+3. Begin by moving to the nearest corner of the plot bounds, using the RGB camera and lidar-inertial odometry to navigate and identify landmarks and objects to avoid.
+
+4. Start planting seeds at 1m intervals along the width of the plot area. Each planting location should be stored in the system memory.
+
+5. After the completion of one row, move 1m in the perpendicular direction using lidar-inertial odometry and GPS for accurate positioning.
+
+6. Start planting seeds at 1m intervals along this row, in the opposite direction to the previous row. Each new planting location should be added to the system memory.
+
+7. Repeat steps 5 and 6 until the entire plot area has been covered in a 1m x 1m grid pattern.
+
+8. If at any point the robot is unable to find a clear path due to the presence of 'planted areas' or 'conmods', inform the user saying "I am unable to find a clear path due to the presence of planted areas or conmods. Please provide further instructions."
+
+9. Once the task is complete, provide a summary to the user, including the total area covered, number of seeds planted, and any difficulties encountered during the operation. 
+
+10. End the task and switch to standby mode, awaiting further instructions. 
+
+Failed to Project Sketch: module 'open3d.cpu.pybind.geometry' has no attribute 'pointCloud'
+2024-06-18 11:31:29,150 - WARNING -  * Debugger is active!
+2024-06-18 11:31:29,150 - INFO -  * Debugger PIN: 731-273-360
+2024-06-18 11:33:07,407 - WARNING -  * Debugger is active!
+2024-06-18 11:33:07,408 - INFO -  * Debugger PIN: 731-273-360

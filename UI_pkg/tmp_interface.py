@@ -51,7 +51,7 @@ class ConversationalInterface:
         # wait for the user response. 
         while not self.human_response:
             time.sleep(1)
-            print('Waiting for human response from backend')
+            
         with open("prompts/verification_prompt.txt","r") as f:
             prompt = f.read()
         enhanced_verification_response = prompt + self.feedback  #self.get_human_feedback()
