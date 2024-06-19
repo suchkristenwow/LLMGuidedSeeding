@@ -34,7 +34,7 @@ drawing = None
 bridge = CvBridge()
 
 ################### Utility functions for the backend ##########################
-def image_callback(data):
+def image_callback(data) -> None:
     """Hook function to pull out our frames from Rospy.Subscriber"""
     global frame, _frame, cv_image 
     if frame is not None and _frame is not None:
@@ -45,13 +45,11 @@ def image_callback(data):
     cv_image = bridge.imgmsg_to_cv2(data)
     frame = np.frombuffer(data.data, dtype=np.uint8).reshape(data.height, data.width, -1)
  
-
 def lidar_callback(data):
     """Hook function to pull out out LiDAR from Rospy.Subscriber"""
     global pc_msg
     pc_msg = data
    
-    
 def gen():
     """Video streaming generator function."""
     global _frame
@@ -61,17 +59,17 @@ def gen():
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + _frame + b'\r\n')
 
-def update_window():
-    """Continously update the OpenCV window"""
-    global cv_image
-    while True:
-        cv.imshow("Video 1", cv_image)
-        if cv.waitKey(1) & 0xFF == ord('q'):
-            break
+# def update_window():
+#     """Continously update the OpenCV window"""
+#     global cv_image
+#     while True:
+#         cv.imshow("Video 1", cv_image)
+#         if cv.waitKey(1) & 0xFF == ord('q'):
+#             break
 
 def draw_polylines(event, x, y, flags, param):
     """logic for our callback: Hold down the left click to drop points as you move the mouse"""
-    global drawing, drawing_frame, points # we have to run the global call again in this function
+    global drawing, paused_cv_image, drawing_frame, points # we have to run the global call again in this function
     if event == cv.EVENT_LBUTTONDOWN:
         drawing = True
     elif event == cv.EVENT_MOUSEMOVE:
@@ -93,20 +91,17 @@ def draw_polylines(event, x, y, flags, param):
         # cv.circle(drawing_frame, (x,y), 3, (0,255,0), -1)
         # points.append([x,y])
         points = []
-        drawing_frame = cv.UMat(og_drawing_frame.copy())
+        drawing_frame = cv.UMat(paused_cv_image.copy())
 
 def project_sketch(sketch_points: list, paused_pc_message: PointCloud2) -> o3d.geometry.PointCloud:
     """
-    Given pixel coordinates from a sketch and the point cloud data at the time of the sketch, project the sketch points into the point cloud data
-
+    Project pixel coordinates into the egocentric lidar when the sketch was made
     Args:
         points (np.ndarray): The sketched pixel coordinates to be processed as a NumPy array.
         paused_pc_msg (pc2.PointCloud2): The environments point cloud data collected in the function pause..
-
     Returns:
         projected_pcd: (o3d.geometry.PointCloud)
     """
-
     cam_projector = CamProjector(1, camera_pose = [0.152758, 0.00, 0.0324, 0,0,0], robot_pose = [0,0,0,0,0,0]) # scaling factor of 1
     sketch_proj = np.array([cam_projector.project(c) for c in sketch_points])[:,:3]
     
@@ -135,7 +130,17 @@ def project_sketch(sketch_points: list, paused_pc_message: PointCloud2) -> o3d.g
     # Select the closest world point
     return o3d.geometry.PointCloud(points = o3d.utility.Vector3dVector(np.array(world_pcd.points)[closest_ind]))
 
-    
+def display_window():
+    global drawing_frame
+    cv.namedWindow("Video 1", cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
+    cv.moveWindow("Video 1", 500, 250)
+    cv.setMouseCallback('Video 1', draw_polylines)
+    while True:
+        cv.imshow("Video 1", drawing_frame)
+        key = cv.waitKey(1) & 0xFF
+        if key == ord('x') or key == 27:
+            break
+    cv.destroyAllWindows()   
 
 def write_pcd_to_csv(pcd: o3d.geometry.PointCloud, filename: str) -> None:
     """
@@ -168,35 +173,48 @@ def pause():
     
 @app_routes.route('/backend/sketch_boundary')
 def drawing():
-    global cv_image, og_drawing_frame, drawing_frame, paused_frame, points, paused_pc_msg
-    og_drawing_frame = cv_image
-    drawing_frame = cv.UMat(og_drawing_frame.copy())
+    """Pops up a cv window of the paused frame, click and hold left button to drop points as you drag,  x to exit"""
+    global paused_cv_image, drawing_frame, paused_frame, points, paused_pc_msg
+    # AttributeError: 'NoneType' object has no attribute 'copy'
+    # Check if paused_cv_image is None
+    if paused_cv_image is None:
+        return "No paused image to draw on", 400
+    
+    try:
+        drawing_frame = cv.UMat(paused_cv_image.copy())
+    except AttributeError as e:
+        print(f"Error copying paused_cv_image: {e}")
+        return "Internal server error: paused_cv_image", 500
+    
+    drawing_frame = cv.UMat(paused_cv_image.copy())
 
     cv.namedWindow("Video 1", cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
-    # Resize the window
     cv.moveWindow("Video 1", 500, 250)
     cv.setMouseCallback('Video 1', draw_polylines)
-    
     # Main loop
-    while True:
-        # Display the window
+    is_drawing = True
+    while is_drawing:
+        #print('DRAWING')
         cv.imshow("Video 1", drawing_frame)
-        # Check for any key pressed, wait for 1 millisecond
         key = cv.waitKey(1) & 0xFF
-        # Check if 'x' key is pressed or the window is closed
         if key == ord('x') or key == 27:
-            break
+            #print('STOPPED')
+            is_drawing = False
     # Clean up
     cv.destroyAllWindows()
-    print(f'Types: {type(points)}, {type(paused_pc_msg)}')
+    # Run the OpenCV window in a separate thread
+    # window_thread = threading.Thread(target=display_window)
+    # window_thread.start()
+    # window_thread.join()
+    # Project the sketch into the ego lidar
     try:
         projected_pcd = project_sketch(points, paused_pc_msg)
         #pcd = o3d.io.read_point_cloud("../../test_data/fragment.pcd")
-        o3d.io.write_point_cloud("projected_pcd.pcd", projected_pcd)
-        print(projected_pcd)
+        o3d.io.write_point_cloud("projected_pcd.pcd", projected_pcd) 
     except Exception as e:
         print(f"Function project_sketch failed: {e}")
-    
+    # Reinitialize points
+    points = []
     return Response(paused_frame, mimetype='image.jpeg')
 
 @app_routes.route('/backend/player')

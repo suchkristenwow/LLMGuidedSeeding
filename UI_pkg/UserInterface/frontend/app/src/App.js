@@ -49,8 +49,7 @@ function ImageStream() {
       })
       .catch(error => {
         console.error("There was a problem with the fetch operation:", error);
-      });
-        }
+      });} 
     }
   
   
@@ -105,13 +104,6 @@ function Chat({socket}) {
       setUserMessage('');
     }
   }
-
-  // const handleKeyPress = (event) => {
-  //   if (event.key === 'Enter') {
-  //     event.preventDefault(); // Prevents the default behavior of the Enter key
-  //     handleChat(); // Calls the handleChat function if Enter key is pressed
-  //   }
-  // };
 
   const handleChange = (event) => {
     setUserMessage(event.target.value);
