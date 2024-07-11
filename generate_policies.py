@@ -91,7 +91,6 @@ class PolicyGenerator:
             enhanced_prompt = prompt.replace("*INSERT_CONSTRAINT_DICTIONARY*",constraints)
             enhanced_prompt = prompt.replace("*INSERT_POLICY*",self.current_policy)
             enhanced_prompt = prompt.replace("*INSERT_FEEDBACK*",self.feedback)
-            #print("this is the new prompt: ",enhanced_prompt)
             print("modifying policy...")
             modified_policy = generate_with_openai(enhanced_prompt)
             print("modified_policy: ",modified_policy)
@@ -131,7 +130,6 @@ class PolicyGenerator:
                 if self.policy_iters == 0:
                     policy = self.build_policy(constraints)
                 #3. Verfiy with user 
-                
                 self.verify_policy(policy)
                 #4. Integrate user feedback 
                 if not self.validPolicy:
@@ -140,12 +138,8 @@ class PolicyGenerator:
                 raise Exception("Cannot come up with an acceptable policy :(")
             self.policy_iters += 1 
         #print(f'Human response: {self.conversational_interface.human_response}')
-
-
-
         code =  code_gen(self.policy)
 
-        
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description="Explore Test")

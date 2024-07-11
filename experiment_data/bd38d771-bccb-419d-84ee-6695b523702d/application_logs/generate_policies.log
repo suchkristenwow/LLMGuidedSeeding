@@ -1,0 +1,151 @@
+initting the Policy Generator with these arguments: 
+Namespace(config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/bd38d771-bccb-419d-84ee-6695b523702d/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv', prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+llm_result: {"avoid":"planted areas, conmods", "pattern":"grid", "pattern_offset":1, "seed":"True"}
+
+results_str:  {"avoid":"planted areas, conmods", "pattern":"grid", "pattern_offset":1, "seed":"True"}
+constraints: {'avoid': 'planted areas, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True} 
+
+building policy...
+feedback is none!
+Policy:  1. Begin by checking the robot's current location in relation to the plot bounds using lidar-inertial odometry and GPS.
+2. If the robot is outside the plot bounds, plan the shortest route to enter the bounds and execute the plan.
+3. Initialize an empty list in the system memory to keep track of all the planted locations.
+4. Use the RGB cameras to scan the environment for any existing "planted areas" and "conmods" and avoid these areas.
+5. Based on the detected 'avoid' objects and the 'plot_bounds', calculate a grid of 1m x 1m cells for the plot.
+6. Start at one corner of the plot.
+7. For each cell in the grid, plan a safe path to the cell avoiding any planted areas or conmods.
+8. Execute the path plan to reach the center of the cell.
+9. Once at the center of the cell, deploy the seed planting mechanism.
+10. After planting, add the current cell's location to the list of planted locations.
+11. Move to the next cell following the grid pattern and repeat steps 7-10. 
+12. Continue this process until all the cells within the plot bounds have been covered.
+13. If an obstacle or a conmod is encountered which is not immediately avoidable, ask the human for more direction or context.
+14. After all cells have been seeded, stop and signal task completion. 
+
+If during the operation, the robot is unable to find the path to the next grid cell due to an obstacle or previously planted area, the robot should communicate "I can't find a safe path to the next cell, where should I look?".
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
+Waiting for human response from backend
