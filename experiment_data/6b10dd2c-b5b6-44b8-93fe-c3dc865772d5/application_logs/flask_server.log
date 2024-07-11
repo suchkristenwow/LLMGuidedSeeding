@@ -1,0 +1,25 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Check the initial location of the robot relative to the plot_bounds. If the robot is outside the bounds, plan the shortest path to the nearest point inside the plot_bounds. 
+
+2. Identify the objects listed under 'avoid' in the constraint dictionary in the current environment. If any objects are not found, ask the user for more information on their locations. 
+
+3. Start at one corner of the plot_bounds. If the 'pattern' specified in the constraints dictionary is a 'grid', start navigating in a straight line towards the opposite end of the plot.
+
+4. Every 1 meter (as specified in 'pattern_offset'), stop and plant a seed. Record this location in system memory to avoid it in the future.
+
+5. After planting, check the area within the next 1 meter for any objects listed under 'avoid'. If such an object is found, plan a path around it while staying within the plot_bounds and not crossing over previously planted areas.
+
+6. Continue this process until the end of the row is reached. Then, move 1 meter perpendicular to the previous path, making sure to avoid any objects listed under 'avoid' and previously planted areas. 
+
+7. Repeat steps 3 to 6, moving in the opposite direction for the new row. This creates the grid pattern specified.
+
+8. Continue this process until the entire plot within the plot_bounds is covered.
+
+9. If at any point during this process an object listed under 'avoid' cannot be avoided while staying within the plot_bounds and not crossing over previously planted areas, ask the user for guidance.
+
+10. Once all the seeds are planted in the grid pattern within the plot_bounds, stop and send a completion message to the user. 
+
+2024-06-18 11:27:36,812 - WARNING -  * Debugger is active!
+2024-06-18 11:27:36,813 - INFO -  * Debugger PIN: 731-273-360

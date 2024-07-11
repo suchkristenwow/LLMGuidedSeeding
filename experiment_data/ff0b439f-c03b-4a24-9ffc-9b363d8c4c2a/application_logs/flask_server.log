@@ -1,0 +1,22 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Types: <class 'NoneType'>
+Types: <class 'generator'>
+Types: <class 'NoneType'>
+Types: <class 'generator'>
+Types: <class 'NoneType'>
+Types: <class 'generator'>
+.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.50.145:5000
+2024-06-17 15:40:07,253 - INFO - [33mPress CTRL+C to quit[0m
+2024-06-17 15:40:07,253 - INFO -  * Restarting with stat
+2024-06-17 15:40:09,015 - WARNING -  * Debugger is active!
+2024-06-17 15:40:09,016 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:41:21,788 - WARNING -  * Debugger is active!
+2024-06-17 15:41:21,788 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:42:02,101 - WARNING -  * Debugger is active!
+2024-06-17 15:42:02,101 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:42:30,866 - WARNING -  * Debugger is active!
+2024-06-17 15:42:30,867 - INFO -  * Debugger PIN: 731-273-360

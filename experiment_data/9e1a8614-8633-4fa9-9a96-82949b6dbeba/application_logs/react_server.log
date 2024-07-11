@@ -1,0 +1,173 @@
+
+> llm-guided-seeder-interface@0.1.0 start
+> react-scripts start
+
+Starting the development server...
+
+Compiled successfully!
+
+You can now view llm-guided-seeder-interface in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.50.145:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nlBaC.0&sid=LjzGMqOZUeIugosAAAAM from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nlBaA.0&sid=Gy89201on8Vy2HpRAAAN from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nl-Xq.0&sid=9iyiYdcfOO62irCQAAAB from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nl-Xo&sid=z0ht2EbovsxQYjnSAAAJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nm5V6&sid=wgh0k7-9nSGx9ZH-AAAG from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nm5V4&sid=ytw33T0kApEEi2oEAAAH from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nm76m&sid=3vxUlMMFVkTx0wXJAAAJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nm76j&sid=vVTSuRTSpA-Br1mQAAAI from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nmDDJ&sid=4Vt-OGbKIl8wCFNSAAAJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nmDDE&sid=9X1RkjjqigAxKwIKAAAI from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nmJ4u&sid=f9YHz1ixhlxKB4eUAAAJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nmJ4d&sid=_WWcVit8Ddys2F_yAAAI from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nmNf3&sid=NUiNnBgZy_WczORNAAAJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nmNeu&sid=GeCQr9AeGoXdv0rDAAAI from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nnStn&sid=_T5nCtdNYeO7TBf2AAAI from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nnStl&sid=hLKg8vo_CGgoYDLHAAAG from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nnU7g&sid=nCCENXNcZ0bTKrtWAAAB from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nnU7r&sid=X9W_11QrvwqI6RnQAAAE from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nng_F.0&sid=FyuFZIKkF263sApFAAAV from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nng_B.0&sid=6DgOZ4Gcz9HL4bQMAAAU from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nnmdv&sid=2zQiymPTml8F1H5wAAAA from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nnmeF&sid=NmuhPK5onnkpabJtAAAJ from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0noRBC.0&sid=xVFQ6rQEMvjScRrvAAAH from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0noRBA&sid=Y3PPz3BOVl_akCE9AAAB from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0noZKb.0&sid=ag-Robv-9371F4s3AAAW from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0noZKa&sid=E9kp83AgezY8-eyoAAAX from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nohXo&sid=UrRvfdG8MgpOhSskAAAV from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0nohXp.0&sid=lZXJQ05eqhIvpjvOAAAU from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0npH0C&sid=sK9LSznzIfOzZeOrAAAE from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0npH0A.0&sid=8mBCkqhxn2VpuxYMAAAC from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.js
+  Line 97:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.js
+  Line 97:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.js
+  Line 97:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.js
+  Line 97:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0npnuC.0&sid=UJklWbPzpw-AZlBuAAAU from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Proxy error: Could not proxy request /socket.io/?EIO=4&transport=polling&t=P0npnu2.0&sid=c7hF7d1m63OpqcuLAAAV from localhost:3000 to http://127.0.0.1:5000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNRESET).
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.js
+  Line 107:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.js
+  Line 107:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.js
+  Line 107:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.js
+  Line 107:6:  React Hook useEffect has a missing dependency: 'socket'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning

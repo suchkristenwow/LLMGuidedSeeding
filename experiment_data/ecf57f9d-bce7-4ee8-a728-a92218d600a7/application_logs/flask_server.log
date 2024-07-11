@@ -1,0 +1,29 @@
+ * Serving Flask app 'app'
+ * Debug mode: on
+Received message: I believe this policy should complete the desired task. What do you think?
+1. Begin by checking the robot's current location against the operational bounds, if the robot is outside of the bounds, plan the shortest route possible to be inside the bounds.
+2. Once inside the bounds, start by scanning the environment using RGB cameras for any existing planted areas or conmods.
+3. If any of the objects listed in the 'avoid' key are detected, mark their location in system memory and plan paths accordingly to avoid them.
+4. Begin the grid pattern from one corner of the plot, maintaining a 1m x 1m spacing as defined in 'pattern_offset'.
+5. Start planting seeds at each grid intersection.
+6. After planting each seed, mark the location in system memory as a planted area.
+7. Move to the next grid point, avoiding all marked objects and areas.
+8. If the robot encounters an object that it cannot identify or locate, interface with the human for more direction, saying "I can't find {landmark}, where should I look?"
+9. Continue this process until the entire plot has been covered, always checking the planned path against the stored locations of planted areas and conmods to avoid them.
+10. Once the entire plot has been covered and all seeds planted, store the final map of planted locations in system memory for future reference.
+11. Communicate to the user that the task has been completed and provide a report of the activity including the map of planted locations. 
+
+Types: <class 'NoneType'>
+Types: <class 'generator'>
+2024-06-17 15:44:42,300 - WARNING -  * Debugger is active!
+2024-06-17 15:44:42,300 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:45:14,500 - WARNING -  * Debugger is active!
+2024-06-17 15:45:14,501 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:45:42,130 - WARNING -  * Debugger is active!
+2024-06-17 15:45:42,131 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:45:58,142 - WARNING -  * Debugger is active!
+2024-06-17 15:45:58,143 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:47:15,916 - WARNING -  * Debugger is active!
+2024-06-17 15:47:15,917 - INFO -  * Debugger PIN: 731-273-360
+2024-06-17 15:47:22,992 - WARNING -  * Debugger is active!
+2024-06-17 15:47:22,992 - INFO -  * Debugger PIN: 731-273-360

@@ -8,6 +8,7 @@ import logging
 import uuid
 import shutil
 import numpy as np 
+import time 
 
 class ExperimentRunner:
     def __init__(self, args):
@@ -209,6 +210,35 @@ class ExperimentRunner:
         #explore_runner_dir = os.path.abspath(os.path.join("../"))
         self.policyExecution_process = self.start_process_with_terminal(launch_command, "execute_policy", cwd=os.getcwd())
 
+    def launch_flask_app(self):
+        log_file_path = os.path.join(self.uuid_logging_dir,"application_logs", "flask_server.log")
+        log_file_path_abs = os.path.abspath(log_file_path)
+        print(f'Explore flask log file: {log_file_path_abs} \n')
+        
+        app_dir = os.path.join("UI_pkg", "UserInterface", "backend")
+        app_path = os.path.join(app_dir, "application.py")
+
+        launch_command = [
+            "python", app_path,
+            "--logging_file", log_file_path_abs
+        ]
+        
+        self.flask_backend = self.start_process_with_terminal(launch_command, "flask_server", cwd = os.getcwd())
+        time.sleep(2) # wait for the flask app to launch
+
+    def launch_react(self):
+        log_file_path = os.path.join(self.uuid_logging_dir, "application_logs", "react_server.log")
+        log_file_path_abs = os.path.abspath(log_file_path)
+        print(f'Explore react log file: {log_file_path_abs} \n')
+
+        app_dir = os.path.join("UI_pkg", "UserInterface", "frontend", "app")
+        #os.chdir(app_dir)  # Change directory to the React app directory
+
+        launch_command = ["npm", "start"]
+        
+        self.react_frontend = self.start_process_with_terminal(launch_command, "react_server", cwd = app_dir)
+        
+    
     def run(self):
         self.create_logging_directory() 
         #launch the robot 
