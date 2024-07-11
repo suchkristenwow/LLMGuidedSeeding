@@ -1,0 +1,19 @@
+1. First, check your current location against the plot bounds. If you're outside the plot bounds, calculate the shortest path into the plot and move there.
+
+2. Once inside the plot bounds, initialize a grid pattern with a 1m x 1m spacing. This will serve as your navigation guide for planting seeds.
+
+3. Begin at the first grid point, taking care to avoid any planted areas and conmods.
+
+4. At the grid point, deploy a seed.
+
+5. Record the grid point as a planted area in the system memory.
+
+6. Proceed to the next grid point, again avoiding any planted areas and conmods. If the next grid point is occupied by a conmod, notify the user and ask for direction. 
+
+7. Repeat steps 4-6 until all grid points within the plot bounds have been visited and seeds have been planted where possible.
+
+8. Once all grid points have been visited, double-check system memory to ensure all planting locations have been recorded.
+
+9. After seeding is complete, return to the starting point or a user-defined home base, avoiding any planted areas and conmods on the return journey.
+
+10. Notify the user that the planting task has been completed and provide a report of where seeds were planted, any issues encountered, and the final location of the robot.

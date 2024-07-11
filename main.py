@@ -8,7 +8,6 @@ import logging
 import uuid
 import shutil
 import numpy as np 
-import os
 import time
 
 class ExperimentRunner:
@@ -23,14 +22,13 @@ class ExperimentRunner:
         self.policyGeneration_process = None
         self.policyRehearsal_process = None 
         self.policyExecution_process = None 
-        self.flask_backend = None
-        self.react_frontend = None
         
         logging.basicConfig(
             level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
         )
-        
-        self.uuid_logging_dir = self.settings["logging_directory"] + str(uuid.uuid4())
+        self.base_dir =  os.path.dirname(os.path.abspath(__file__))
+        self.uuid_logging_dir = self.base_dir + self.settings["logging_directory"] + str(uuid.uuid4())
+
 
         self.vqa_url = f"http://{self.settings['common_ip']}:{self.settings['vqa_model']['port']}/completion"
 
@@ -42,6 +40,7 @@ class ExperimentRunner:
             None
         """
         logging_dir = self.uuid_logging_dir
+        print(logging_dir, self.base_dir)
         os.makedirs(logging_dir, exist_ok=True)
         os.makedirs(logging_dir + "/application_logs", exist_ok=True)
         full_path = os.path.abspath(logging_dir)
@@ -65,6 +64,7 @@ class ExperimentRunner:
             # Copy the entire logging directory
             logging.info(f"Coppying logs and data to {destination_dir}")
             shutil.copytree(self.uuid_logging_dir, os.path.join(destination_dir, os.path.basename(self.uuid_logging_dir)), dirs_exist_ok=True)
+            shutil.copytree(self.uuid_logging_dir, os.path.join(destination_dir, os.path.basename(self.uuid_logging_dir)), dirs_exist_ok=True)
             logging.info(f"Copied logs and data to {destination_dir}")
         except Exception as e:
             logging.error(f"Failed to copy logs and data: {e}")
@@ -78,6 +78,7 @@ class ExperimentRunner:
     def start_process_with_terminal(self, launch_command, process_name, cwd=None):
         try:
             log_file_path = os.path.join(
+                self.uuid_logging_dir + "/application_logs",
                 self.uuid_logging_dir + "/application_logs",
                 f"{process_name}.log",
             )
@@ -96,11 +97,11 @@ class ExperimentRunner:
                 tee_command, shell=True, env=os.environ, cwd=cwd, preexec_fn=os.setsid
             )
             logging.info(
-                f"Process '{process_name}' launched with command: {tee_command} \n"
+                f"Process '{process_name}' launched with command: {tee_command}"
             )
 
         except OSError as e:
-            logging.error(f"Error launching process '{process_name}': {e} \n")
+            logging.error(f"Error launching process '{process_name}': {e}")
 
         return process 
     
@@ -142,7 +143,7 @@ class ExperimentRunner:
             os.killpg(os.getpgid(self.explore_process.pid), signal.SIGTERM)
             self.explore_process = None
         '''
-        print(self.running_processes)
+    
         for process in self.running_processes:
             logging.info(f"Terminating process {process.pid}...")
             if process.poll() is None:  # Check if the process is still running
@@ -165,6 +166,7 @@ class ExperimentRunner:
     
     def launch_policy_gen(self):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
+        logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
         print()
@@ -173,10 +175,10 @@ class ExperimentRunner:
         config_path = os.path.abspath(self.args.config)
         bounds_path = os.path.abspath(self.args.plot_bounds_path)
         print("this is config path: ",config_path)
-        print()
         # Split the command into a list of arguments
         #TO DO: LOAD IN PLOT BOUNDS FROM USER INTERFACE 
         launch_command = [
+            "python", "generate_policies.py",
             "python", "generate_policies.py",
             "--prompt_path", prompt_path,
             "--config_path", config_path,
@@ -189,14 +191,15 @@ class ExperimentRunner:
 
     def launch_policy_rehearsal(self,policy): 
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
+        logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
-        print()
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
         # Split the command into a list of arguments
         launch_command = [
+            "python", "rehearse_policies.py",
             "python", "rehearse_policies.py",
             "--policy", policy,
             "--config_path", config_path,
@@ -208,14 +211,15 @@ class ExperimentRunner:
 
     def launch_policy_execution(self,policy):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
+        logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
-        print(f'Explore logs dir {logs_dir_absolute} \n')
-        
+        print("Explore logs dir", logs_dir_absolute)
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
         # Split the command into a list of arguments
         launch_command = [
+            "python", "execute_policy.py",
             "python", "execute_policy.py",
             "--policy", policy,
             "--config_path", config_path,
@@ -288,13 +292,6 @@ def setup_signal_handling(runner):
     signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == "__main__":
-    # os and user agnostic edits to TOML file
-    config_path = os.path.join("configs","example_config.toml")
-    config = toml.load(config_path)
-    config['prompt_file'] = os.path.join(os.path.expanduser("~"), config['prompt_file'])
-    config['logging_directory'] = os.path.join(os.path.expanduser("~"), config['logging_directory'])
-    config['commonObj_path'] = os.path.join(os.path.expanduser("~"), config['commonObj_path'])
-
     parser = argparse.ArgumentParser(description="Experiment Runner")
     parser.add_argument(
         "--config",

@@ -1,0 +1,68 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/f0b85505-280c-4929-9662-0a68e3a1dcf2/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+response.status_code:  200
+llm_result: {"avoid":"planted areas, conmods","pattern":"grid","pattern_offset":1,"seed":"True"}
+results_str:  {"avoid":"planted areas, conmods","pattern":"grid","pattern_offset":1,"seed":"True"}
+constraints:  {'avoid': 'planted areas, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+constraints[k]:  planted areas, conmods
+<class 'str'>
+split_constraint:  ['planted areas', ' conmods']
+this is  a list!
+constraints[k]:  grid
+<class 'str'>
+constraints[k]:  1
+<class 'int'>
+constraints[k]:  True
+<class 'bool'>
+extending prompt lms
+prompt lms:  ['planted areas', ' conmods']
+I dont know what planted areas is. Ill have to ask.
+I dont know what  conmods is. Ill have to ask.
+response.status_code:  200
+policy:  1. First, check your current location against the plot bounds. If you're outside the plot bounds, calculate the shortest path into the plot and move there.
+
+2. Once inside the plot bounds, initialize a grid pattern with a 1m x 1m spacing. This will serve as your navigation guide for planting seeds.
+
+3. Begin at the first grid point, taking care to avoid any planted areas and conmods.
+
+4. At the grid point, deploy a seed.
+
+5. Record the grid point as a planted area in the system memory.
+
+6. Proceed to the next grid point, again avoiding any planted areas and conmods. If the next grid point is occupied by a conmod, notify the user and ask for direction. 
+
+7. Repeat steps 4-6 until all grid points within the plot bounds have been visited and seeds have been planted where possible.
+
+8. Once all grid points have been visited, double-check system memory to ensure all planting locations have been recorded.
+
+9. After seeding is complete, return to the starting point or a user-defined home base, avoiding any planted areas and conmods on the return journey.
+
+10. Notify the user that the planting task has been completed and provide a report of where seeds were planted, any issues encountered, and the final location of the robot.
+Question:  I believe this policy should complete the desired task. What do you think?
+1. First, check your current location against the plot bounds. If you're outside the plot bounds, calculate the shortest path into the plot and move there.
+
+2. Once inside the plot bounds, initialize a grid pattern with a 1m x 1m spacing. This will serve as your navigation guide for planting seeds.
+
+3. Begin at the first grid point, taking care to avoid any planted areas and conmods.
+
+4. At the grid point, deploy a seed.
+
+5. Record the grid point as a planted area in the system memory.
+
+6. Proceed to the next grid point, again avoiding any planted areas and conmods. If the next grid point is occupied by a conmod, notify the user and ask for direction. 
+
+7. Repeat steps 4-6 until all grid points within the plot bounds have been visited and seeds have been planted where possible.
+
+8. Once all grid points have been visited, double-check system memory to ensure all planting locations have been recorded.
+
+9. After seeding is complete, return to the starting point or a user-defined home base, avoiding any planted areas and conmods on the return journey.
+
+10. Notify the user that the planting task has been completed and provide a report of where seeds were planted, any issues encountered, and the final location of the robot.
+Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise.
+If the user suggests any changes, return False. 
+Yes this is good
+response.status_code:  200
+verifying the policy; this is the llm result: True
+Found a valid policy approved by the human!

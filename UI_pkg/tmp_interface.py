@@ -1,7 +1,5 @@
 import os 
 from LLMGuidedSeeding_pkg import * 
-import socketio
-import time
 
 class ConversationalInterface:
     def __init__(
@@ -21,12 +19,10 @@ class ConversationalInterface:
 
     def ask_human(self,content):
         '''
-        Emit the GPT content to the bakend through a socket 
+        This function ports text from the robot to the interface 
         '''
-        # Send a message to the server 
-        self.sio.emit('message', content)   
-
-
+        print("Question: ",content)
+    
     def get_human_feedback(self):
         '''
         This function ports text from the interface to the robot
@@ -37,14 +33,12 @@ class ConversationalInterface:
         '''
         feedback = input("Feedback: ")
         self.feedback = feedback
-        return feedback
+        return feedback 
     
-        
     def ask_policy_verification(self,policy):
         '''
         This function enhances the policy for verification by the human 
         '''
-        self.human_response = False
         preface = "I believe this policy should complete the desired task. What do you think?"
         enhanced_prompt = preface + "\n" + policy 
         self.ask_human(enhanced_prompt)
@@ -54,7 +48,7 @@ class ConversationalInterface:
             
         with open("prompts/verification_prompt.txt","r") as f:
             prompt = f.read()
-        enhanced_verification_response = prompt + self.feedback  #self.get_human_feedback()
+        enhanced_verification_response = prompt + self.get_human_feedback()
         print("enhanced verification response: ",enhanced_verification_response)
         llm_result = generate_with_openai(enhanced_verification_response)
         print("verifying the policy; this is the llm result:",llm_result)

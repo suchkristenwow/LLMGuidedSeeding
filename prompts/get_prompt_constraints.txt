@@ -5,8 +5,12 @@ The robot is able to observe landmarks via RGB cameras and it is able to plant s
 
 Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
 
-The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+The keys to this dictionary should be the strings "meta-obstacle", "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
 which is true if the robot should plant in the specified pattern. 
+
+A meta-obstacle is an obstacle created by the platform itself. For example, if the prompt includes a command to avoid driving over areas where you've already driven, you should include 
+{"meta-obstacle":"already driven"}. Another example would be if the prompt includes a command like "Avoid driving over areas where you have already planted", you should include
+{"meta-obstacle":"planted areas"}. 
 
 For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
 "Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 

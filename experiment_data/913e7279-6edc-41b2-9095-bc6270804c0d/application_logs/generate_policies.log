@@ -1,0 +1,17 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/913e7279-6edc-41b2-9095-bc6270804c0d/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+key:  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
+llm_result: {"avoid":"planted areas, conmods", "pattern":"grid", "pattern_offset":1, "seed":"True"}
+results_str:  {"avoid":"planted areas, conmods", "pattern":"grid", "pattern_offset":1, "seed":"True"}
+constraints:  {'avoid': 'planted areas, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+constraints.keys():  dict_keys(['avoid', 'pattern', 'pattern_offset', 'seed'])
+avoid in constraints!
+constraints[avoid]:  planted areas, conmods
+<class 'str'>
+appending to prompt lms
+prompt lms:  ['planted areas, conmods']
+I dont know what planted areas, conmods is. Ill have to ask.
+key:  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
+policy:  None
