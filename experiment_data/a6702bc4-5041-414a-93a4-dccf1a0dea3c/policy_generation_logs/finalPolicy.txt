@@ -1,7 +1,0 @@
-1. Begin by checking the current location of the robot within the plot bounds using lidar-inertial odometry and GPS.
-2. If the robot is not currently inside the plot bounds, plan the shortest route possible to navigate inside the plot bounds while avoiding any obstacles.
-3. Once inside the plot bounds, start scanning the environment using the RGB cameras to identify any landmarks that match the constraint dictionary's "goal_lms" attribute, in this case, the goal landmark is not explicitly specified, so we will proceed directly to the planting task.
-4. Start planting seeds in a 1mx1m grid pattern within the bounded area. Use the constraint dictionary's "pattern_offset" value of 1.0 to ensure each seed is planted 1 meter apart in both horizontal and vertical directions.
-5. While planting seeds, avoid driving over any areas where seeds have already been planted (identified as "planted_seeds" in the constraint dictionary) or any conmods (identified as "conmods" in the constraint dictionary).
-6. Continue planting seeds in the grid pattern until the entire bounded area has been covered.
-7. Once the planting task is completed, update the system memory to mark the areas where seeds have been planted to avoid driving over them in the future tasks.

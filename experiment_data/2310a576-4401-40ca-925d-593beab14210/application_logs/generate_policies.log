@@ -1,37 +1,0 @@
-initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/2310a576-4401-40ca-925d-593beab14210/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
-self.settings:  {'prompt_file': '/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', 'waypoint_threshold': 0.5, 'logging_directory': '/home/kristen/LLMGuidedSeeding/experiment_data/', 'commonObj_path': '/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt', 'common_ip': '40.78.49.78', 'robot': {'object_sever_url': 'http://0.0.0.0:5005', 'host_url': 'http://0.0.0.0:5000', 'eps_dbscan': 0.5, 'min_samples': 5, 'median_filter_rate': 2, 'median_filtier_distance_threshold': 0.5, 'waypoint_threshold': 0.5}, 'llm_model': {'model_name': 'openai', 'full_name': 'gpt-3.5-turbo', 'api_env_var': 'openai_key'}, 'vqa_model': {'full_name': 'llava-1.5', 'ip': '0.0.0.0', 'port': 8000, 'temp': 0.8}}
-parsing prompt to get constraints ...
-llm_result: Based on the provided prompt, the constraints can be formatted into a dictionary as follows:
-
-{"pattern": "grid", "pattern_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
-
-This dictionary captures the constraints of planting in a 1mx1m grid within the bounded area, avoiding driving over wherever planting has occurred or over any conmods. The "pattern" key specifies the planting pattern, "pattern_offset" provides the spacing for the grid, "avoid" lists the areas to avoid, and "seed" indicates that the robot should plant seeds.
-results_str:  {"pattern": "grid", "pattern_offset": 1, "avoid": ["planted", "conmods"], "seed": "True"}
-constraints:  {'pattern': 'grid', 'pattern_offset': 1, 'avoid': ['planted', 'conmods'], 'seed': True}
-building policy...
-Question:  I believe this policy should complete the desired task. What do you think?
-1. Begin by checking the robot's current location within the plot bounds. If the robot is outside the bounds, plan the shortest route to get inside the plot bounds.
-2. Start by identifying the landmarks in the immediate environment to ensure accurate navigation. If any landmark in the "goal_lms" is not immediately visible, prompt the user for guidance on where to look.
-3. Initiate the planting process by determining the starting point for the grid pattern. Ensure that the robot is at least 1 meter away from any obstacles or boundaries within the plot.
-4. Implement the grid pattern planting strategy by moving the robot in 1-meter increments along both the x and y axes. Plant seeds at each grid point while maintaining a safe distance from previously planted areas and any conmods as specified in the constraints.
-5. Continuously monitor the robot's position and adjust the planting trajectory to ensure adherence to the 1mx1m grid pattern and avoidance of planted areas and conmods.
-6. Complete the planting process for the entire plot area following the grid pattern, making sure to cover the entire designated region while respecting the avoidance constraints.
-7. Once the planting task is completed, provide a status update to confirm the successful execution of planting in a 1mx1m grid within the plot bounds while avoiding previously planted areas and conmods.
-Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise. 
-
-Somewhere in the policy, you should add a step to update a list of planted areas as to avoid driving over those areas later.
-verifying the policy; this is the llm result: False
-policy verification result: True
-Question:  I believe this policy should complete the desired task. What do you think?
-1. Begin by checking the robot's current location within the plot bounds. If the robot is outside the bounds, plan the shortest route to get inside the plot bounds.
-2. Start by identifying the landmarks in the immediate environment to ensure accurate navigation. If any landmark in the "goal_lms" is not immediately visible, prompt the user for guidance on where to look.
-3. Initiate the planting process by determining the starting point for the grid pattern. Ensure that the robot is at least 1 meter away from any obstacles or boundaries within the plot.
-4. Implement the grid pattern planting strategy by moving the robot in 1-meter increments along both the x and y axes. Plant seeds at each grid point while maintaining a safe distance from previously planted areas and any conmods as specified in the constraints.
-5. Continuously monitor the robot's position and adjust the planting trajectory to ensure adherence to the 1mx1m grid pattern and avoidance of planted areas and conmods.
-6. Complete the planting process for the entire plot area following the grid pattern, making sure to cover the entire designated region while respecting the avoidance constraints.
-7. Once the planting task is completed, provide a status update to confirm the successful execution of planting in a 1mx1m grid within the plot bounds while avoiding previously planted areas and conmods.
-Feedback: enhanced verification response:  The following paragraph is feedback from the user on a policy. Based on the following response, does the user approve of this policy? Return "True" if so, and "False" otherwise. 
-
-[A[Aypythnppth[A[ACan you add a part somewhere to make sure you update a list of planted areas each time you plant?
-verifying the policy; this is the llm result: False
-Found a valid policy approved by the human!

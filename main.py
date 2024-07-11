@@ -241,6 +241,7 @@ class ExperimentRunner:
     
     def run(self):
         self.create_logging_directory() 
+        self.launch_flask_app()
         #launch the robot 
         self.launch_policy_gen()
         #rehearsed_policy = self.launch_policy_rehearsal(policy)

@@ -1,9 +1,0 @@
-initting the Policy Generator with these arguments:  Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/1acccea2-b7d1-4858-a818-357b6593ae11/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
-parsing prompt to get constraints ...
-OpenAI key: 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
-llm_result: {"avoid": "planted areas, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
-results_str:  {"avoid": "planted areas, conmods", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
-constraints:  {'avoid': 'planted areas, conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
-building policy...
-feedback is none!
-OpenAI key: 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
