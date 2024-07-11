@@ -16,8 +16,7 @@ class PolicyGenerator:
     ):
         self.logging_directory = logging_directory 
         self.query = self.read(prompt_path)
-        self.settings = toml.load(config_path)
-        # is this supposed to ge
+        self.settings = toml.load(config_path)  
         self.plot_bounds = np.genfromtxt(plot_bounds_path)
         self.current_policy = None 
         self.validPolicy = False 
@@ -38,40 +37,63 @@ class PolicyGenerator:
     def verify_policy(self,policy): 
         #ask the user if they approve of this policy 
         #print("policy verification result:",self.conversational_interface.ask_policy_verification(policy))
-        print("Policy: ", policy)
+        print("policy: ",policy) 
         if self.conversational_interface.ask_policy_verification(policy):
             self.validPolicy = True 
-            
             print("Found a valid policy approved by the human!")
             with open(os.path.join(self.logging_directory,"finalPolicy.txt"),"w") as f:
                 f.write(policy)
         else: 
             print("Updating feedback!")
-            
             self.feedback = self.conversational_interface.feedback
-            print(f'feedback:  {self.feedback}')
-            
+
     def build_policy(self,constraints): 
         print("building policy...")
         if self.feedback is None and self.current_policy is None: 
             print("feedback is none!")
             #1. Navigate to goal points, respecting the constraints 
             # "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset","seed" = True/False.
-            # check all of these landmarks 
+            # check all of these landmarks  
             prompt_lms = []
+            for k in constraints.keys(): 
+                print("constraints[k]: ",constraints[k]) 
+                print(type(constraints[k])) 
+                if isinstance(constraints[k],str): 
+                    if "and" in constraints[k]:
+                        print("And is in the constraints!") 
+                        split_constraints = constraints[k].split("and") 
+                        constraints_list = [split_constraints[0],split_constraints[1]] 
+                        constraints[k] = constraints_list 
+                    elif "," in constraints[k]: 
+                        split_constraint = constraints[k].split(",") 
+                        print("split_constraint: ",split_constraint)
+                        constraints[k] = split_constraint 
+
+                if isinstance(constraints[k],list):  
+                    print("this is  a list!")
+                    if isinstance(constraints[k][0],str): 
+                        if "," in constraints[k][0]:
+                            split_constraint = constraints[k][0].split(",") 
+                            print("split_constraint: ",split_constraint)
+                            constraints[k] = split_constraint 
+
             if "goal_lms" in constraints.keys():
-                if constraints["goal_lms"] is list:
+                if isinstance(constraints["goal_lms"],list):
                     prompt_lms.extend(constraints["goal_lms"])
-                elif constraints["goal_lms"] is str: 
-                    prompt_lms.append(constraints["goal_lms"])
+                elif isinstance(constraints["goal_lms"],str): 
+                    prompt_lms.append(constraints["goal_lms"]) 
+
             if "avoid" in constraints.keys(): 
-                if constraints["avoid"] is list: 
+                if isinstance(constraints['avoid'],list):  
+                    print("extending prompt lms")
                     prompt_lms.extend(constraints["avoid"])
-                elif constraints["avoid"] is str:
+                elif isinstance(constraints["avoid"],str): 
+                    print("appending to prompt lms")
                     prompt_lms.append(constraints["avoid"])
 
+            print("prompt lms: ",prompt_lms) 
             for lm in prompt_lms:
-                if not lm.lower() in self.common_objects and lm.lower() not in [x.name for x in self.learned_objects]:
+                if not lm.lower() in self.common_objects and lm.lower() not in self.learned_objects:
                     print("I dont know what {} is. Ill have to ask.".format(lm))
                     self.conversational_interface.ask_object_clarification(lm) 
                     #because the interface doesnt exist yet im just going to write the object descriptors and save them in txt files 
@@ -79,67 +101,69 @@ class PolicyGenerator:
 
             #TO DO: ask object clarification 
             with open("prompts/get_policy_steps.txt","r") as f:
-                prompt = f.read()
+                prompt = f.read() 
+            
             enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.query)
             enhanced_prompt = enhanced_prompt.replace("*INSERT_CONSTRAINTS*",str(constraints))
-            self.current_policy = generate_with_openai(enhanced_prompt)
+            #print("using enhanced prompt to generate a policy") 
+            self.current_policy = generate_with_openai(enhanced_prompt) 
         else: 
             with open("prompts/modify_policy.txt","r") as f: 
                 prompt = f.read() 
             enhanced_prompt = prompt.replace("*INSERT_PROMPT*",self.query)
-            print(constraints)
             enhanced_prompt = prompt.replace("*INSERT_CONSTRAINT_DICTIONARY*",constraints)
             enhanced_prompt = prompt.replace("*INSERT_POLICY*",self.current_policy)
             enhanced_prompt = prompt.replace("*INSERT_FEEDBACK*",self.feedback)
+            #print("this is the new prompt: ",enhanced_prompt)
             print("modifying policy...")
             modified_policy = generate_with_openai(enhanced_prompt)
             print("modified_policy: ",modified_policy)
             self.current_policy = modified_policy 
-        return self.current_policy
 
     def parse_prompt(self): 
         print("parsing prompt to get constraints ...")
         with open("prompts/get_prompt_constraints.txt","r") as f:
             constraints_prompt = f.read()
         enhanced_query = constraints_prompt.replace("*INSERT_QUERY*",self.query)
-        print(f"Enhanced Query: {enhanced_query}\n")
         llm_result = generate_with_openai(enhanced_query) 
-        print(f"llm_result: {llm_result}\n")
+        print("llm_result:",llm_result)
         '''
         #Debug
         with open("tmp.txt","w") as f:
             f.write(llm_result)
             f.close()
-        '''       
+        ''' 
         constraints = {} 
-        # if "?" not in llm_result.
-        # I think I got a result without a "{}", so we might guard against that
+        #if "?" not in llm_result:
         i0 = llm_result.index("{"); i1 = llm_result.index("}")
         parsed_results = llm_result[i0:i1+1]
-        constraints = dictify(parsed_results)
+        if "}" not in parsed_results:
+            parsed_results = parsed_results + "}"
+        constraints = dictify(parsed_results) 
         
         return constraints
         
     def gen_policy(self): 
         #1. Identify constraints and goal landmarks from the prompt 
         constraints = self.parse_prompt()
-        print(f'constraints: {constraints} \n')
+        print("constraints: ",constraints)
         while not self.validPolicy:
             if self.policy_iters < self.max_policy_iters:
                 #2. Come up with policy
                 if self.policy_iters == 0:
-                    policy = self.build_policy(constraints)
+                    self.build_policy(constraints)
                 #3. Verfiy with user 
-                self.verify_policy(policy)
+                self.verify_policy(self.current_policy)
                 #4. Integrate user feedback 
                 if not self.validPolicy:
-                    policy = self.build_policy(constraints) 
+                    self.build_policy(constraints) 
             else:
                 raise Exception("Cannot come up with an acceptable policy :(")
             self.policy_iters += 1 
-        #print(f'Human response: {self.conversational_interface.human_response}')
-        code =  code_gen(self.policy)
 
+        #code =  code_gen(self.policy)
+
+        
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description="Explore Test")
@@ -175,7 +199,7 @@ if __name__ == "__main__":
     # Parse the command-line arguments
     args = parser.parse_args() 
     
-    print(f"initting the Policy Generator with these arguments: \n{args}\n")
+    print("initting the Policy Generator with these arguments: ",args)
 
     pg = PolicyGenerator(
         prompt_path=args.prompt_path,

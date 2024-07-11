@@ -11,8 +11,10 @@ def encode_image(image_path):
 
 def generate_with_openai(prompt, max_retries = 5, retry_delay = 10, n_predict=2048, temperature=0.9, top_p=0.9, image_path=None):
     attempts = 0 
-    openai_api_key = os.getenv("openai_key")
-    #print(f'OpenAI key: {openai_api_key}')
+    openai_api_key = os.getenv("openai_key") 
+
+    #print("prompt: ",prompt)
+
     if image_path is None:
         headers = {
             "Content-Type": "application/json",
@@ -67,10 +69,12 @@ def generate_with_openai(prompt, max_retries = 5, retry_delay = 10, n_predict=20
         }
 
     while attempts < max_retries:
+        #print("Trying to get response ...")
         try: 
             response = requests.post(
                 "https://api.openai.com/v1/chat/completions", json=data, headers=headers
             )
+            #print("response.status_code: ",response.status_code)
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
             else:
