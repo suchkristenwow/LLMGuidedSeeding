@@ -1,0 +1,67 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/c060cc4f-271b-42c3-abc7-9fbabbaa562e/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+openai_api_key:  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
+llm_result: Based on the provided prompt, here is a dictionary of constraints:
+
+{
+"meta-obstacle": ["already driven", "conmods"],
+"pattern": "grid",
+"pattern_offset": 1,
+"seed": "True",
+"avoid": "planted areas"
+}
+results_str:  {
+"meta-obstacle": ["already driven", "conmods"],
+"pattern": "grid",
+"pattern_offset": 1,
+"seed": "True",
+"avoid": "planted areas"
+}
+constraints:  {'meta-obstacle': ['already driven', 'conmods'], 'pattern': 'grid', 'pattern_offset': 1, 'seed': True, 'avoid': 'planted areas'}
+building policy...
+feedback is none!
+constraints[k]:  ['already driven', 'conmods']
+<class 'list'>
+this is  a list!
+constraints[k]:  grid
+<class 'str'>
+constraints[k]:  1
+<class 'int'>
+constraints[k]:  True
+<class 'bool'>
+constraints[k]:  planted areas
+<class 'str'>
+appending to prompt lms
+prompt lms:  ['planted areas']
+I dont know what planted areas is. Ill have to ask.
+openai_api_key:  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
+policy:  1. Check the current position of the robot using lidar-inertial odometry and GPS to determine if it is outside of the defined plot bounds.
+2. If the robot is outside of the plot bounds, plan the shortest route to the nearest point within the bounds while avoiding any objects specified in the 'avoid' key of the constraint dictionary.
+3. Once inside the plot bounds, start executing the revegetation task according to the provided pattern and offset.
+4. Using the RGB cameras, identify any existing planted areas and 'conmods' in the immediate environment.
+5. If there are existing planted areas or 'conmods' detected, add them to the 'meta-obstacle' list in the system memory to ensure they are avoided during the operation.
+6. Begin moving according to the 'grid' pattern specified in the constraints, with a 1m offset as defined by the 'pattern_offset'.
+7. At each point in the grid, stop the robot and activate the seeding mechanism, making sure to record the coordinates of the planted location in the system memory.
+8. After each seeding operation, update the 'meta-obstacle' list in the system memory to include the new planted area.
+9. Continue to move in the grid pattern, always ensuring to avoid any objects or areas listed in the 'meta-obstacle' list.
+10. Repeat steps 7 through 9 until the entire plot within the bounds has been covered.
+11. Once the entire plot has been covered, stop the robot and signal completion of the task. 
+12. Finally, upload the list of planted locations from the system memory for the ecologists' future reference. 
+
+If any objects or areas specified in the 'avoid' key are not identifiable in the immediate environment, I will inform the user by saying "I can't find {object}, where should I look?"
+Question:  I believe this policy should complete the desired task. What do you think?
+1. Check the current position of the robot using lidar-inertial odometry and GPS to determine if it is outside of the defined plot bounds.
+2. If the robot is outside of the plot bounds, plan the shortest route to the nearest point within the bounds while avoiding any objects specified in the 'avoid' key of the constraint dictionary.
+3. Once inside the plot bounds, start executing the revegetation task according to the provided pattern and offset.
+4. Using the RGB cameras, identify any existing planted areas and 'conmods' in the immediate environment.
+5. If there are existing planted areas or 'conmods' detected, add them to the 'meta-obstacle' list in the system memory to ensure they are avoided during the operation.
+6. Begin moving according to the 'grid' pattern specified in the constraints, with a 1m offset as defined by the 'pattern_offset'.
+7. At each point in the grid, stop the robot and activate the seeding mechanism, making sure to record the coordinates of the planted location in the system memory.
+8. After each seeding operation, update the 'meta-obstacle' list in the system memory to include the new planted area.
+9. Continue to move in the grid pattern, always ensuring to avoid any objects or areas listed in the 'meta-obstacle' list.
+10. Repeat steps 7 through 9 until the entire plot within the bounds has been covered.
+11. Once the entire plot has been covered, stop the robot and signal completion of the task. 
+12. Finally, upload the list of planted locations from the system memory for the ecologists' future reference. 
+
+If any objects or areas specified in the 'avoid' key are not identifiable in the immediate environment, I will inform the user by saying "I can't find {object}, where should I look?"
+Feedback: 

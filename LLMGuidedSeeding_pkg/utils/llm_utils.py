@@ -11,8 +11,8 @@ def encode_image(image_path):
 
 def generate_with_openai(prompt, max_retries = 5, retry_delay = 10, n_predict=2048, temperature=0.9, top_p=0.9, image_path=None):
     attempts = 0 
-    openai_api_key = os.getenv("openai_key") 
-
+    openai_api_key = os.getenv("openai_api_key") 
+    print("openai_api_key: ",openai_api_key)
     #print("prompt: ",prompt)
 
     if image_path is None:
