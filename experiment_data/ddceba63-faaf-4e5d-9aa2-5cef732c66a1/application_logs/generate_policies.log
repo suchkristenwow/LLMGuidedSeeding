@@ -1,0 +1,11 @@
+initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/ddceba63-faaf-4e5d-9aa2-5cef732c66a1/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+parsing prompt to get constraints ...
+key:  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
+llm_result: {"avoid":"previously planted areas and conmods","pattern":"grid","pattern_offset":1,"seed":"True"}
+results_str:  {"avoid":"previously planted areas and conmods","pattern":"grid","pattern_offset":1,"seed":"True"}
+constraints:  {'avoid': 'previously planted areas and conmods', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+building policy...
+feedback is none!
+prompt lms:  []
+key:  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
+policy:  None

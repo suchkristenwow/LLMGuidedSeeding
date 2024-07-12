@@ -1,6 +1,6 @@
 prompt_file = "/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt"
 waypoint_threshold = 0.5
-logging_directory = "/home/kristen/LLMGuidedSeeding/experiment_data/"
+logging_directory = "experiment_data/"
 commonObj_path = "/home/kristen/LLMGuidedSeeding/configs/commonObjs.txt"
 
 common_ip = "40.78.49.78"

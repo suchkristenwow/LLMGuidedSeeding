@@ -115,6 +115,7 @@ class PolicyGenerator:
             enhanced_prompt = prompt.replace("*INSERT_POLICY*",self.current_policy)
             enhanced_prompt = prompt.replace("*INSERT_FEEDBACK*",self.feedback)
             #print("this is the new prompt: ",enhanced_prompt)
+            #print("this is the new prompt: ",enhanced_prompt)
             print("modifying policy...")
             modified_policy = generate_with_openai(enhanced_prompt)
             print("modified_policy: ",modified_policy)
