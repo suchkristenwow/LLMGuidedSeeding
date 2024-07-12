@@ -181,7 +181,6 @@ class ExperimentRunner:
         #TO DO: LOAD IN PLOT BOUNDS FROM USER INTERFACE 
         launch_command = [
             "python", "generate_policies.py",
-            "python", "generate_policies.py",
             "--prompt_path", prompt_path,
             "--config_path", config_path,
             "--logging_dir", logs_dir_absolute,
@@ -193,7 +192,6 @@ class ExperimentRunner:
 
     def launch_policy_rehearsal(self,policy): 
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
-        logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
         os.makedirs(logs_dir_absolute, exist_ok=True)
@@ -201,7 +199,6 @@ class ExperimentRunner:
         config_path = os.path.abspath(self.args.config)
         # Split the command into a list of arguments
         launch_command = [
-            "python", "rehearse_policies.py",
             "python", "rehearse_policies.py",
             "--policy", policy,
             "--config_path", config_path,
@@ -213,9 +210,7 @@ class ExperimentRunner:
 
     def launch_policy_execution(self,policy):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
-        logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
-        print("Explore logs dir", logs_dir_absolute)
         print("Explore logs dir", logs_dir_absolute)
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
@@ -267,7 +262,7 @@ class ExperimentRunner:
         self.launch_react()
         #launch the robot 
         self.launch_policy_gen()
-        #rehearsed_policy = self.launch_policy_rehearsal(policy)
+        self.launch_policy_rehearsal()
         '''
         self.launch_policy_execution(rehearsed_policy)
         self.start_process_monitoring()
