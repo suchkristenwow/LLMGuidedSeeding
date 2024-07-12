@@ -22,6 +22,8 @@ class ExperimentRunner:
         self.policyGeneration_process = None
         self.policyRehearsal_process = None 
         self.policyExecution_process = None 
+        self.react_frontend = None
+        self.flask_backend = None
         
         logging.basicConfig(
             level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -44,7 +46,7 @@ class ExperimentRunner:
         os.makedirs(logging_dir, exist_ok=True)
         os.makedirs(logging_dir + "/application_logs", exist_ok=True)
         full_path = os.path.abspath(logging_dir)
-        logging.info(f"Created experiment directory at {full_path} \n")
+        logging.info(f"Created experiment directory at {full_path}")
 
     def copy_logs_and_data(self, base_destination_dir):
         """
@@ -98,9 +100,11 @@ class ExperimentRunner:
             )
             logging.info(
                 f"Process '{process_name}' launched with command: {tee_command}"
+                f"Process '{process_name}' launched with command: {tee_command}"
             )
 
         except OSError as e:
+            logging.error(f"Error launching process '{process_name}': {e}")
             logging.error(f"Error launching process '{process_name}': {e}")
 
         return process 
@@ -144,6 +148,7 @@ class ExperimentRunner:
             self.explore_process = None
         '''
     
+    
         for process in self.running_processes:
             logging.info(f"Terminating process {process.pid}...")
             if process.poll() is None:  # Check if the process is still running
@@ -161,15 +166,12 @@ class ExperimentRunner:
         os.killpg(os.getpgid(self.flask_backend.pid), signal.SIGTERM) #terminate gracefully, signal.SIGKILL : kill forcefully
         print(f'Terminating frontend PID: {self.react_frontend.pid} \n')
         os.killpg(os.getpgid(self.react_frontend.pid), signal.SIGTERM)
-
-   
     
     def launch_policy_gen(self):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
-        print()
         os.makedirs(logs_dir_absolute, exist_ok=True)
         prompt_path = os.path.abspath(self.args.prompt)
         config_path = os.path.abspath(self.args.config)
@@ -214,6 +216,7 @@ class ExperimentRunner:
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
+        print("Explore logs dir", logs_dir_absolute)
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
@@ -257,15 +260,11 @@ class ExperimentRunner:
         
         self.react_frontend = self.start_process_with_terminal(launch_command, "react_server", cwd = app_dir)
         
-        
-
+    
     def run(self):
-        
         self.create_logging_directory() 
-        # Launch Servers
         self.launch_flask_app()
         self.launch_react()
-
         #launch the robot 
         self.launch_policy_gen()
         #rehearsed_policy = self.launch_policy_rehearsal(policy)
@@ -322,9 +321,3 @@ if __name__ == "__main__":
     runner = ExperimentRunner(args)  # Pass the config file from arguments
     setup_signal_handling(runner)
     runner.run()
-
-
-
-
-
-

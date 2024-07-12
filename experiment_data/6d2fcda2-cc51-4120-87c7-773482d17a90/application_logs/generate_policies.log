@@ -1,3 +1,0 @@
-initting the Policy Generator with these arguments: 
-Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/6d2fcda2-cc51-4120-87c7-773482d17a90/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
-

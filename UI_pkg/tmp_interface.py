@@ -6,16 +6,6 @@ class ConversationalInterface:
         self):
         self.this =  1 
         self.feedback = None 
-        self.human_response = False
-        self.sio = socketio.Client()
-        
-        @self.sio.on('outgoing')
-        def on_outgoing(data):
-            self.feedback = data
-            self.human_response = True
-
-        self.sio.connect('http://localhost:5000')
-        
 
     def ask_human(self,content):
         '''
@@ -42,10 +32,6 @@ class ConversationalInterface:
         preface = "I believe this policy should complete the desired task. What do you think?"
         enhanced_prompt = preface + "\n" + policy 
         self.ask_human(enhanced_prompt)
-        # wait for the user response. 
-        while not self.human_response:
-            time.sleep(1)
-            
         with open("prompts/verification_prompt.txt","r") as f:
             prompt = f.read()
         enhanced_verification_response = prompt + self.get_human_feedback()

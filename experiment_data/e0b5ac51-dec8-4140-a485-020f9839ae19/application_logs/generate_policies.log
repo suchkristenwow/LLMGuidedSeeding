@@ -1,5 +1,0 @@
-constraints_result:  {
-    "grid_size": 1,
-    "avoid_driving_over_planted_area": true,
-    "avoid_conmods": true
-}

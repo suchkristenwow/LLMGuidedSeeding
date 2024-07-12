@@ -161,11 +161,8 @@ class PolicyGenerator:
             else:
                 raise Exception("Cannot come up with an acceptable policy :(")
             self.policy_iters += 1 
-        #print(f'Human response: {self.conversational_interface.human_response}')
 
-
-
-        code =  code_gen(self.policy)
+        #code =  code_gen(self.policy)
 
         
 if __name__ == "__main__":

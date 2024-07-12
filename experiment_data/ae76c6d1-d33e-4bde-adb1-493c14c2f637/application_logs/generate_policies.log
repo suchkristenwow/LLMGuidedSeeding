@@ -1,4 +1,0 @@
-initting the Policy Generator with these arguments:  Namespace(config_path='/home/miles/projects/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/miles/projects/LLMGuidedSeeding/experiment_data/ae76c6d1-d33e-4bde-adb1-493c14c2f637/policy_generation_logs', plot_bounds_path='/home/miles/projects/LLMGuidedSeeding/random_path.csv', prompt_path='/home/miles/projects/LLMGuidedSeeding/prompts/ex_query.txt')
-parsing prompt to get constraints ...
-None
-llm_result: None
