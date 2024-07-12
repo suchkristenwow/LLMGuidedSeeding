@@ -262,7 +262,7 @@ class ExperimentRunner:
         self.launch_react()
         #launch the robot 
         self.launch_policy_gen()
-        self.launch_policy_rehearsal()
+        #self.launch_policy_rehearsal()
         '''
         self.launch_policy_execution(rehearsed_policy)
         self.start_process_monitoring()

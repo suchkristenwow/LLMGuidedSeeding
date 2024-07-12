@@ -23,8 +23,9 @@ class PolicyGenerator:
         self.feedback= None 
         self.init_waypoint = None #this is a waypoint to get the robot within bounds if it's initially out of bounds 
         self.conversational_interface = ConversationalInterface()
+        self.base_url = os.path.dirname(os.path.abspath(__file__))
         #print("self.settings: ",self.settings)
-        with open(self.settings["commonObj_path"],"r") as f: 
+        with open(self.base_url + self.settings["commonObj_path"],"r") as f: 
             self.common_objects = [line.strip() for line in f]
         self.learned_objects = []
         self.policy_iters = 0 
