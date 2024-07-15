@@ -10,6 +10,7 @@ def encode_image(image_path):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 def generate_with_openai(prompt, max_retries=25, retry_delay=10, n_predict=2048, temperature=0.9, top_p=0.9, image_path=None):
+    print("Tying to get an answer from Chat GPT hold on ...")
     attempts = 0
     openai_api_key = os.getenv("openai_key")
 

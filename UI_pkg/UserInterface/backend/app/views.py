@@ -230,6 +230,10 @@ def process_message():
 
     return jsonify(data)
 
+@app_routes.route("/") 
+def test():
+    return "Hi"
+
 ###################### websocket ###################3
 @socketio.on('message')
 def handle_messsage(message):

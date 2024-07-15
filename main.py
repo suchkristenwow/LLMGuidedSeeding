@@ -169,7 +169,6 @@ class ExperimentRunner:
     
     def launch_policy_gen(self):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
-        logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
         print("Explore logs dir", logs_dir_absolute)
         os.makedirs(logs_dir_absolute, exist_ok=True)
@@ -259,7 +258,11 @@ class ExperimentRunner:
     def run(self):
         self.create_logging_directory() 
         self.launch_flask_app()
+        print("Done launching the flask app!") 
+        print()
         self.launch_react()
+        print("Done launching the react server!")
+        print() 
         #launch the robot 
         self.launch_policy_gen()
         #self.launch_policy_rehearsal()

@@ -23,6 +23,7 @@ class ConversationalInterface:
         '''
         Emit the GPT content to the bakend through a socket 
         '''
+        print("asking the hooman")
         # Send a message to the server 
         self.sio.emit('message', content)   
 

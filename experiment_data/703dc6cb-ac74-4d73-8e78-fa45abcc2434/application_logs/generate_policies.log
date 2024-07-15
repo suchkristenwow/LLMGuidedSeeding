@@ -1,0 +1,44 @@
+initting the Policy Generator with these arguments: 
+Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/703dc6cb-ac74-4d73-8e78-fa45abcc2434/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
+
+parsing prompt to get constraints ...
+Enhanced Query: You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded 
+rangelands.
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. 
+
+Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
+
+The keys to this dictionary should be the strings "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
+which is true if the robot should plant in the specified pattern. 
+
+For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", return {"goal_lms":"shrub","landmark_offset":0.1,"seed":"True"}. Or, if the prompt was 
+"Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
+Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
+
+If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
+into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
+your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
+like this or should I edit my constraint dictionary format?"
+
+Prompt: Plant in 1mx1m grid in the bounded area. Avoid driving over wherever you’ve planted or any conmods.
+
+
+Encountered SSLError: HTTPSConnectionPool(host='api.openai.com', port=443): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7ff4dcc1b580>: Failed to establish a new connection: [Errno 111] Connection refused'))
+Retrying in 10 seconds...
+llm_result: {"avoid": "conmods, planted areas", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+
+results_str:  {"avoid": "conmods, planted areas", "pattern": "grid", "pattern_offset": 1, "seed": "True"}
+constraints: {'avoid': 'conmods, planted areas', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True} 
+
+building policy...
+feedback is none!
+Policy:  1. Confirm that the robot is positioned within the bounds of the plot. If not, calculate the shortest path to the plot boundaries and navigate towards it without violating any constraints.
+2. Once within the bounds, initiate a scanning process using the robot's RGB cameras and lidar-inertial odometry to identify and map the locations of conmods and previously planted areas. Make sure to mark these as 'avoid' areas in the robot's internal map.
+3. Based on the constraints and the 'avoid' areas, generate a 1m x 1m grid within the plot bounds for planting seeds.
+4. Start at the nearest grid intersection that doesn't violate any constraints. If all intersections violate constraints, inform the user of the issue and ask for further guidance.
+5. Plant a seed at the grid intersection and mark the location in the system's memory as a 'planted area'. 
+6. Move to the next grid intersection that doesn't fall within an 'avoid' area. Use lidar-inertial odometry and GPS for accurate navigation.
+7. Repeat steps 5 and 6 until all valid grid intersections within the plot bounds have been planted.
+8. If the robot encounters a situation where the 'goal_lms' cannot be located, inform the user with the message "I can't find {landmark}, where should I look?" and wait for further instructions.
+9. Once the task is complete, inform the user and provide a summary of the task, including the total number of seeds planted and any issues encountered during the task.

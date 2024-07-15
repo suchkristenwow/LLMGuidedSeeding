@@ -38,7 +38,7 @@ class PolicyGenerator:
     def verify_policy(self,policy): 
         #ask the user if they approve of this policy 
         #print("policy verification result:",self.conversational_interface.ask_policy_verification(policy))
-        print("policy: ",policy) 
+        #print("policy: ",policy) 
         if self.conversational_interface.ask_policy_verification(policy):
             self.validPolicy = True 
             print("Found a valid policy approved by the human!")
