@@ -1,0 +1,125 @@
+/* styles.css */
+
+/* Adjust for tablets (iPad portrait mode, landscape may need further adjustment) */
+@media (max-width: 1024px) {
+    .split.left, .split.right {
+        width: 100%; /* Full width for tablets */
+        display: block;
+    }
+
+    .display_class {
+        width: 100%; /* Adjust video width */
+        max-width: 100%;
+        height: auto; /* Maintain aspect ratio */
+        display: block;
+        margin: 0 auto; /* Center horizontally */
+    }
+
+    #chatbox {
+        width: 80%; /* Decrease width of the chatbox */
+        margin: auto;
+        margin-top: 20px; /* Space between video and chatbox */
+    }
+
+    #chat-messages {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        height: 200px; /* Decrease height of the chat messages area */
+        overflow-y: scroll;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }
+
+    #message-form {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    #input-message {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+}
+
+/* Centered container for video and buttons */
+.centered {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* Style for button images */
+.video-button-container {
+    margin-top: 10px;
+}
+
+.video-button-container img {
+    width: 50px;
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Style for send button */
+.send-button-container {
+    margin-top: 10px;
+}
+
+.send-button-container img {
+    width: 50px; /* Adjust width as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* New Section */
+#chatbox {
+    width: 90%;
+    margin: auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+}
+
+#chat-messages {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    height: 200px; /* Adjust this value to increase/decrease the height */
+    overflow-y: scroll;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+#message-form {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#input-message {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Message styles */
+.incoming-msg {
+    background-color: #d4edda; /* Light green background */
+    border: 1px solid #c3e6cb; /* Green border */
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+.outgoing-msg {
+    background-color: #cce5ff; /* Light blue background */
+    border: 1px solid #b8daff; /* Blue border */
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px 0;
+}

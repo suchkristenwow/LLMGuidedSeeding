@@ -162,10 +162,12 @@ class ExperimentRunner:
                 # logging.info(f"Process {process.pid} terminated.")
 
         # manually shutdown the servers
-        print(f'Terminating backend PID: {self.flask_backend.pid}')
-        os.killpg(os.getpgid(self.flask_backend.pid), signal.SIGTERM) #terminate gracefully, signal.SIGKILL : kill forcefully
-        print(f'Terminating frontend PID: {self.react_frontend.pid} \n')
-        os.killpg(os.getpgid(self.react_frontend.pid), signal.SIGTERM)
+        if self.flask_backend:
+            print(f'Terminating backend PID: {self.flask_backend.pid}')
+            os.killpg(os.getpgid(self.flask_backend.pid), signal.SIGTERM) #terminate gracefully, signal.SIGKILL : kill forcefully
+        if self.react_frontend:
+            print(f'Terminating frontend PID: {self.react_frontend.pid} \n')
+            os.killpg(os.getpgid(self.react_frontend.pid), signal.SIGTERM)
     
     def launch_policy_gen(self):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
@@ -231,7 +233,8 @@ class ExperimentRunner:
         log_file_path_abs = os.path.abspath(log_file_path)
         print(f'Explore flask log file: {log_file_path_abs} \n')
         
-        app_dir = os.path.join("UI_pkg", "UserInterface", "backend")
+        # app_dir = os.path.join("UI_pkg", "UserInterface", "backend")
+        app_dir = os.path.join("UI", "backend" )
         app_path = os.path.join(app_dir, "application.py")
 
         launch_command = [
@@ -260,8 +263,8 @@ class ExperimentRunner:
         self.launch_flask_app()
         print("Done launching the flask app!") 
         print()
-        self.launch_react()
-        print("Done launching the react server!")
+        # self.launch_react()
+        # print("Done launching the react server!")
         print() 
         #launch the robot 
         self.launch_policy_gen()

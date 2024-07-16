@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Guided Seeding</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+        <section class="split left">
+        <div class="centered">
+            <img class="display_class" id="VideoN" src="/backend/image_stream">
+            <div class="video-button-container">
+            <!--  <a href="#pause" id="pause-button"><img id="pause-img" src="{{ url_for('static', filename='images/pause.png') }}" alt="Pause/Play Image"></a>  -->
+                <a href="#pause" id="pause-button" data-initial-image="{{ url_for('static', filename='images/pause.png') }}" data-paused-image="{{ url_for('static', filename='images/play.png') }}"><img id="pause-img" src="{{ url_for('static', filename='images/pause.png') }}" alt="Pause/Play Image"></a>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="split right">
+        <div class="centered">
+            <div id="chatbox">
+                <ul id="chat-messages"></ul>
+                <form id="message-form">
+                    <input id="input-message" autocomplete="off" />
+                    <div class=" send-button-container">
+                    <a href="#send"><img src="{{ url_for('static', filename='images/send.png') }}" alt="Send Image" "></a>
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/videoControl.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    
+</body>
+</body>
+</html>

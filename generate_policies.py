@@ -4,7 +4,8 @@ import argparse
 import numpy as np 
 import os 
 import toml 
-from UI_pkg import ConversationalInterface
+# from UI_pkg import ConversationalInterface
+from UI import ConversationalInterface
 
 class PolicyGenerator: 
     def __init__(
