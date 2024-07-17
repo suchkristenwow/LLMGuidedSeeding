@@ -54,6 +54,11 @@
     flex-direction: column;
 }
 
+/* Style for button images */
+.video-button-container {
+    margin-top: 10px;
+}
+
 /* Container for buttons */
 .video-button-container {
     margin-top: 10px;
@@ -61,6 +66,16 @@
     justify-content: center;
     align-items: center;
     gap: 10px; /* Space between buttons */
+}
+
+/* Style for send button */
+.send-button-container {
+    margin-top: 10px;
+}
+
+.send-button-container img {
+    width: 50px; /* Adjust width as needed */
+    height: auto; /* Maintain aspect ratio */
 }
 
 /* Style for button images */
