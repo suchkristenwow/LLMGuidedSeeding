@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const videoElement = document.getElementById('VideoN');
     const pauseButton = document.getElementById('pause-button');
     const pauseImg = document.getElementById('pause-img');
+    const secondButton = document.getElementById('draw-button');
+
     let isPaused = false;
 
     // Retrieve URLs from data attributes
@@ -23,9 +25,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
             videoElement.src = "/backend/pause";
             pauseImg.src = pausedImage;
+            secondButton.style.display = 'block';  // Show the second button
+
         } else {
             videoElement.src = "/backend/image_stream";
             pauseImg.src = initialImage;
+            secondButton.style.display = 'none';  // Hide the second button
+
         }
     });
 });
