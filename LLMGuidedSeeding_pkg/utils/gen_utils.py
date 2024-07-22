@@ -31,8 +31,13 @@ def dictify(results_str):
     This function returns a dictionary from the string of a dictionary 
     '''
     # Convert the string to a dictionary
-    print("results_str: ",results_str)
-    data_dict = json.loads(results_str)
+    print() 
+    print("results_str: ",results_str) 
+    try: 
+        data_dict = json.loads(results_str)
+    except: 
+        results_str += "}" 
+        data_dict = json.loads(results_str) 
     data_dict["seed"] = bool(data_dict["seed"])
     return data_dict
 

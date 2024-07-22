@@ -78,20 +78,26 @@ class ExperimentRunner:
             raise ValueError("Prompt text is empty.")
 
     def start_process_with_terminal(self, launch_command, process_name, cwd=None):
+        print("trying to start process with terminal ... ") 
+        print()
+
         try:
             log_file_path = os.path.join(
                 self.uuid_logging_dir + "/application_logs",
-                self.uuid_logging_dir + "/application_logs",
                 f"{process_name}.log",
             )
-            
+            print("This is log file path: ",log_file_path)
             log_file_path_abs = os.path.abspath(log_file_path)
                         
             # Combine the launch command into a single string if it's a list
             if isinstance(launch_command, list):
                 launch_command_str = " ".join(launch_command)
             else:
-                launch_command_str = launch_command
+                launch_command_str = launch_command 
+
+            print("This is launch command: ",launch_command) 
+            print() 
+
             # Use tee to duplicate output to both logfile and terminal
             tee_command = f"{launch_command_str} | tee '{log_file_path_abs}'"
             
@@ -100,11 +106,9 @@ class ExperimentRunner:
             )
             logging.info(
                 f"Process '{process_name}' launched with command: {tee_command}"
-                f"Process '{process_name}' launched with command: {tee_command}"
             )
 
         except OSError as e:
-            logging.error(f"Error launching process '{process_name}': {e}")
             logging.error(f"Error launching process '{process_name}': {e}")
 
         return process 
@@ -175,7 +179,7 @@ class ExperimentRunner:
         prompt_path = os.path.abspath(self.args.prompt)
         config_path = os.path.abspath(self.args.config)
         bounds_path = os.path.abspath(self.args.plot_bounds_path)
-        print("this is config path: ",config_path)
+        #print("this is config path: ",config_path)
         # Split the command into a list of arguments
         #TO DO: LOAD IN PLOT BOUNDS FROM USER INTERFACE 
         launch_command = [

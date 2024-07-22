@@ -14,7 +14,8 @@ socketio = SocketIO()
 
 def create_app():
     application = Flask(__name__)
-    CORS(application)
+    CORS(application)  
+    socketio = SocketIO(application,cors_allowed_origins="*") 
 
     socketio.init_app(application)
     # Importing in create_app() avoids circular dependcies

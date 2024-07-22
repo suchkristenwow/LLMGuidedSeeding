@@ -237,13 +237,13 @@ def test():
 ###################### websocket ###################3
 @socketio.on('message')
 def handle_messsage(message):
-    print(f'Received message: {message} \n')
+    print(f'Received message (incoming): {message} \n')
     # Process message and send response if needed
     socketio.send(message)
 
 @socketio.on('outgoing')
 def handle_outgoing(message):
-    print(f'Received message: {message} \n')
+    print(f'Received message (outgoing): {message} \n')
     # Process message and send response if needed
     socketio.emit('outgoing', message)  
 

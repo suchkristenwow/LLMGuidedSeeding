@@ -78,11 +78,12 @@ function ImageStream() {
   )
   }
 
-function Chat({socket}) {
+function Chat({socket}) { 
   const [userMessage, setUserMessage] = useState('');
   const [messages, setMessages] = useState([]);
    // Set up event listener for incoming messages
    useEffect(() => {
+
     socket.on('message', message => {
       //console.log('Server Response:', message);
       // const formattedMessage = message.replace(/\n/g, '<br>');
@@ -93,7 +94,7 @@ function Chat({socket}) {
     return () => {
       socket.off('message'); // Remove the event listener
     };
-  }, []); // Only run this effect when 'socket' changes
+  }, [socket]); // Only run this effect when 'socket' changes
   
   const handleChat = () => {
     if (userMessage.trim() !== '') {
@@ -128,7 +129,8 @@ function Chat({socket}) {
 }
 
 function App() { 
-  const socket = io(); 
+  //const socket = io('http://127.0.0.1:5000'); 
+  const socket = io('http://127.0.0.1:5000'); 
   return (
     <div className="App" style={{ backgroundColor: 'white', height: '100vh' }}>
       <div className="videoArea">

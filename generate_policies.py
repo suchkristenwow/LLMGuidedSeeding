@@ -146,6 +146,8 @@ class PolicyGenerator:
         return constraints
         
     def gen_policy(self): 
+        print("We are in gen policy!!!!") 
+        print() 
         #1. Identify constraints and goal landmarks from the prompt 
         constraints = self.parse_prompt()
         print("constraints: ",constraints)
