@@ -176,7 +176,7 @@ def pause():
     paused_frame = _frame
     paused_cv_image = cv_image
     np.save("UI/still_frame.npy", paused_cv_image)
-    return Response(paused_frame, mimetype='image.jpeg')
+    return Response(paused_frame, mimetype='image.jpeg'), 200
     
 @app_routes.route('/backend/sketch_boundary')
 def drawing():
@@ -184,6 +184,9 @@ def drawing():
     global paused_cv_image, drawing_frame, paused_frame, points, paused_pc_msg
     # AttributeError: 'NoneType' object has no attribute 'copy'
     # Check if paused_cv_image is None
+    print("sketch_boundary endpoint called\n")
+    
+    
     if paused_cv_image is None:
         return "No paused image to draw on", 400
     
@@ -193,11 +196,12 @@ def drawing():
         print(f"Error copying paused_cv_image: {e}")
         return "Internal server error: paused_cv_image", 500
     
-    drawing_frame = cv.UMat(paused_cv_image.copy())
+    #drawing_frame = cv.UMat(paused_cv_image.copy())
 
     cv.namedWindow("Video 1", cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
     cv.moveWindow("Video 1", 500, 250)
     cv.setMouseCallback('Video 1', draw_polylines)
+    print("OpenCV window setup complete\n")
     # Main loop
     is_drawing = True
     while is_drawing:
@@ -207,6 +211,7 @@ def drawing():
         if key == ord('x') or key == 27:
             #print('STOPPED')
             is_drawing = False
+    print("OpenCV window closed\n")
     # Clean up
     cv.destroyAllWindows()
     # Run the OpenCV window in a separate thread
@@ -217,12 +222,13 @@ def drawing():
     try:
         projected_pcd = project_sketch(points, paused_pc_msg)
         #pcd = o3d.io.read_point_cloud("../../test_data/fragment.pcd")
-        o3d.io.write_point_cloud("projected_pcd.pcd", projected_pcd) 
+        o3d.io.write_point_cloud("UI/projected_pcd.pcd", projected_pcd) 
     except Exception as e:
         print(f"Function project_sketch failed: {e}")
     # Reinitialize points
     points = []
-    return Response(paused_frame, mimetype='image.jpeg')
+    print("Points reinitialized\n")
+    return Response(paused_frame, mimetype='image.jpeg'), 200
 
 
 @app_routes.route('/backend/process_message', methods=['POST'])

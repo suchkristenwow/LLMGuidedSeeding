@@ -18,9 +18,12 @@ document.addEventListener("DOMContentLoaded", function() {
         isPaused = !isPaused;
         if (isPaused) {
             fetch("http://127.0.0.1:5000/backend/pause").then(response => {
-          if (!response.ok) {
+                if (!response.ok) {
             throw new Error('Network response was not ok');
-          }}).catch(error => {
+          } else {
+            console.log("Pause Response: ", response)
+          }
+        }).catch(error => {
             console.error('There was a problem with the fetch operation:', error);});
 
             videoElement.src = "/backend/pause";
@@ -31,20 +34,26 @@ document.addEventListener("DOMContentLoaded", function() {
             videoElement.src = "/backend/image_stream";
             pauseImg.src = initialImage;
             drawButton.style.display = 'none';  // Hide the second button
-
         }
+        
     });
 
     drawButton.addEventListener('click', function(e) {
         e.preventDefault();
-        console.log("sketch boundry called")
+        console.log("drawing button clicked");
+        
         fetch("http://127.0.0.1:5000/backend/sketch_boundary").then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                console.log("Sketch_boundary FAILURE: ", response)
+                throw new Error('Network response was not ok');  
+            } else {
+                console.log("Sketch_Boundary Response: ", response)
             }
         }).catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+        
+        console.log("sketch boundary called");
     });     
     
 });
