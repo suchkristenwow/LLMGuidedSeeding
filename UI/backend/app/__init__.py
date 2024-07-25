@@ -6,11 +6,7 @@ from sensor_msgs.msg import PointCloud2
 import threading
 from flask_socketio import SocketIO
 
-
-
-
 socketio = SocketIO()
-
 
 def create_app():
     application = Flask(__name__)

@@ -42,11 +42,11 @@ class ExperimentRunner:
             None
         """
         logging_dir = self.uuid_logging_dir
-        print(logging_dir, self.base_dir)
+        # print(logging_dir, self.base_dir)
         os.makedirs(logging_dir, exist_ok=True)
         os.makedirs(logging_dir + "/application_logs", exist_ok=True)
         full_path = os.path.abspath(logging_dir)
-        logging.info(f"Created experiment directory at {full_path}")
+        logging.info(f"Created experiment directory at {full_path}\n")
 
     def copy_logs_and_data(self, base_destination_dir):
         """
@@ -99,13 +99,12 @@ class ExperimentRunner:
                 tee_command, shell=True, env=os.environ, cwd=cwd, preexec_fn=os.setsid
             )
             logging.info(
-                f"Process '{process_name}' launched with command: {tee_command}"
-                f"Process '{process_name}' launched with command: {tee_command}"
+                f"Process '{process_name}' launched with command: {tee_command}\n"
             )
 
         except OSError as e:
             logging.error(f"Error launching process '{process_name}': {e}")
-            logging.error(f"Error launching process '{process_name}': {e}")
+            
 
         return process 
     
@@ -166,18 +165,22 @@ class ExperimentRunner:
             print(f'Terminating backend PID: {self.flask_backend.pid}')
             os.killpg(os.getpgid(self.flask_backend.pid), signal.SIGTERM) #terminate gracefully, signal.SIGKILL : kill forcefully
         if self.react_frontend:
-            print(f'Terminating frontend PID: {self.react_frontend.pid} \n')
+            logging.info(f'Terminating frontend PID: {self.react_frontend.pid} \n')
             os.killpg(os.getpgid(self.react_frontend.pid), signal.SIGTERM)
     
     def launch_policy_gen(self):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_generation_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
-        print("Explore logs dir", logs_dir_absolute)
+        logging.info(
+            f"Explore policy gen logs dir {logs_dir_absolute}\n"
+            )
         os.makedirs(logs_dir_absolute, exist_ok=True)
         prompt_path = os.path.abspath(self.args.prompt)
         config_path = os.path.abspath(self.args.config)
         bounds_path = os.path.abspath(self.args.plot_bounds_path)
-        print("this is config path: ",config_path)
+        logging.info(
+            f"this is config path: {config_path}\n"
+            )
         # Split the command into a list of arguments
         #TO DO: LOAD IN PLOT BOUNDS FROM USER INTERFACE 
         launch_command = [
@@ -194,7 +197,7 @@ class ExperimentRunner:
     def launch_policy_rehearsal(self,policy): 
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
-        print("Explore logs dir", logs_dir_absolute)
+        logging.ingo(f"Explore logs dir {logs_dir_absolute}")
         os.makedirs(logs_dir_absolute, exist_ok=True)
         
         config_path = os.path.abspath(self.args.config)
@@ -231,8 +234,7 @@ class ExperimentRunner:
     def launch_flask_app(self):
         log_file_path = os.path.join(self.uuid_logging_dir,"application_logs", "flask_server.log")
         log_file_path_abs = os.path.abspath(log_file_path)
-        print(f'Explore flask log file: {log_file_path_abs} \n')
-        
+    
         # app_dir = os.path.join("UI_pkg", "UserInterface", "backend")
         app_dir = os.path.join("UI", "backend" )
         app_path = os.path.join(app_dir, "application.py")
@@ -248,7 +250,9 @@ class ExperimentRunner:
     def launch_react(self):
         log_file_path = os.path.join(self.uuid_logging_dir, "application_logs", "react_server.log")
         log_file_path_abs = os.path.abspath(log_file_path)
-        print(f'Explore react log file: {log_file_path_abs} \n')
+        logging.info(
+            f'Explore react log file: {log_file_path_abs} \n'
+            )
 
         app_dir = os.path.join("UI_pkg", "UserInterface", "frontend", "app")
         #os.chdir(app_dir)  # Change directory to the React app directory
@@ -256,16 +260,25 @@ class ExperimentRunner:
         launch_command = ["npm", "start"]
         
         self.react_frontend = self.start_process_with_terminal(launch_command, "react_server", cwd = app_dir)
-        
+    
+
+    def print_all_loggers(self):
+        # Access the dictionary of active loggers
+        logger_dict = logging.Logger.manager.loggerDict
+
+        for name, logger in logger_dict.items():
+            print(f"Logger name: {name}, Level: {logger.level}")
+
+   
     
     def run(self):
         self.create_logging_directory() 
         self.launch_flask_app()
-        print("Done launching the flask app!") 
-        print()
+        self.print_all_loggers()
         # self.launch_react()
         # print("Done launching the react server!")
-        print() 
+         # Print all active loggers
+    
         #launch the robot 
         self.launch_policy_gen()
         #self.launch_policy_rehearsal()
