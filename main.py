@@ -147,8 +147,6 @@ class ExperimentRunner:
             os.killpg(os.getpgid(self.explore_process.pid), signal.SIGTERM)
             self.explore_process = None
         '''
-    
-    
         for process in self.running_processes:
             logging.info(f"Terminating process {process.pid}...")
             if process.poll() is None:  # Check if the process is still running

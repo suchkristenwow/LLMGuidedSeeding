@@ -1,9 +1,5 @@
-1. Determine the current position of the robot within the plot bounds using lidar-inertial odometry and GPS localization.
-2. Check if there are any obstacles such as previously planted areas or conmods (construction modules) in the immediate vicinity that need to be avoided.
+1. Determine if the current position of the robot is within the plot bounds using lidar-inertial odometry and GPS localization.
+2. Check if there are any obstacles such as previously planted areas or conmods in the immediate vicinity that need to be avoided.
 3. Begin planning the shortest route to enter the bounded area if the robot is currently outside the plot bounds.
-4. Start scanning the environment using RGB cameras to locate the "bounded_area" landmark within the plot.
-5. If the "bounded_area" landmark is not immediately visible, prompt the user: "I can't find the bounded area, where should I look?"
-6. Once the "bounded_area" landmark is identified, start planting seeds in a 1mx1m grid pattern within the bounded area.
-7. Ensure that the robot avoids driving over any previously planted areas or conmods while moving in the grid pattern.
-8. Continuously monitor the robot's position and adjust its trajectory to maintain the 1mx1m grid pattern while planting seeds.
-9. Complete the task of planting seeds in the 1mx1m grid pattern within the bounded area while adhering to the avoidance constraints specified in the constraint dictionary.
+4. Plant seeds in a 1mx1m grid pattern within the bounded area. Ensure that the robot avoids driving over any previously planted areas or conmods while moving in the grid pattern. 
+   Continuously monitor the robot's position and adjust its trajectory to maintain the 1mx1m grid pattern while planting seeds.

@@ -8,11 +8,30 @@ common_ip = "40.78.49.78"
 [robot]
 object_sever_url = "http://0.0.0.0:5005"
 host_url = "http://0.0.0.0:5000"
-eps_dbscan = 0.5
-min_samples = 5
-median_filter_rate = 2
-median_filtier_distance_threshold = 0.5
-waypoint_threshold = 0.5
+frustrum_length = 20 
+front_camera_fov_deg = 90 
+down_cam_img_width = 640 
+down_cam_img_height = 480
+husky_length = 0.927
+husky_width = 0.635
+observation_frequency = 1
+confidence_threshold = 0.75 
+
+[sensor_transforms]
+left_down_camera_tf =  [0.1, 0.15,  0.5, 0.0, -1.571, 0.0] 
+right_down_camera_tf = [0.1, -0.15, 0.5, 0.0, -1.571, 0.0]  
+front_camera_tf = [0.152758, 0.0, 0.0324, 0.0, 0.0, 0.0] 
+right_camera_tf = [0.0, -0.158258, 0.0324, 0.0, 0.0, -1.571]
+left_camera_tf =  [0.0, 0.158248, 0.0324, 0.0, 0.0, 1.571]  
+planter_tf = [-0.05, -0.1, 0.8, 0.0, 0.0, -1.571]
+
+[tire_transforms] 
+left_front_tire_tf =  [-0.165, 0.28,  0.8, 0.0, 0.0, 1.571]
+right_front_tire_tf = [-0.165, -0.28, 0.8, 0.0, 0.0, -1.571]
+left_back_tire_tf =   [-0.69,  0.28,  0.8, 0.0, 0.0, 1.571]
+right_back_tire_tf =  [-0.69,  -0.28, 0.8, 0.0, 0.0, -1.571]
+tire_length = 0.165 
+tire_width = 0.114
 
 [llm_model] 
 model_name = "openai"
@@ -26,4 +45,11 @@ port = 8000
 temp = 0.8
 
 [policyRehearsal] 
-rehearsal_epochs = 10
+rehearsal_epochs = 10 
+
+[simulation_parameters] 
+sensor_range = 25 
+miss_detection_rate = 0.15
+measurement_var_x = 0.5 
+measurement_var_y = 0.5
+measurement_var_xy = 0.2

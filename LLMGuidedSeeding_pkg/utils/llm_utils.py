@@ -13,7 +13,8 @@ def generate_with_openai(prompt, max_retries=25, retry_delay=10, n_predict=2048,
     print("Tying to get an answer from Chat GPT hold on ...")
     attempts = 0
     openai_api_key = os.getenv("openai_key")
-
+    #print("this is the key: ",openai_api_key)
+    
     if image_path is None:
         headers = {
             "Content-Type": "application/json",

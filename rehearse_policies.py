@@ -1,128 +1,243 @@
 from LLMGuidedSeeding_pkg import * 
+from LLMGuidedSeeding_pkg.utils.rehearsal_utils import * 
+from UI import ConversationalInterface 
 import os 
 import toml 
 import argparse
 import numpy as np 
 import matplotlib.pyplot as plt 
 import random 
-
-def get_unique_markers(num_markers):
-    """
-    Get a list of unique random markers.
-    
-    Parameters:
-    - num_markers: The number of unique markers to select.
-    
-    Returns:
-    - A list of unique marker styles.
-    """
-    marker_styles = [
-        '.', ',', 'o', 'v', '^', '<', '>', '1', '2', '3', '4', 's', 'p', '*',
-        'h', 'H', '+', 'x', 'D', 'd', '|', '_'
-    ]
-    
-    if num_markers > len(marker_styles):
-        raise ValueError("Number of requested markers exceeds the number of available unique markers.")
-    
-    return random.sample(marker_styles, num_markers)
-
-def point_in_bounds(point,polygon): 
-    x, y = point
-    n = len(polygon)
-    inside = False
-
-    p1x, p1y = polygon[0]
-    for i in range(n + 1):
-        p2x, p2y = polygon[i % n]
-        if y > min(p1y, p2y):
-            if y <= max(p1y, p2y):
-                if x <= max(p1x, p2x):
-                    if p1y != p2y:
-                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
-                    if p1x == p2x or x <= xinters:
-                        inside = not inside
-        p1x, p1y = p2x, p2y
-
-    return inside 
+from matplotlib.path import Path 
+import pandas as pd 
+import shutil 
+import pickle 
 
 class policyRehearsal: 
     def __init__(self,args):
+        self.final_policy_path = args.final_policy_path
         self.prompt_path = args.prompt_path  
-        self.logging_dir = args.logging_dir 
-        self.plot_bounds_path = args.plot_bounds_path 
+        self.logging_dir = args.logging_dir  
+        with open(args.constraints_dict_path,"rb") as handle: 
+            self.policy_constraints = pickle.load(handle) 
+
+        self.plot_bounds = np.genfromtxt(args.plot_bounds_path,delimiter=",")  
+        self.plot_bounds = self.plot_bounds[~np.isnan(self.plot_bounds).any(axis=1)]
+        if not np.array_equal(self.plot_bounds[0], self.plot_bounds[-1]):
+            self.plot_bounds = np.vstack([self.plot_bounds, self.plot_bounds[0]]) 
+
+        self.config_path = args.config_path
         self.parameters = toml.load(args.config_path) 
-        plt.ion() 
-        fig, ax = plt.subplots(figsize=(12,12)) #this is for the animation thing 
-        self.fig = fig; self.ax = ax 
-        self.robot_traj = np.zeros((1,3)) 
+        
         self.obstacle_locations = {} 
         self.target_locations = {} 
         self.meta_constraints = {} 
-
-    def plot_frame(self): 
-        self.ax.clear() 
-        # Plot Robot & Pointer, and Bounds 
-        plot_bounds = np.genfromtxt(self.plot_bounds_path) 
-        self.ax.plot(plot_bounds[:,0],plot_bounds[:,1],color="k") 
-        maxX = max([max(self.robot_traj[:,0]),max(self.obstacle_locations[:,0]),max(self.target_locations[:,0])]) 
-        minX = min([min(self.robot_traj[:,0]),min(self.obstacle_locations[:,0]),min(self.target_locations[:,0])]) 
-        deltaX = maxX - minX 
-        maxY = max([max(self.robot_traj[:,1]),max(self.obstacle_locations[:,1]),max(self.target_locations[:,1])]) 
-        minY = min([min(self.robot_traj[:,1]),min(self.obstacle_locations[:,1]),min(self.target_locations[:,1])]) 
-        deltaY = maxY - minY 
-        bounds_mag = max([deltaX,deltaY]) 
-        minX -= bounds_mag*0.1; maxX += bounds_mag*0.1 
-        minY -= bounds_mag*0.1; maxY += bounds_mag*0.1 
-        self.ax.set_xlim(minX,maxX)
-        self.ax.set_ylim(minY,maxY) 
-        self.ax.set_aspect('equal') 
-        self.ax.scatter(self.robot_traj[-1,0],self.robot_traj[-1,0],color="k") 
-        pointer_x = self.robot_traj[-1,0] + 2*np.cos(self.robot_traj[-1,2]); pointer_y = self.robot_traj[-1,1] + 2*np.sin(self.robot_traj[-1,2])  
-        robot_pointer = self.ax.arrow(self.robot_traj[-1,0], self.robot_traj[-1,1], pointer_x, pointer_y, head_width=0.5, head_length=0.5, fc='red', ec='red') 
-        self.ax.add_patch(robot_pointer) 
-        # Plot traversed trajectory 
-        self.ax.plot(self.robot_traj[:,0],self.robot_traj[:,1],linestyle="--")  
-        # Plot any obstacles 
-        obstacles = self.policy_constraints["avoid"] 
-        obstacle_markers = get_unique_markers(len(obstacles)) 
-        for i,obstacle_type in enumerate(obstacles): 
-            for j,pt in enumerate(self.obstacle_locations[obstacle_type]): 
-                if j == 0:
-                    self.ax.scatter(pt[0],pt[1],color="red",marker=obstacle_markers[i],label=obstacle_type) 
-                else: 
-                    self.ax.scatter(pt[0],pt[1],color="red",marker=obstacle_markers[i]) 
-        # Plot any targets 
-        targets = self.policy_constraints["goal_lms"] 
-        target_markers = get_unique_markers(len(obstacles)) 
-        for i,lm_type in enumerate(targets): 
-            for j,pt in enumerate(self.target_locations[lm_type]): 
-                if j == 0:
-                    self.ax.scatter(pt[0],pt[1],color="green",marker=target_markers[i],label=lm_type) 
-                else: 
-                    self.ax.scatter(pt[0],pt[1],color="green",marker=obstacle_markers[i]) 
-        # Plot meta constraints 
-        for constraint in self.meta_constraints.keys(): 
-            if constraint["type"] == "point": 
-                for pt in enumerate(constraint["locations"]):
-                    self.ax.scatter(pt[0],pt[1],"purple",label=constraint) 
-            else: 
-                wheel_patches = get_robot_wheel_patches(self.robot_traj[-1,0],self.robot_traj[-1,1],self.robot_traj[-1,2],self.parameters["vehicle_params"])
-                for patch in wheel_patches:
-                    self.ax.add_patch(patch) 
-
-    def plot_camera_views(self): 
-
-    def rehearse(self): 
-        #load in the polciy 
-        with open(os.path.join(self.logging_directory,"finalPolicy.txt"),"r") as f:
-            policy = f.read() 
-
-        epoch = 0 
-        while epoch < self.parameters["policyRehearsal"]["rehearsal_epochs"]: 
-
-            epoch += 1 
-       
         
+        with open("./configs/std_imports.txt","r") as f:
+            self.std_imports = f.read()
+
+        self.current_step = 0 
+
+        self.robot_transforms = robotTransforms(self.config_path)
+
+        #TODO: UI ... idk how to integrate this, going to use command line for now 
+        #self.conversational_interface = ConversationalInterface() 
+
+    def init_obstacles(self,obstacles,max_obstacles=15):  
+        contour = Path(self.plot_bounds)
+        # Get the bounding box of the contour
+        min_x, min_y = np.min(self.plot_bounds, axis=0)
+        max_x, max_y = np.max(self.plot_bounds, axis=0)
+
+        #"meta-obstacle", "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset"
+        for obstacle in obstacles:  
+            num_points = random.randint(2,max_obstacles)  
+            #print("initting {} obstacles of type: {}".format(num_points,obstacle))
+            points = []
+            while len(points) < num_points:
+                # Generate random points within the bounding box
+                random_points = np.random.rand(num_points, 2)
+                random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
+                random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
+                
+                # Check which points are inside the contour
+                mask = contour.contains_points(random_points)
+                points_inside = random_points[mask]
+                
+                # Add the valid points to the list
+                points.extend(points_inside.tolist())
+                
+                # Limit the number of points to the desired number
+                points = points[:num_points]
+
+            self.obstacle_locations[obstacle] = points  
+
+    def init_goals(self,goals,max_goals=15): 
+        print("initalizing targets!")
+        contour = Path(self.plot_bounds)
+        # Get the bounding box of the contour
+        min_x, min_y = np.min(self.plot_bounds, axis=0)
+        max_x, max_y = np.max(self.plot_bounds, axis=0)
+        
+        for target in goals: 
+            num_points = random.randint(2,max_goals)  
+            #print("initting {} obstacles of type: {}".format(num_points,target))
+            points = []
+            while len(points) < num_points:
+                # Generate random points within the bounding box
+                random_points = np.random.rand(num_points, 2)
+                random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
+                random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
+                
+                # Check which points are inside the contour
+                mask = contour.contains_points(random_points)
+                points_inside = random_points[mask]
+                
+                # Add the valid points to the list
+                points.extend(points_inside.tolist())
+                
+                # Limit the number of points to the desired number
+                points = points[:num_points] 
+
+            self.target_locations[target] = points  
+
+    def init_constraints(self,constraints): 
+        print("these are the constraints: ",constraints)
+
+        if "avoid" in constraints.keys(): 
+            self.init_obstacles(constraints["avoid"])  
+        
+        if "goal_lms" in constraints.keys(): 
+            self.init_goals(constraints["goal_lms"]) 
+
+        if "search" in constraints.keys(): 
+            self.init_goals(constraints["goal_lms"]) 
+
+    def init_pose(self,max_distance=10): 
+        path = Path(self.plot_bounds)
+        init_pose = np.zeros((6,))
+        # Get the bounding box of the contour
+        min_x = min(self.plot_bounds[:,0]); max_x = max(self.plot_bounds[:,0]) 
+        min_y = min(self.plot_bounds[:,1]); max_y = max(self.plot_bounds[:,1])   
+        if np.random.rand() < 0.5: 
+            print("initting robot inside plot bounds")
+            #then its inside the plot bounds 
+            point_inside = None
+            while point_inside is None:
+                # Generate a random point within the bounding box
+                random_point = np.random.rand(1, 2)
+                random_point[:, 0] = random_point[:, 0] * (max_x - min_x) + min_x
+                random_point[:, 1] = random_point[:, 1] * (max_y - min_y) + min_y
+                #print("random_point: ",random_point)
+                if np.any(np.isnan(random_point)): 
+                    raise OSError 
+                # Check if the point is inside the contour
+                if path.contains_point(random_point[0]):
+                    point_inside = random_point[0] 
+                    init_pose[:2] = point_inside  
+                    #pick random initial heading 
+                    init_pose[-1] = random.uniform(0, 2*np.pi) 
+                '''
+                else:
+                    print("path.constains_point(random_point[0]): ",path.contains_point(random_point[0]))
+                '''
+        else:
+            print("initting robot outside plot bounds")
+            #the its outside the plot bounds 
+            point_outside = None
+            while point_outside is None:
+                # Generate a random point within an extended bounding box
+                random_point = np.random.rand(1, 2)
+                random_point[:, 0] = random_point[:, 0] * ((max_x + max_distance) - (min_x - max_distance)) + (min_x - max_distance)
+                random_point[:, 1] = random_point[:, 1] * ((max_y + max_distance) - (min_y - max_distance)) + (min_y - max_distance) 
+                #print("random_point: ",random_point) 
+                if np.any(np.isnan(random_point)): 
+                    raise OSError 
+                # Check if the point is outside the contour
+                if not path.contains_point(random_point[0]):
+                    # Check if the point is within the max_distance from the contour
+                    distances = np.linalg.norm(self.plot_bounds - random_point, axis=1) 
+                    if np.min(distances) <= max_distance:
+                        point_outside = random_point[0]
+                        init_pose[:2]= point_outside
+                        init_pose[-1] = random.uniform(0, 2 * np.pi)
+                '''
+                else:
+                    print("path.contains_point(random_point[0]): ",path.contains_point(random_point[0]))
+                '''
+
+        return init_pose 
+
+    def parse_next_step(self,policy):
+        if not os.path.exists("parsed_steps"):
+            os.mkdir("parsed_steps") 
+
+        next_step = self.current_step + 1 
+        step = get_step_from_policy(policy,next_step) 
+        
+        return step 
+    
+    def attempt_policy_execution(self): 
+        #load in the polciy 
+        print("reading the policy...")
+        with open(self.final_policy_path,"r") as f:
+            policy = f.read()
+
+        print("initting constraints...")
+        self.init_constraints(self.policy_constraints)
+    
+        initted_pose = self.init_pose() 
+
+        with open("prompts/step_parser_codeGen.txt","r") as f: 
+            prompt = f.read() 
+
+        enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.prompt_path)
+        enhanced_prompt = enhanced_prompt.replace("*INSERT_POLICY*",policy)
+
+        raw_code = generate_with_openai(enhanced_prompt) 
+        with open("rawCode.txt","w") as f:
+            f.write(raw_code) 
+
+        clean_code = remove_chatGPT_commentary(raw_code)
+        with open("cleaned_code.txt","w") as f: 
+            f.write(clean_code)
+
+        code = ensure_imports(clean_code,self.std_imports)
+        with open("post-ensure_imports.txt","w") as f: 
+            f.write(code)
+            
+        local_scope = {} 
+
+        try:
+            with open("attempted_policy.txt",'w') as f:
+                f.write(code)  
+            exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'target_locations': self.target_locations, 'obstacle_locations': self.obstacle_locations}, local_scope)
+        
+        except Exception as e: 
+            print("An error occurred during the execution of the code :(") 
+            print(e)
+            raise OSError 
+
+    def test_existing_code(self,code_path):
+        '''
+        This function is to test the non-code gen parts 
+        '''
+        #instantiate obstacles and targets 
+        print("initting constraints...")
+        self.init_constraints(self.policy_constraints)
+
+        initted_pose = self.init_pose() 
+        print("initted_pose:",initted_pose)  
+
+        local_scope = {}
+
+        with open(code_path) as file:
+            code = file.read()
+
+        code = ensure_imports(code,self.std_imports)
+
+        # Execute the code directly
+        exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'target_locations': self.target_locations, 'obstacle_locations': self.obstacle_locations}, local_scope)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Explore Test")
 
@@ -134,10 +249,23 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--constraints_dict_path",
+        type=str,
+        help="Path to the constraint dict from the gen_policies",
+        default="random_constraints.pickle" 
+    )
+
+    parser.add_argument(
+        "--final_policy_path",
+        type=str,
+        help="Path to desired prompt"
+    )
+
+    parser.add_argument(
         "--config_path",
         type=str,
         help="Path to the configuration file",
-        default="experiment_runner/config/example_config.toml",
+        default="configs/example_config.toml",
     )
     
     parser.add_argument(
@@ -158,4 +286,5 @@ if __name__ == "__main__":
     args = parser.parse_args()  
 
     pR = policyRehearsal(args)
-    pR.rehearse()
+    
+    pR.attempt_policy_execution() 

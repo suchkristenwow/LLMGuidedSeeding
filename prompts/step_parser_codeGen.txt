@@ -1,0 +1,456 @@
+You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded rangelands.
+In order to practice policy execution, you will first help control this simulated robot to make sure the policies are safe and effective. 
+
+This is the prompt: *INSERT_QUERY*
+
+The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. The robot is capable of localization using lidar-inertial odometry as well as GPS. 
+Whenever there is some uncertainty, you can interface with the human for more direction or context. 
+
+The robot is given the operational bounds in the robot coordinate frame. This variable is called "plot_bounds". The plot bounds are given as a nx2 np array describing the
+contour. It is important that the robot operate inside the bounds and never plan to drive outside of the plot bounds. If the robot begins outside of the plot bounds, the 
+first step will be to plan the shortest route possible to be inside the bounds.
+
+To execute the desired task, the ecologist has written you this list of steps:
+*INSERT_POLICY*
+
+Please write some Python code that would execute this policy. 
+
+In order to do so, please use the following classes and functions. 
+
+Consider the following guidelines:
+- Use base Python (comparison, sorting) for basic logical operations, left/right/up/down, math, etc.
+- You are encouraged to use the given functions BELOW and simBot class implementation but not all of it will always be applicable so you are encouraged to write your own 
+  functions if need be. 
+- Use the given generate_with_openai function to access external information if necessary.
+- Whatever you come up with will be executed like this: 
+    # Execute the code directly
+        exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'target_locations': self.target_locations, 'obstacle_locations': self.obstacle_locations}, local_scope) 
+    That is, you will have access to the config path, plot_bounds, init_pose, target_locations, obstacle_locations. You have access to all the variables you need to instantiate the simBot and robotTransforms classes, if
+    desired. 
+- Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the shapely library). The plot_bounds describe 
+ an arbitrary shape drawn by the user. 
+
+def generate_with_openai(prompt): 
+    """
+    Args: 
+        prompt (str) : The desired prompt for Chat GPT  
+    Returns: 
+        response (str) : The response from Chat GPT 
+    """
+
+def save_chatGPT_function(function_implementation):
+    """
+    This function saves functions to be called in your implementation for later steps 
+
+    Args: 
+        function_implementation (str) : The function we need to save 
+    """
+
+def generate_circle_points(center, radius, n=5):
+    """
+    Generates n points on a circle with a given radius and center 
+
+    Args:
+        center (str): Tuple representing the center of the circle 
+        radius (float): Radius of the circle 
+        optional: n (int): Number of points on the circle perimeter. Default is 5
+    Returns: 
+        points (list): List of tuples representing the (x,y) coordinates on the perimeter of the circle 
+    """
+
+def plant_with_offset(pose,coord,offset):
+    """
+    Determines the waypoint of a given object located at coord such that we can plant there with a given offset. 
+
+    Args:
+        pose (np.ndarray): The 6 DOF pose of the robot like [x,y,z,roll,pitch,yaw] 
+        coord (np.ndarray): A 1x2 array representing the 2D coordinate of the object which we are planting with reference to 
+        offset (float): Describes the desired offset in meters from the object we are planting with reference to 
+
+    Returns: 
+        waypoint (np.ndarray): A 1x6 array representing the waypoint necessary to plant with the given offset with reference to the given object 
+        coordinate 
+    """
+
+def get_id_given_coord(objects,coord): 
+    """
+    Given the object coord, find the most likely object id in the current map.
+
+    Args:
+        objects (list): This is a list of identified_object objects which all have the same label 
+        coord (np.ndarray): A 1x2 array representing the coordinate 
+
+    Returns: 
+        object_id (int): This is the most likely object id given the coordinate 
+    """
+
+class simBot:
+    """ A Python class which allows for control of a simulated robot for ecological restoration which can navigate using lidar-inertial SLAM as well as GPS, make 
+    observations using 3 RGB cameras and YoloWorld, and plant seeds, if desired. Query Attributes or call Methods from this class by calling self.simBot (this is 
+    where we saved the class instance)
+    """
+    Attributes
+    ----------
+    static_transformer : robotTransforms 
+        A class instance for handling the static transforms relevant to the robot such as the camera frustrums, seed planter, and wheels (see robotTransforms explanation) 
+
+    plot_bounds : np.ndarray 
+        This is a nx2 array describing the area inside which the robot should operate (in the robot coordinate frame)
+
+    planted_locations : list 
+        This is a list of 1x2 arrays describing the coordinates where the robot has planted. 
+
+    observed_areas : list 
+        This is a list of shapely Polygon objects describing the camera frustrums from each time we get observations. This will determine what areas of the plot bounds are still
+        unobserved 
+
+    sensor_range : float 
+        A float which defines the range of the camera visability in meters 
+
+    miss_detection_range : float 
+        Since this is a simulation, the object detections are simulated. To make the sim more realistic, we include a rate of missed detections. 
+
+    fov : float 
+        This is the field of view in radians of the RGB cameras on the robot 
+    
+    sensor_noise_cov_matrix : np.ndarray 
+        This is a 2x2 np array which quantifies the uncertainty in the measurement model. 
+
+    traj_cache : np.ndarray 
+        This is a nx6 np array where the rows describe the robot pose at that timestep. The rows contain: x,y,z,roll,pitch,yaw 
+
+    observation_cache : dict 
+        This is a dictionary where the keys are timesteps and the entries are the results. This maintains the history of all observations made by the simBot. 
+        The entries are dictionaries where the keys are the camera names and the entries are "labels" and "coords" which in turn are lists of detected object labels 
+        and their observed coordinate. 
+
+    current_waypoint : np.ndarray 
+        This is a 1x6 np array which describes the next goal pose like this : x,y,z,roll,pitch,yaw 
+
+    current_path : np.ndarray 
+        This is a nx6 array which describes the goal path where the rows are : x,y,z,roll,pitch,yaw 
+
+    current_map : dict  
+        This is a dictionary where the keys are labels of different objects observed in the environment and the entries are lists of identified_object class instances.
+        See identified_object explanation. E.g: {"foo":[<identified_object class instance>],"bar":[<identified_object class instance>]}
+
+    gt_targets : dict 
+        This is a dictionary where the keys are the labels of different target objects and the entries are nx2 np.ndarrays in which each row is the 2D coordinate of the 
+        target object. 
+
+    gt_obstacles : dict 
+        This is a dictionary where the keys are the labels of different obstacles and the entries are nx2 np.ndarrays in which each row is the 2D coordinate of the 
+        target obstacle.  
+
+    Methods
+    -------
+    def __init__(self,config_path,plot_bounds,init_pose,target-locations,obstacle_locations):
+        """
+        Instatiates the simBot class. 
+
+        Args:
+            config_path (str) : Path to user configs.  
+            plot_bounds (np.ndarray) : An nx2 array describing the perimeter inside which the robot should operate 
+            init_pose (np.ndarray) : A 1x6 array describing the initial pose of the robot like this: x,y,z,roll,pitch,yaw 
+            target_locations (dict) : This is a dictionary where the keys are strings which are the labels of the targets and the entires are nx2 arrays containing their respective
+            ground truth locations  
+            target_locations (dict) : This is a dictionary where the keys are strings which are the labels of the obstacles and the entires are nx2 arrays containing their respective
+            ground truth locations  
+        """
+
+    def in_plot_bounds(self):
+        """
+        Check if the robot is currently inside plot bounds. 
+
+        Returns: 
+            in_bounds (bool) : A boolean which is true if the robot is inside the plot bounds, and false if not. 
+        """
+
+    def check_all_observed(self):
+        """
+        Want to keep track of which areas weve already observed within the plot bounds. Returns True if we have observed the entire area of the plot bounds 
+        else False. 
+
+        Returns: 
+            whole_plot_observed (bool) : A boolean which is True if the whole plot has been observed by the front-facing cameras and False otherwise
+        """
+
+    def get_current_observations(self): 
+        """
+        Uses the measurement model to check for observable landmarks given the current pose. You may call this method if 
+        you think it's necessary, but note that it is also called automatically each time the robot moves. 
+
+        This function also updates the current_map attribute
+
+        This function also updates the observed_areas attribute
+        """ 
+    
+    def get_current_pose(self):
+        """
+        Returns:
+            current_pose (np.ndarray) : A 1x6 np ndarray defining the current robot pose like this: x,y,z,roll,pitch,yaw 
+        """
+
+    def check_environment_for_something(self,thing): 
+        """
+        Return the nearest object id and location, if any, of any object labelled "thing". 
+
+        Args:
+            thing (str) : The label of the desired object 
+
+        Returns :
+            object_id (int) : A float specifiying the id of the nearest object 
+            location (np.ndarray) : A 1x2 np array defining the nearest known location of the desired type of object, if the desired object
+            has not been observed, the function returns None. 
+        """ 
+
+    def explore_using_volumetric_gain(self): 
+        """
+        Explore the environment using a volumetric gain strategy. Determines the goal waypoint, then calls go_to_waypoint() 
+        """ 
+
+    def go_to_waypoint(self):
+        """
+        Navigates to the self.current_waypoint. If the current waypoint is more that 0.5 m away, the function plans a path and then calls 
+        follow_path
+        """ 
+
+    def follow_path(self): 
+        """
+        Updates the traj_cache, calls the control API so the robot follows the self.current_path 
+        """ 
+
+    def plant(self): 
+        """
+        Calls the control API to plant a seed. Updates self.planted_locations with the 2D coordinate where the seed was planted. 
+        """ 
+
+class identified_object:
+    """ A Python class which stores relevant information for localized objects in the map. 
+    """
+    Attributes
+    ----------
+    mu : np.ndarray 
+        This is a 1x2 np array describing the (x,y) coordinate of a landmark 
+    sigma : np.ndarray 
+        This is a 2x2 np array describing the covariance in the localization of a landmark 
+    label : str 
+        This is a string containing the label of the landmark type 
+    object_id : int 
+        This is a unique id to differentiate between multiple objects of the same type  
+    visited : bool 
+        This is a boolean to keep track of whether the object has been visited or not, if relevant 
+
+    Methods
+    -------
+    def __init__(self,object_id,init_observation,label): 
+        """
+        This instantiates the identified_object class object. 
+        
+        Args:
+            object_id (int) : This is the unique id of this object 
+            init_observation (np.ndarray) : This is a 1x2 array which describes the first observed coordinate of the object 
+            label (str) : This is the object label 
+        """
+
+    def integrate_new_observation(self,observation):
+        """
+        This function integrates observations to localize objects. Updates mu 
+
+        Args:
+            observation (np.ndarray) : This a 1x2 np array defining the observed 2D location of the landmark  
+        """ 
+
+class robotTransforms:
+    """This is a Python class which you can use to get the transformation between the robot odometry and the sensors
+    """ 
+    Attributes
+    ----------
+    left_camera_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the left camera 
+    right_camera_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the right camera  
+    front_camera_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the front camera 
+    left_front_tire_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the left front tire  
+    right_front_tire_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the right front tire 
+    left_back_tire_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the left back tire 
+    right_back_tire_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the right back tire  
+    tire_width : float 
+        This is the width of the tires in m 
+    tire_length : float 
+        This is the length of the tires in m 
+    planter_tf : list 
+        This is a list of 6 elements describing the transformation between the robot odometry and the planter device  
+    fov : float 
+        This is the field of view in radians of the cameras in the y (left/right) direction 
+
+    Methods
+    -------
+    def __init__(self,config_path): 
+        """
+        This instantiates the robotTransforms class. Use this to figure out transformations between the robot and the sensors. 
+        Args:
+        config_path : str 
+            This is the path to the configurations for the given robot. 
+        """
+
+    def get_robot_transformation(self,robot_pose): 
+        """
+        This function helps find the transformation of the body of the robot given the robot pose. 
+        Args:
+        robot_pose : np.ndarray 
+            This array describes the 6 DOF pose of the robot like this: x,y,z,roll,pitch,yaw 
+        Returns:
+        corners : list 
+            This function returns a list of 4 tuples describing the (x,y) coordinates of each corner of the robot body 
+        """
+
+    def get_front_cam_fov(self,cam_type,robot_pose): 
+        """
+        This function helps find the field of view of the given camera in the robot frame. 
+        Args:
+        cam_type : str 
+            This is a str which indicates which camera you want to find the field of view of (either; 'left','right','front')
+        robot_pose : np.ndarray 
+            This array describes the 6 DOF pose of the robot like this: x,y,z,roll,pitch,yaw 
+        Returns: 
+        vertices : list 
+            This function returns a list of 4 lists describing the [x,y] coordinates of each vertex of the camera frustrum 
+        """
+
+    def get_tire_corners(self,robot_pose,tire_type): 
+        """
+        This function helps find where the robot tires will be given the robot pose. Helpful when you need to make sure you don't run over anything. 
+        Args:
+        robot_pose : np.ndarray 
+            This array describes the 6 DOF pose of the robot like this: x,y,z,roll,pitch,yaw 
+        tire_type : str 
+            This is a str which indicates which tire you want to find (either; 'left_back','right_back','left_front', 'right_front)
+        Returns: 
+        vertices : np.ndarray 
+            This function returns a 4x2 array describing the 4 corners inside which the tire print will be given a robot pose 
+        """
+
+    def get_robot_pose_from_planter(self,planter_position):
+        """
+        This function finds the robot pose given the planter position (it is the inverse transform of the one which can be accessed by the get_planter_position method) 
+        Args: 
+        planter_position : np.ndarray 
+            This array describes the 2D coordinate of the planter position 
+        Returns:
+            The robot pose which would allow for that position 
+        """
+
+    def get_planter_position(self,robot_pose): 
+        """
+        This function finds the transformation of where the planter will plant given the robot pose. 
+        Args:
+        robot_pose : np.ndarray 
+            This array describes the 6 DOF pose of the robot like this: x,y,z,roll,pitch,yaw 
+        Returns: 
+        planter_coord : np.ndarray 
+            This function returns the x,y coordinate of where the planter will plant given the robot pose. 
+        """ 
+
+Here's an example. Suppose the prompt was "Plant 10 cm away from any shrubs in the plot", and this was the policy: 
+1. Ensure the robot is inside the plot bounds, if not, navigate to the closest waypoint inside the plot bounds. 
+2. Check if any shrubs are currently detected, if so add them to a queue and navigate to them to plant. 
+3. If no shrubs are detected, explore the plot bounds using volumetric gain until a shrub is observable. 
+4. Continue looking for shrubs and planting 10 cm away from them until the whole plot has been observed 
+
+Then a good response would be: 
+
+bot = simBot(config_path,plot_bounds,init_pose,target_locations,obstacle_locations) 
+
+#1. Navigate inside the plot bounds if not already in them 
+pose = bot.get_current_pose() 
+
+if not bot.in_plot_bounds():
+    nearest_point_on_perimeter, _ = nearest_points(Polygon(bot.plot_bounds), Point(pose[0],pose[1])) 
+    # Set waypoint 
+    bot.current_waypoint = np.zeros((6,)) 
+    bot.current_waypoint[0] = nearest_point_on_perimeter.x; bot.current_waypoint[1] = nearest_point_on_perimeter.y; 
+    heading = np.arctan2(nearest_point_on_perimeter.y - pose[1],nearest_point_on_perimeter.x - pose[0])  
+    bot.current_waypoint[5] = heading 
+    bot.go_to_waypoint() 
+
+#2. Check if there are any shrubs, if so, plant in them 
+observed_shrubs = [] 
+unvisited_shrubs = []
+if "shrub" in bot.current_map.keys(): 
+    observed_shrubs = bot.current_map["shrub"]
+    unvisited_shrubs = [x for x in observed_shrubs if not x.visited]
+
+#3. Plant in any observed shrubs
+if len(unvisited_shrubs) > 0:
+    if len(unvisited_shrubs) > 1:
+        NN_path = nearest_neighbor_path([x.mu for x in unvisited_shrubs])
+        for shrub_coord in NN_path: 
+            waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1) #pose,nearest_shrub_coord,offset
+            bot.current_waypoint = waypoint 
+            bot.go_to_waypoint()
+            bot.plant()
+            # Update visited bool 
+            shrubs = bot.current_map["shrub"] 
+            shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
+            idx = [x.object_id for x in shrubs].index(shrub_id)
+            bot.current_map["shrub"][idx].visited = True  
+    else: 
+        shrub_coord = unvisited_shrubs[0].mu 
+        waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1)  
+        bot.current_waypoint = waypoint 
+        bot.go_to_waypoint()
+        bot.plant() 
+        # Update visited bool 
+        shrubs = bot.current_map["shrub"] 
+        shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
+        idx = [x.object_id for x in shrubs].index(shrub_id)
+        bot.current_map["shrub"][idx].visited = True  
+
+#4. Continue looking for shrubs and planting 10 cm away until the whole plot has been observed
+check_all_observed = bot.check_all_observed() 
+while not check_all_observed or len(unvisited_shrubs) > 0:
+    #Either we havent observed the whole plot, either we have unvisted shrubs 
+    check_all_observed = bot.check_all_observed() #Check if we have observed the whole plot yet 
+    #Determine if there are any unvisted shrubs 
+    if "shrub" not in bot.current_map.keys(): 
+        observed_shrubs = [] 
+        unvisited_shrubs = []
+        visited_shrubs = []
+    else: 
+        observed_shrubs = bot.current_map["shrub"]
+        unvisited_shrubs = [x for x in observed_shrubs if not x.visited]
+        visited_shrubs = [x for x in observed_shrubs if x.visited] 
+
+    if len(unvisited_shrubs) == 0:
+        bot.explore_using_volumetric_gain() #Explore to try and find a shrub 
+    else:
+        if len(unvisited_shrubs) == 1:
+            nearest_shrub_coord = unvisited_shrubs[0].mu 
+            nearest_shrub_id = unvisited_shrubs[0].object_id 
+            # Update visited bool 
+            shrubs = bot.current_map["shrub"] 
+            idx = [x.object_id for x in shrubs].index(nearest_shrub_id)
+            bot.current_map["shrub"][idx].visited = True 
+        else: 
+            NN_path = nearest_neighbor_path([x.mu for x in unvisited_shrubs])
+            print("NN_path: ",NN_path)
+            for shrub_coord in NN_path: 
+                print("shrub_coord: ",shrub_coord)
+                waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1) 
+                bot.current_waypoint = waypoint 
+                bot.go_to_waypoint()
+                bot.plant()
+                # Update visited bool 
+                shrubs = bot.current_map["shrub"] 
+                shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
+                idx = [x.object_id for x in shrubs].index(shrub_id)
+                bot.current_map["shrub"][idx].visited = True  
+
+If you want to write a function that could be reused in later steps you can do that by calling save_chatGPT_function. In this example, 
+generate_circle_points, plant_with_offset, get_id_given_coord were all saved and now you can use those if its helpful. 

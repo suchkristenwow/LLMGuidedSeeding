@@ -1,3 +1,0 @@
-initting the Policy Generator with these arguments:  Namespace(prompt_path='/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt', config_path='/home/kristen/LLMGuidedSeeding/configs/example_config.toml', logging_dir='/home/kristen/LLMGuidedSeeding/experiment_data/11a72c93-9256-4862-a53b-3e46a0d70bf7/policy_generation_logs', plot_bounds_path='/home/kristen/LLMGuidedSeeding/random_path.csv')
-parsing prompt to get constraints ...
-llm_result: None
