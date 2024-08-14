@@ -41,3 +41,10 @@ def get_id_given_coord(objects,coord):
     distances = [np.linalg.norm(x.mu - coord) for x in objects] 
     idx = np.argmin(distances) 
     return objects[idx].object_id
+
+def check_overlap_w_existing_lms(shape,existing_landmarks): 
+    """
+    Return true if there is overlap 
+    """
+    overlap_found = any(shape.intersects(landmark) for landmark in existing_landmarks)
+    return overlap_found 

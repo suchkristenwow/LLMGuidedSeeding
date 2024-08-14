@@ -3,6 +3,10 @@ from matplotlib.path import Path
 import numpy as np 
 import os 
 
+def get_standard_vocab(path="../"):
+    with open("../../configs/commonObjs.txt","r") as f: 
+        return f.read() 
+
 def get_most_recent_file(dir,filename,sub_dir_name=None): 
     files = []
     for sub_dir in os.listdir(dir): 

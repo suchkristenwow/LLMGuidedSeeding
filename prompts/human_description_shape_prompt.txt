@@ -1,0 +1,131 @@
+I want to make a 2D BEV plot to simulate an autonomous agent executing a task where the robot has to avoid *INSERT_OBJECT*. 
+
+Can you help me by showing me how to plot a few random objects that are the size and shape and pattern given the user description? 
+
+The user has described *INSERT_OBJECT* like this: 
+*INSERT_DESCRIPTION*
+
+Given this description, what shape would be best to approximate *INSERT_OBJECT*? And how big is it? If the human description includes mention of a shape, you can use that. 
+Otherwise, try to use context clues. 
+
+For example, if the human didn't mention a specific shape, but uses words like 'diameter' or 'radius', then a circle would probably be best. If the human mentions edges, then a rectangle would 
+probably be the best shape. 
+
+Note that sometimes there can be more than one good answer. 
+
+Suppose the human description of an object (desk chair) was like this: 
+A desk chair is a piece of furniture about 1 m tall and about 30 cm across. They are usually made of metal and fabric. People sit on them when they do work.
+
+Then the correct response could be either square or square. Either response would be acceptable, but it must be only 1 word. 
+
+Be sure to also consider that this is a 2D BEV plot, so consider what the object would look like viewed from the top. 
+
+Here is a more abstract example: 
+
+Suppose the human description of a an object (foo) was like this:
+A foo is a round, rubbery object that fits around the baz of a bar, helping it move smoothly on the road. Imagine a thick, hollow ring that is flexible yet strong enough to support the bar's weight. 
+This ring, or foo, is usually black and has a pattern of grooves and ridges on the outside. These grooves, known as tread, are important because they help the foo grip the road, 
+especially when it's wet or slippery. The inside of the foo is smooth and fits snugly around a metal baz, which is like the foo's frame.
+
+Then the correct response would be: rectangle, because this seems to be describing a tire, and a tire viewed from the top is just a rectangle. 
+
+Finally, given you have determined the best shape, can you write a few lines of code to initialize a few of those shapes as shapely.Polygon objects within the given plot bounds so I can simulate the 
+task and make sure that the robot avoids *INSERT_OBJECT*? 
+
+The plot bounds are given as a nx2 np array describing the contour. Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the 
+shapely library). The plot_bounds describe an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
+
+There are already some objects I've initialized in the environment, these is saved under existing_landmarks - which is a list of shapely Polygon objects and Point objects 
+
+In my simulation I have already initialized the number of the *INSERT_OBJECT*. I have saved this number in the n_obstacles variable (which is int type).
+
+Your response will be executed like this: 
+
+exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles 'existing_landmarks' : self.existing_landmarks, local_scope)
+That is, you have access to the plot_bounds variable and the n_obstacles variable, and the existing_landmarks. 
+
+You can use this function to generate random points inside the plot boundaries. 
+
+def gen_random_points_in_plot_bounds(plot_bounds,num_points): 
+    contour = Path(plot_bounds)
+    points = []
+    while len(points) < num_points:
+        # Generate random points within the bounding box
+        random_points = np.random.rand(num_points, 2)
+        random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
+        random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
+        
+        # Check which points are inside the contour
+        mask = contour.contains_points(random_points)
+        points_inside = random_points[mask]
+        
+        # Add the valid points to the list
+        points.extend(points_inside.tolist())
+        
+        # Limit the number of points to the desired number
+        points = points[:num_points]
+    return points 
+
+I have also written a function that ensures the new object doesn't intersect with any of the existing landmarks 
+
+def check_overlap_w_existing_lms(shape,existing_landmarks):
+    """
+    Args: 
+        shape (shapely.Polygon) : Describes the shape in question 
+        existing_landmarks (list) : List of existing landmarks (shapely.Polygon objects) 
+    Returns:
+        overlap (bool) : Returns True if there is overlap (invalid object), and False otherwise 
+    """
+
+For example, if the best shape is circle, and the user has specified that the object in question is 30 cm across and that they are usually are found in clusters then a good response would be: 
+
+import numpy as np
+from shapely import Polygon,Point  
+import random 
+
+n_clusters = random.randint(1,num_points/2) #there should be at least two objects per cluster
+
+avg_points_cluster = int(num_points/n_clusters)
+
+cluster_centers = gen_random_points_in_plot_bounds(plot_bounds,n_clusters)
+
+obj_count = 0
+
+obstacles = []
+
+def gen_rand_object_center (radii): 
+    angle = random.uniform(0, 2 * np.pi)
+    distance = random.uniform(0, radii * 2)  # Ensure circles do not overlap within the cluster
+    x_offset = np.cos(angle) * distance
+    y_offset = np.sin(angle) * distance
+    
+    circle_center = Point(cluster_center.x + x_offset, cluster_center.y + y_offset) 
+
+    return circle_center
+
+for i in range(n_clusters):
+    cluster_center = cluster_centers[i,:]
+    if i == n_clusters - 1:
+        #want to add the remaining points to the cluster 
+        points_cluster = num_points - obj_count 
+    else:
+        points_cluster = avg_points_cluster  
+        # Generate a random point within a certain distance (0.3 m) from the cluster center
+        circle_center = gen_rand_object_center(0.3) 
+        # Approximate a circle
+        angles = np.linspace(0, 2 * np.pi, num_vertices, endpoint=False)
+        points = [(circle_center.x + np.cos(angle) * radius, circle_center.y + np.sin(angle) * radius) for angle in angles]  
+        
+        # Ensure the circle is within the polygon
+        if polygon.contains(circle_center):
+            if check_overlap_w_existing_lms(Polygon(points)):
+                overlap = check_overlap_w_existing_lms(Polygon(points))
+                while overlap: 
+                    circle_center = gen_rand_object_center(0.3) 
+                    angles = np.linspace(0, 2 * np.pi, num_vertices, endpoint=False)
+                    points = [(circle_center.x + np.cos(angle) * radius, circle_center.y + np.sin(angle) * radius) for angle in angles]  
+            
+            obstacles.append(Polygon(points))  
+
+Make sure that the output of your code is a list of shapely Polygon objects saved under the variable name 'obstacles'. 
+BE SURE TO SAVE THE SHAPES YOU COME UP WITH AS OBSTACLES SO I CAN ACCESS IT FROM THE MAIN SCRIPT! 

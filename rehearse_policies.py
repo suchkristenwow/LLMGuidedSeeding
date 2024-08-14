@@ -1,4 +1,5 @@
 from LLMGuidedSeeding_pkg import * 
+from LLMGuidedSeeding_pkg.utils.gen_utils import get_standard_vocab 
 from LLMGuidedSeeding_pkg.utils.rehearsal_utils import * 
 from UI import ConversationalInterface 
 import os 
@@ -11,6 +12,7 @@ from matplotlib.path import Path
 import pandas as pd 
 import shutil 
 import pickle 
+from shapely.geometry import Polygon, Point 
 
 class policyRehearsal: 
     def __init__(self,args):
@@ -28,77 +30,138 @@ class policyRehearsal:
         self.config_path = args.config_path
         self.parameters = toml.load(args.config_path) 
         
-        self.obstacle_locations = {} 
-        self.target_locations = {} 
+        self.obstacle_objs = {} 
+        self.target_objs = {}
+
         self.meta_constraints = {} 
         
         with open("./configs/std_imports.txt","r") as f:
             self.std_imports = f.read()
-
+            
         self.current_step = 0 
 
         self.robot_transforms = robotTransforms(self.config_path)
+        
+        self.std_vocabulary = get_standard_vocab() 
 
         #TODO: UI ... idk how to integrate this, going to use command line for now 
         #self.conversational_interface = ConversationalInterface() 
 
-    def init_obstacles(self,obstacles,max_obstacles=15):  
-        contour = Path(self.plot_bounds)
-        # Get the bounding box of the contour
-        min_x, min_y = np.min(self.plot_bounds, axis=0)
-        max_x, max_y = np.max(self.plot_bounds, axis=0)
+        self.feedback = None 
+        self.obstacle_descriptions = {} #keys are labels, subkeys are size and shape and description 
+        self.target_descriptions = {} 
 
-        #"meta-obstacle", "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset"
-        for obstacle in obstacles:  
-            num_points = random.randint(2,max_obstacles)  
-            #print("initting {} obstacles of type: {}".format(num_points,obstacle))
-            points = []
-            while len(points) < num_points:
-                # Generate random points within the bounding box
-                random_points = np.random.rand(num_points, 2)
-                random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
-                random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
-                
-                # Check which points are inside the contour
-                mask = contour.contains_points(random_points)
-                points_inside = random_points[mask]
-                
-                # Add the valid points to the list
-                points.extend(points_inside.tolist())
-                
-                # Limit the number of points to the desired number
-                points = points[:num_points]
+        self.existing_landmarks = [] 
 
-            self.obstacle_locations[obstacle] = points  
+    def ask_human(self,question): 
+        print("Question: ",question)
+        print()
+        input("Type your answer in feedback.txt and press Enter to Continue")
+        with open("feedback.txt","r") as f:
+            self.feedback = f.read()
 
-    def init_goals(self,goals,max_goals=15): 
-        print("initalizing targets!")
-        contour = Path(self.plot_bounds)
-        # Get the bounding box of the contour
-        min_x, min_y = np.min(self.plot_bounds, axis=0)
-        max_x, max_y = np.max(self.plot_bounds, axis=0)
-        
+    def init_obstacles(self,obstacles,max_obstacles=20):  
+        contour = Polygon(self.plot_bounds)
+        for obstacle in obstacles: 
+            self.obstacle_objs[obstacle] = [] 
+
+            if obstacle in self.std_vocabulary:
+                prompt = "prompts/shape_prompt.txt"
+                enhanced_prompt = prompt.replace("*INSERT_OBJECT",obstacle)
+            else: 
+                with open("prompts/object_clarification_prompt.txt","r") as f:
+                    question_prompt = f.read()
+                question = question_prompt.replace("*INSERT_OBJECT",obstacle) 
+                self.ask_human(question) 
+                prompt = "prompts/human_description_shape_prompt.txt" 
+                enhanced_prompt = prompt.replace("*INSERT_OBJECT",obstacle)
+                enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION",self.feedback) 
+
+            n_obstacles = random.randint(2,max_obstacles) 
+            #exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles 'existing_landmarks' : self.existing_landmarks, local_scope)
+            try:                
+                raw_code = generate_with_openai(enhanced_prompt)
+                '''
+                with open("rawCode.txt","w") as f:
+                    f.write(raw_code)
+                ''' 
+                
+                clean_code = remove_chatGPT_commentary(raw_code)
+                '''
+                with open("cleaned_code.txt","w") as f: 
+                    f.write(clean_code)
+                '''
+            
+                code = ensure_imports(clean_code,self.std_imports)
+                '''
+                with open("post-ensure_imports.txt","w") as f: 
+                    f.write(code)
+                '''
+
+                with open("attempted_init_obstacles.py",'w') as f:
+                    f.write(code)  
+
+                local_scope = {} 
+                exec(code, {'plot_bounds': contour, 'n_obstacles': n_obstacles, 'existing_landmarks':self.existing_landmarks}, local_scope) 
+
+            except Exception as e: 
+                print("An error occurred during the execution of the code :(") 
+                print(e)
+                raise OSError 
+
+            self.obstacle_objs[obstacle].extend(local_scope['obstacles']) 
+            self.existing_landmarks.extend(local_scope['obstacles']) 
+
+    def init_goals(self,goals,max_goals=20): 
+        contour = Polygon(self.plot_bounds)
         for target in goals: 
-            num_points = random.randint(2,max_goals)  
-            #print("initting {} obstacles of type: {}".format(num_points,target))
-            points = []
-            while len(points) < num_points:
-                # Generate random points within the bounding box
-                random_points = np.random.rand(num_points, 2)
-                random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
-                random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
-                
-                # Check which points are inside the contour
-                mask = contour.contains_points(random_points)
-                points_inside = random_points[mask]
-                
-                # Add the valid points to the list
-                points.extend(points_inside.tolist())
-                
-                # Limit the number of points to the desired number
-                points = points[:num_points] 
+            self.target_objs[target] = []
+            if target in self.std_vocabulary:
+                prompt = "prompts/shape_prompt.txt"
+                enhanced_prompt = prompt.replace("*INSERT_OBJECT",target)
+            else: 
+                with open("prompts/object_clarification_prompt.txt","r") as f:
+                    question_prompt = f.read()
+                question = question_prompt.replace("*INSERT_OBJECT",target) 
+                self.ask_human(question) 
+                prompt = "prompts/human_description_shape_prompt.txt" 
+                enhanced_prompt = prompt.replace("*INSERT_OBJECT",target)
+                enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION",self.feedback) 
 
-            self.target_locations[target] = points  
+            n_obstacles = random.randint(2,max_goals) 
+            #exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles 'existing_landmarks' : self.existing_landmarks, local_scope)
+            try:                
+                raw_code = generate_with_openai(enhanced_prompt)
+                '''
+                with open("rawCode.txt","w") as f:
+                    f.write(raw_code)
+                ''' 
+                
+                clean_code = remove_chatGPT_commentary(raw_code)
+                '''
+                with open("cleaned_code.txt","w") as f: 
+                    f.write(clean_code)
+                '''
+            
+                code = ensure_imports(clean_code,self.std_imports)
+                '''
+                with open("post-ensure_imports.txt","w") as f: 
+                    f.write(code)
+                '''
+
+                with open("attempted_init_obstacles.py",'w') as f:
+                    f.write(code)  
+
+                local_scope = {} 
+                exec(code, {'plot_bounds': contour, 'n_obstacles': n_obstacles, 'existing_landmarks':self.existing_landmarks}, local_scope) 
+
+            except Exception as e: 
+                print("An error occurred during the execution of the code :(") 
+                print(e)
+                raise OSError 
+
+            self.target_objs[target].extend(local_scope['obstacles']) 
+            self.existing_landmarks.extend(local_scope['obstacles']) 
 
     def init_constraints(self,constraints): 
         print("these are the constraints: ",constraints)
@@ -193,24 +256,30 @@ class policyRehearsal:
         enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.prompt_path)
         enhanced_prompt = enhanced_prompt.replace("*INSERT_POLICY*",policy)
 
-        raw_code = generate_with_openai(enhanced_prompt) 
+        raw_code = generate_with_openai(enhanced_prompt)
+        '''
         with open("rawCode.txt","w") as f:
-            f.write(raw_code) 
-
+            f.write(raw_code)
+        ''' 
+        
         clean_code = remove_chatGPT_commentary(raw_code)
+        '''
         with open("cleaned_code.txt","w") as f: 
             f.write(clean_code)
-
+        '''
+    
         code = ensure_imports(clean_code,self.std_imports)
+        '''
         with open("post-ensure_imports.txt","w") as f: 
             f.write(code)
-            
+        '''
+
         local_scope = {} 
 
         try:
-            with open("attempted_policy.txt",'w') as f:
+            with open("attempted_policy.py",'w') as f:
                 f.write(code)  
-            exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'target_locations': self.target_locations, 'obstacle_locations': self.obstacle_locations}, local_scope)
+            exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'targets': self.target_objs, 'obstacles': self.obstacle_objs}, local_scope)
         
         except Exception as e: 
             print("An error occurred during the execution of the code :(") 
@@ -287,4 +356,5 @@ if __name__ == "__main__":
 
     pR = policyRehearsal(args)
     
+    #pR.test_existing_code("attempted_policy.py")
     pR.attempt_policy_execution() 

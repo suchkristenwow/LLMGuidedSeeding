@@ -4,7 +4,6 @@ In order to practice policy execution, you will first help control this simulate
 This is the prompt: *INSERT_QUERY*
 
 The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. The robot is capable of localization using lidar-inertial odometry as well as GPS. 
-Whenever there is some uncertainty, you can interface with the human for more direction or context. 
 
 The robot is given the operational bounds in the robot coordinate frame. This variable is called "plot_bounds". The plot bounds are given as a nx2 np array describing the
 contour. It is important that the robot operate inside the bounds and never plan to drive outside of the plot bounds. If the robot begins outside of the plot bounds, the 
@@ -28,7 +27,7 @@ Consider the following guidelines:
     That is, you will have access to the config path, plot_bounds, init_pose, target_locations, obstacle_locations. You have access to all the variables you need to instantiate the simBot and robotTransforms classes, if
     desired. 
 - Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the shapely library). The plot_bounds describe 
- an arbitrary shape drawn by the user. 
+ an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
 
 def generate_with_openai(prompt): 
     """
@@ -95,7 +94,7 @@ class simBot:
         A class instance for handling the static transforms relevant to the robot such as the camera frustrums, seed planter, and wheels (see robotTransforms explanation) 
 
     plot_bounds : np.ndarray 
-        This is a nx2 array describing the area inside which the robot should operate (in the robot coordinate frame)
+        This is a nx2 array describing the perimeter inside which the robot should operate (in the robot coordinate frame)
 
     planted_locations : list 
         This is a list of 1x2 arrays describing the coordinates where the robot has planted. 
@@ -144,7 +143,7 @@ class simBot:
 
     Methods
     -------
-    def __init__(self,config_path,plot_bounds,init_pose,target-locations,obstacle_locations):
+    def __init__(self,config_path,plot_bounds,init_pose,targets,obstacles):
         """
         Instatiates the simBot class. 
 
@@ -152,10 +151,10 @@ class simBot:
             config_path (str) : Path to user configs.  
             plot_bounds (np.ndarray) : An nx2 array describing the perimeter inside which the robot should operate 
             init_pose (np.ndarray) : A 1x6 array describing the initial pose of the robot like this: x,y,z,roll,pitch,yaw 
-            target_locations (dict) : This is a dictionary where the keys are strings which are the labels of the targets and the entires are nx2 arrays containing their respective
-            ground truth locations  
-            target_locations (dict) : This is a dictionary where the keys are strings which are the labels of the obstacles and the entires are nx2 arrays containing their respective
-            ground truth locations  
+            targets(dict) : This is a dictionary where the keys are strings which are the labels of the targets and the entires are shapely Polygon objects representing their ground 
+            truth locations 
+            obstacles (dict) : This is a dictionary where the keys are strings which are the labels of the obstacles and the entires are shapely Polygon objects representing their ground 
+            truth locations 
         """
 
     def in_plot_bounds(self):
@@ -199,9 +198,10 @@ class simBot:
             thing (str) : The label of the desired object 
 
         Returns :
-            object_id (int) : A float specifiying the id of the nearest object 
-            location (np.ndarray) : A 1x2 np array defining the nearest known location of the desired type of object, if the desired object
-            has not been observed, the function returns None. 
+            object_id (int) : A float specifiying the object_id of the nearest object - see the identified_object class. 
+            If you are trying to access the object with this id, you need to search the list for the object having this object_id. 
+            location (np.ndarray) : A 1x2 np array defining the nearest known location of the desired type of object
+            Note: if the desired object has not been observed, the function returns [],-1 
         """ 
 
     def explore_using_volumetric_gain(self): 

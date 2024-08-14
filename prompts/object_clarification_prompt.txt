@@ -1,2 +1,2 @@
 I'm not sure what a *INSERT_OBJECT* is. Can you describe it to me? It's helpful if you tell me what a *INSERT_OBJECT* is made of, how big it is, where it is typically found, 
-what it is used for, or something else that resembles *INSERT_OBJECT*. 
+what it is used for, what shape it is, or something else that resembles *INSERT_OBJECT*. 

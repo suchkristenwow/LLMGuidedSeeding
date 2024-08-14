@@ -3,8 +3,28 @@ import random
 import heapq 
 from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai 
 import re 
+from matplotlib.path import Path  
 
-#ROBOT HELPER FUNCTIONS
+def gen_random_points_in_plot_bounds(plot_bounds,num_points): 
+    contour = Path(plot_bounds)
+    points = []
+    while len(points) < num_points:
+        # Generate random points within the bounding box
+        random_points = np.random.rand(num_points, 2)
+        random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
+        random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
+        
+        # Check which points are inside the contour
+        mask = contour.contains_points(random_points)
+        points_inside = random_points[mask]
+        
+        # Add the valid points to the list
+        points.extend(points_inside.tolist())
+        
+        # Limit the number of points to the desired number
+        points = points[:num_points]
+    return points 
+
 def check_plot_bounds(robot,plot_bounds): 
     robot_pose = robot.get_current_pose() 
     return point_in_bounds(robot_pose,plot_bounds) 
@@ -233,7 +253,7 @@ def get_step_from_policy(text, step_number):
     #print("len(steps): ",len(steps)) 
     # Check if the step number is valid
     if 1 <= step_number <= len(steps):
-        # Return the specific step
+        # Return the specific stepa
         return steps[step_number - 1].strip()
     else:
         return None 
@@ -253,7 +273,14 @@ def is_in_obstacle(point, obstacles):
     for obs in obstacles:
         if np.linalg.norm(point - np.array(obs['center'])) < obs['radius']:
             return True
-        
+    
+    return False
+
+def is_in_polgonal_obstacle(point,obstacles): 
+    point_geom = Point(point)
+    for polygon in obstacles:
+        if polygon.contains(point_geom):
+            return True
     return False
 
 # Heuristic function for A*
@@ -266,6 +293,62 @@ def is_within_bounds(point, min_x, max_x, min_y, max_y):
     bool = min_x <= point[0] <= max_x and min_y <= point[1] <= max_y
     #print("bool:",bool)
     return bool 
+
+def astar_pathfinding_w_polygonal_obstacles(start,target,obstacles,step_size=0.5):
+    # Normalize start and target to tuples of (x, y)
+    if len(start) > 2:
+        start = (start[0], start[1])
+    elif not isinstance(start, tuple):
+        start = tuple(start) 
+
+    if len(target) > 2:
+        target = (target[0], target[1]) 
+    elif not isinstance(target, tuple):
+        target = tuple(target) 
+
+    neighbors = [(step_size, 0), (-step_size, 0), (0, step_size), (0, -step_size)]
+    close_set = set()
+    came_from = {}
+    gscore = {start: 0}
+    fscore = {start: heuristic(start, target)}
+    oheap = []
+
+    heapq.heappush(oheap, (fscore[start], start))
+    
+    while oheap:
+        current = heapq.heappop(oheap)[1]
+        if heuristic(current, target) < step_size:
+            path = []
+            while current in came_from:
+                path.append(current)
+                current = came_from[current]
+            path.append(start)
+            return path[::-1]  # Return reversed path
+
+        min_x, min_y = -50, -50  # Define wider search bounds
+        max_x, max_y = 50, 50
+
+        close_set.add(current)
+        for i, j in neighbors:
+            neighbor = (current[0] + i, current[1] + j)
+            tentative_g_score = gscore[current] + heuristic(current, neighbor)
+            if neighbor in close_set:
+                continue
+            if not is_within_bounds(neighbor, min_x, max_x, min_y, max_y):
+                continue
+            if is_in_polygonal_obstacle(neighbor, obstacles):
+                continue
+            if neighbor not in [i[1] for i in oheap]:
+                heapq.heappush(oheap, (fscore.get(neighbor, float('inf')), neighbor))
+
+            if tentative_g_score >= gscore.get(neighbor, float('inf')):
+                continue
+
+            came_from[neighbor] = current
+            gscore[neighbor] = tentative_g_score
+            fscore[neighbor] = tentative_g_score + heuristic(neighbor, target)
+
+    return False
 
 # A* pathfinding function
 def astar_pathfinding(start, target, obstacles, step_size=0.5):

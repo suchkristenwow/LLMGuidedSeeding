@@ -32,28 +32,23 @@ class simBot:
         self.sensor_noise_cov_matrix = np.array([[sig_x**2,sig_xy],[sig_xy,sig_y**2]])
         self.traj_cache = np.zeros((1,6)); self.traj_cache[0,:] = init_pose 
         self.observation_cache = {} #keys are tsteps, entries are results 
-        self.current_waypoint = None 
-        self.current_path = None  
+        self.current_waypoint = np.zeros((1,6))
+        self.current_path = []  
         self.current_map = {} 
         self.gt_targets = target_locations
         self.gt_obstacles = obstacle_locations 
-        print("these are the targets: ",self.gt_targets) 
-        print("these are the obstacles: ",self.gt_obstacles)
         self.observed_areas = []
         self.human_feedback = None 
         self.current_tstep = 0 
         self.camera_names = ["left","right","front"]
         # PLOTTING 
-        print("opening up the fucking plot")
         plt.ion() 
         fig, ax = plt.subplots(figsize=(12,12)) #this is for the BEV animation thing 
         self.fig = fig; self.ax = ax 
 
-    '''
     def ask_human(self,question): 
         print("question: ",question)
         self.human_feedback = input("Answer the question: ")
-    '''
 
     def in_plot_bounds(self): 
         try:
@@ -74,6 +69,9 @@ class simBot:
             self.observed_areas.append(fov) 
 
     def get_current_observations(self): 
+        if self.current_tstep in self.observation_cache.keys():
+            return 
+        
         robot_pose = self.get_current_pose()
         #Update observed areas 
         self.update_observed_areas(robot_pose) 
@@ -84,6 +82,7 @@ class simBot:
             if not np.array_equal(fov_coords[0], fov_coords[-1]):
                 fov_coords = np.vstack([fov_coords, fov_coords[0]]) 
             fov = Polygon(fov_coords)
+            #TODO: add additional relevant labels to current map using keywords from the user 
             for target_type in self.gt_targets.keys():
                 for x in self.gt_targets[target_type]:
                     if fov.contains(Point(x)) and self.miss_detection_rate < np.random.rand():
@@ -100,8 +99,6 @@ class simBot:
         if self.current_tstep not in self.observation_cache.keys():
             self.observation_cache[self.current_tstep] = results 
             self.update_map(results)
-        else:
-            raise OSError 
 
     def check_all_observed(self):
         '''
@@ -141,7 +138,7 @@ class simBot:
             return thing_locations[closest_index],things[closest_index].object_id
         
         else:
-            return None 
+            return [],-1
 
     def get_current_pose(self):
         return self.traj_cache[-1,:] 
@@ -279,13 +276,18 @@ class simBot:
         else: 
             #print("this waypoint is far, going to use astar to plan there!") 
             #Return the waypoint plan from current location using Astar 
-            all_obstacle_locations = []
+            astar_obstacles = []
             for obstacle_type in self.gt_obstacles:
                 obstacle_locations = self.gt_obstacles[obstacle_type] 
                 for location in obstacle_locations: 
-                    all_obstacle_locations.append((location[0],location[1])) 
+                    obstacle = {"center":location,"radius":0.2} #TODO: incoporate different radii
+                    #all_obstacle_locations.append((location[0],location[1])) 
+                    astar_obstacles.append(obstacle) 
 
-            self.current_path = astar_pathfinding(self.get_current_pose(),target,all_obstacle_locations)
+            #obstacles for a star planning should be list of dicts where the keys are "center" and "radius",
+            # where radius is the size of the obstacle 
+                    
+            self.current_path = astar_pathfinding(self.get_current_pose(),target,astar_obstacles)
 
             if not isinstance(self.current_path,bool):
                 for x in self.current_path:  
@@ -514,7 +516,7 @@ class simBot:
         plt.legend() 
         plt.pause(0.1) 
 
-        input("WAIT")
+        #input("WAIT")
 
         if not os.path.exists("test_frames"):
             os.mkdir("test_frames") 

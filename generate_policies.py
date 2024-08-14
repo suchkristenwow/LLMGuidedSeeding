@@ -6,6 +6,7 @@ import os
 import toml 
 # from UI_pkg import ConversationalInterface
 from UI import ConversationalInterface
+import logging 
 
 class PolicyGenerator: 
     def __init__(
@@ -101,13 +102,12 @@ class PolicyGenerator:
                     #because the interface doesnt exist yet im just going to write the object descriptors and save them in txt files 
                     self.learned_objects.append(lm)  
 
-            #TO DO: ask object clarification 
             with open("prompts/get_policy_steps.txt","r") as f:
                 prompt = f.read() 
-            
+
             enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.query)
             enhanced_prompt = enhanced_prompt.replace("*INSERT_CONSTRAINTS*",str(constraints))
-            #print("using enhanced prompt to generate a policy") 
+            print("using enhanced prompt to generate a policy") 
             self.current_policy = generate_with_openai(enhanced_prompt) 
         else: 
             with open("prompts/modify_policy.txt","r") as f: 
@@ -147,6 +147,7 @@ class PolicyGenerator:
         return constraints
         
     def gen_policy(self): 
+        print("identifying constraints ...") 
         #1. Identify constraints and goal landmarks from the prompt 
         constraints = self.parse_prompt()
         print("constraints: ",constraints)
