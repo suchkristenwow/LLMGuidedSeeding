@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const videoElement = document.getElementById('VideoN');
     const pauseButton = document.getElementById('pause-button');
     const pauseImg = document.getElementById('pause-img');
+    const drawButton = document.getElementById('draw-button');
+
     let isPaused = false;
 
     // Retrieve URLs from data attributes
@@ -16,19 +18,46 @@ document.addEventListener("DOMContentLoaded", function() {
         isPaused = !isPaused;
         if (isPaused) {
             fetch("http://127.0.0.1:5000/backend/pause").then(response => {
-          if (!response.ok) {
+                if (!response.ok) {
             throw new Error('Network response was not ok');
-          }}).catch(error => {
+          } else {
+            console.log("Pause Response: ", response)
+          }
+        }).catch(error => {
             console.error('There was a problem with the fetch operation:', error);});
 
             videoElement.src = "/backend/pause";
             pauseImg.src = pausedImage;
+            drawButton.style.display = 'block';  // Show the second button
+
         } else {
             videoElement.src = "/backend/image_stream";
             pauseImg.src = initialImage;
+            drawButton.style.display = 'none';  // Hide the second button
         }
+        
     });
+
+    drawButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log("drawing button clicked");
+        
+        fetch("http://127.0.0.1:5000/backend/sketch_boundary").then(response => {
+            if (!response.ok) {
+                console.log("Sketch_boundary FAILURE: ", response)
+                throw new Error('Network response was not ok');  
+            } else {
+                console.log("Sketch_Boundary Response: ", response)
+            }
+        }).catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+        
+        console.log("sketch boundary called");
+    });     
+    
 });
+
 
 // function togglePausePlay() {
 //     const imgElement = document.getElementById('pause-image');

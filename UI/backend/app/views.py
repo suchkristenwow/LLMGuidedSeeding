@@ -13,7 +13,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from .transform import CamProjector
 import open3d as o3d
 import csv
-
+import logging
 from . import socketio
 import os 
 #from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai
@@ -26,12 +26,11 @@ cv_image, paused_cv_image = None, None
 pc_msg, paused_pc_msg = None, None
 
 is_paused = False
-bridge = CvBridge()
-
 drawing_frame = None
 points = []
 drawing = None
 bridge = CvBridge()
+
 
 ################### Utility functions for the backend ##########################
 def image_callback(data) -> None:
@@ -157,6 +156,13 @@ def write_pcd_to_csv(pcd: o3d.geometry.PointCloud, filename: str) -> None:
             csvwriter.writerow(point)
 
 ################## App Routes #####################
+@app_routes.route('/test')
+def test():
+    logging.debug("Test endpoint called debug")
+    
+    print('test endpoint called print')
+    return "Test successful", 200
+
 @app_routes.route('/')
 def home():
     """Video streaming home page from the Backend with a simple HTML."""
@@ -176,7 +182,7 @@ def pause():
     paused_frame = _frame
     paused_cv_image = cv_image
     np.save("UI/still_frame.npy", paused_cv_image)
-    return Response(paused_frame, mimetype='image.jpeg')
+    return Response(paused_frame, mimetype='image.jpeg'), 200
     
 @app_routes.route('/backend/sketch_boundary')
 def drawing():
@@ -184,6 +190,9 @@ def drawing():
     global paused_cv_image, drawing_frame, paused_frame, points, paused_pc_msg
     # AttributeError: 'NoneType' object has no attribute 'copy'
     # Check if paused_cv_image is None
+    logging.info("Sketch_boundary endpoint called (logging)")
+    print("sketch boundary called (print)")
+
     if paused_cv_image is None:
         return "No paused image to draw on", 400
     
@@ -193,11 +202,13 @@ def drawing():
         print(f"Error copying paused_cv_image: {e}")
         return "Internal server error: paused_cv_image", 500
     
-    drawing_frame = cv.UMat(paused_cv_image.copy())
+    #drawing_frame = cv.UMat(paused_cv_image.copy())
 
     cv.namedWindow("Video 1", cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
     cv.moveWindow("Video 1", 500, 250)
     cv.setMouseCallback('Video 1', draw_polylines)
+    
+    logging.info("OpenCV window setup complete")   
     # Main loop
     is_drawing = True
     while is_drawing:
@@ -207,6 +218,7 @@ def drawing():
         if key == ord('x') or key == 27:
             #print('STOPPED')
             is_drawing = False
+    logging.info("OpenCV window closed")
     # Clean up
     cv.destroyAllWindows()
     # Run the OpenCV window in a separate thread
@@ -217,12 +229,13 @@ def drawing():
     try:
         projected_pcd = project_sketch(points, paused_pc_msg)
         #pcd = o3d.io.read_point_cloud("../../test_data/fragment.pcd")
-        o3d.io.write_point_cloud("projected_pcd.pcd", projected_pcd) 
+        o3d.io.write_point_cloud("UI/projected_pcd.pcd", projected_pcd) 
     except Exception as e:
         print(f"Function project_sketch failed: {e}")
     # Reinitialize points
     points = []
-    return Response(paused_frame, mimetype='image.jpeg')
+    logging.info("Points reinitialized\n")
+    return Response(paused_frame, mimetype='image.jpeg'), 200
 
 
 @app_routes.route('/backend/process_message', methods=['POST'])
@@ -240,17 +253,18 @@ def process_message():
 ###################### websocket ###################3
 @socketio.on('incoming')
 def handle_messsage(message):
-    print(f'Received message (incoming): {message} \n')
+    print("GPT message recieved through socket\n")
+    logging.info('Received message (incoming):\n {message} \n')
     # Process message and send response if needed
     socketio.emit('incoming',message) 
 
 @socketio.on('outgoing')
 def handle_outgoing(message):
-    print(f'Received message (outgoing): {message} \n')
+    print("User sent feedback through socket\n")
+    logging.info(f'Received message (outgoing):\n {message} \n')
     # Process message and send response if needed
     socketio.emit('outgoing', message)  
 
 # @socketio.on('sketch_proj_points')
     # socketio.emit('sketch_proj_points', sketch_proj)
-
 

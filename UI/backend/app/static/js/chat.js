@@ -37,5 +37,6 @@ document.querySelector('.send-button-container a').addEventListener('click', fun
     const input = document.getElementById('input-message');
     const msg = input.value;
     socket.emit('message', msg); // Send the message to the server
+    addOutgoingMessage(msg);
     input.value = ''; // Clear the input field
 });
