@@ -1,7 +1,12 @@
 You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded rangelands.
 In order to practice policy execution, you will first help control this simulated robot to make sure the policies are safe and effective. 
 
-This is the prompt: *INSERT_QUERY*
+This is the prompt: Driving in a lawn-mower pattern, plant in 6 locations evenly spaced over the plot. Avoid driving over the blue tape on the floor. 
+
+The user has provided a description of the following objects which are important to completing this task: 
+Tape comes in rectangular strips. Blue tape is blue. The tape is on the floor. There could be large patches of it, or long skinny strips. The width is about 1 in and the 
+length is variable. The tape has a matte appearance. 
+
 
 The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. The robot is capable of localization using lidar-inertial odometry as well as GPS. 
 
@@ -10,29 +15,29 @@ contour. It is important that the robot operate inside the bounds and never plan
 first step will be to plan the shortest route possible to be inside the bounds.
 
 To execute the desired task, the ecologist has written you this list of steps:
-*INSERT_POLICY*
+1. Initialize the task by checking the robot's current location within the plot bounds. If it is not inside the plot bounds, plan the shortest route to enter the plot bounds.
+2. Find 6 evenly spaced points within the plot bounds. 
+3. Navigate the robot such that you can plant at those points, avoiding driving over the blue tape. 
+
+The scale is in meters. That is, if an object is supposed to be 10 cm long, you should do: thing_length = 0.1 
 
 Please write some Python code that would execute this policy. 
 
 In order to do so, please use the following classes and functions. 
 
-The scale is in meters. That is, if an object is supposed to be 10 cm long, you should do: thing_length = 0.1 
-
 Consider the following guidelines:
 - Use base Python (comparison, sorting) for basic logical operations, left/right/up/down, math, etc.
-- You are encouraged to use the given functions BELOW and simBot class implementation but not all of it will always be applicable so you are encouraged to write your own 
+- You are encouraged to use the given functions below and the simBot class implementation but not all of it will always be applicable so you are encouraged to write your own 
   functions if need be. 
 - Use the given generate_with_openai function to access external information if necessary.
+- You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
 - Whatever you come up with will be executed like this: 
     # Execute the code directly
         exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'targets': self.targets, 'obstacles': self.obstacles}, local_scope) 
     That is, config_path, plot_bounds, init_pose, targets, obstacles are all in your local scope. These are everything you need to init the simBot and robotTransforms classes. 
-- You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
+
 - Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the shapely library). The plot_bounds describe 
  an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
-
-Don't worry about importing any of the functions or classes below - I will add all the necessary import statements so that you can use these functions and classes. 
-Just import any other packages you believe are necessary.
 
 def generate_with_openai(prompt): 
     """
@@ -195,7 +200,7 @@ class simBot:
     def go_to_waypoint(self):
         """
         Navigates to the self.current_waypoint. If the current waypoint is more that 0.5 m away, the function plans a path and then calls 
-        follow_path. Returns False if current_waypoint is outside plot bounds 
+        follow_path. Returns False if the waypoint is not inside the plot bounds. 
         """ 
 
     def follow_path(self): 
@@ -339,100 +344,63 @@ class robotTransforms:
         planter_coord : np.ndarray 
             This function returns the x,y coordinate of where the planter will plant given the robot pose. 
         """ 
-The robotTransforms class can be imported like this: from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms 
-If you write a function definition using this class be sure to import chatGPT_written_utils from inside the function definition to protect against scope errors.
 
-Here's an example. Suppose the prompt was "Plant 10 cm away from any shrubs in the plot", and this was the policy: 
-1. Ensure the robot is inside the plot bounds, if not, navigate to the closest waypoint inside the plot bounds. 
-2. Check if any shrubs are currently detected, if so add them to a queue and navigate to them to plant. 
-3. If no shrubs are detected, explore the plot bounds using volumetric gain until a shrub is observable. 
-4. Continue looking for shrubs and planting 10 cm away from them until the whole plot has been observed 
+I already tried this code: 
 
-Then a good response would be: 
+import numpy as np
+from shapely.geometry import Polygon, Point
+from scipy.spatial import ConvexHull
+from operator import itemgetter 
 
-bot = simBot(config_path,plot_bounds,init_pose,targets,obstacles) 
+def get_six_even_points(bounds):
+    '''
+    Function to get six evenly spaced points in the given plot bounds
+    Args:
+        bounds: plot bounds
+    Returns:
+        list of six evenly spaced points in the plot
+    '''
+    hull = ConvexHull(bounds)
+    points = hull.points
+    points = sorted(points, key=itemgetter(0,1))
+    return points[::len(points)//6]
 
-#1. Navigate inside the plot bounds if not already in them 
-pose = bot.get_current_pose() 
+# Initialize simBot
+robot = simBot(config_path, plot_bounds, init_pose, targets, obstacles)
 
-if not bot.in_plot_bounds():
-    nearest_point_on_perimeter, _ = nearest_points(Polygon(bot.plot_bounds), Point(pose[0],pose[1])) 
-    # Set waypoint 
-    bot.current_waypoint = np.zeros((6,)) 
-    bot.current_waypoint[0] = nearest_point_on_perimeter.x; bot.current_waypoint[1] = nearest_point_on_perimeter.y; 
-    heading = np.arctan2(nearest_point_on_perimeter.y - pose[1],nearest_point_on_perimeter.x - pose[0])  
-    bot.current_waypoint[5] = heading 
-    bot.go_to_waypoint() 
+# Step 1: Initialize the task by checking the robot's current location within the plot bounds.
+if not robot.in_plot_bounds():
+    nearest_point_on_perimeter, _ = nearest_points(Polygon(robot.plot_bounds), Point(pose[0], pose[1])) 
+    robot.current_waypoint = np.zeros((6,)) 
+    robot.current_waypoint[0] = nearest_point_on_perimeter.x
+    robot.current_waypoint[1] = nearest_point_on_perimeter.y
+    heading = np.arctan2(nearest_point_on_perimeter.y - pose[1], nearest_point_on_perimeter.x - pose[0])  
+    robot.current_waypoint[5] = heading
+    robot.go_to_waypoint() 
 
-#2. Check if there are any shrubs, if so, plant in them 
-observed_shrubs = [] 
-unvisited_shrubs = []
-if "shrub" in bot.current_map.keys(): 
-    observed_shrubs = bot.current_map["shrub"]
-    unvisited_shrubs = [x for x in observed_shrubs if not x.visited]
+# Step 2: Find 6 evenly spaced points within the plot bounds.
+six_points = get_six_even_points(plot_bounds)
 
-#3. Plant in any observed shrubs
-if len(unvisited_shrubs) > 0:
-    if len(unvisited_shrubs) > 1:
-        NN_path = nearest_neighbor_path([x.mu for x in unvisited_shrubs])
-        for shrub_coord in NN_path: 
-            waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1) #pose,nearest_shrub_coord,offset
-            bot.current_waypoint = waypoint 
-            bot.go_to_waypoint()
-            bot.plant()
-            # Update visited bool 
-            shrubs = bot.current_map["shrub"] 
-            shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
-            idx = [x.object_id for x in shrubs].index(shrub_id)
-            bot.current_map["shrub"][idx].visited = True  
-    else: 
-        shrub_coord = unvisited_shrubs[0].mu 
-        waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1)  
-        bot.current_waypoint = waypoint 
-        bot.go_to_waypoint()
-        bot.plant() 
-        # Update visited bool 
-        shrubs = bot.current_map["shrub"] 
-        shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
-        idx = [x.object_id for x in shrubs].index(shrub_id)
-        bot.current_map["shrub"][idx].visited = True  
+# Step 3: Navigate the robot to the points and plant at those points, avoiding the blue tape.
+for point in six_points:
+    # Get waypoint to the point
+    waypoint = plant_with_offset(robot.static_transformer, robot.get_current_pose(), point, 0)
+    robot.current_waypoint = waypoint
+    robot.go_to_waypoint()
+    
+    # Plant at the waypoint
+    robot.plant() 
 
-#4. Continue looking for shrubs and planting 10 cm away until the whole plot has been observed
-check_all_observed = bot.check_all_observed() 
-while not check_all_observed or len(unvisited_shrubs) > 0:
-    #Either we havent observed the whole plot, either we have unvisted shrubs 
-    check_all_observed = bot.check_all_observed() #Check if we have observed the whole plot yet 
-    #Determine if there are any unvisted shrubs 
-    if "shrub" not in bot.current_map.keys(): 
-        observed_shrubs = [] 
-        unvisited_shrubs = []
-        visited_shrubs = []
-    else: 
-        observed_shrubs = bot.current_map["shrub"]
-        unvisited_shrubs = [x for x in observed_shrubs if not x.visited]
-        visited_shrubs = [x for x in observed_shrubs if x.visited] 
+But I get this error:
 
-    if len(unvisited_shrubs) == 0:
-        bot.explore_using_volumetric_gain() #Explore to try and find a shrub 
-    else:
-        if len(unvisited_shrubs) == 1:
-            nearest_shrub_coord = unvisited_shrubs[0].mu 
-            nearest_shrub_id = unvisited_shrubs[0].object_id 
-            # Update visited bool 
-            shrubs = bot.current_map["shrub"] 
-            idx = [x.object_id for x in shrubs].index(nearest_shrub_id)
-            bot.current_map["shrub"][idx].visited = True 
-        else: 
-            NN_path = nearest_neighbor_path([x.mu for x in unvisited_shrubs])
-            print("NN_path: ",NN_path)
-            for shrub_coord in NN_path: 
-                print("shrub_coord: ",shrub_coord)
-                waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1) 
-                bot.current_waypoint = waypoint 
-                bot.go_to_waypoint()
-                bot.plant()
-                # Update visited bool 
-                shrubs = bot.current_map["shrub"] 
-                shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
-                idx = [x.object_id for x in shrubs].index(shrub_id)
-                bot.current_map["shrub"][idx].visited = True  
+string indices must be integers 
+
+Can you re-write this code so that it runs? 
+
+Remember that shapely Polygon objects can't be unpacked. If you want to access the points on the perimeter you can do so using foo.exeterior.coords, and you can subsequently access 
+the x and y coordinates of each point on the perimeter like so: point.x or point.y. That is each coord from foo.exeterior.coords is a shapely Point object. 
+
+You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
+
+Remember that in order to drive the robot in the sim, you can do so by calling simBot.go_to_waypoint() or simBot.follow_path() - see those implementations for more information. 
+That is, if the user asks the robot to drive in a pattern, you need to initialize waypoints in that pattern within the plot bounds and then call simBot.go_to_waypoint()

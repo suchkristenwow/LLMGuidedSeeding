@@ -1,0 +1,24 @@
+I apologize for the confusion earlier. The error "slice step cannot be zero" happens when Python's slicing function is used with a step of zero. In Python, we can slice a list using `start:end:step` and by default, `step` is 1. If `step` is 0, Python will raise a ValueError, because it doesn't make sense to step through a list with a step size of 0.
+
+The error likely arises from this line in your `get_six_even_points` function:
+
+```python
+return points[::len(points)//6]
+```
+
+Here, `len(points)//6` might be returning 0 when the number of points is less than 6, resulting in a slice step of 0.
+
+To resolve this, we can add a check to ensure we don't attempt to slice with a step of 0. If the number of points is less than 6, we'll return the points as they are. If there are 6 or more, we'll return the six points as before. Here's the updated `get_six_even_points` function:
+
+```python
+def get_six_even_points(bounds):
+    hull = ConvexHull(bounds)
+    points = hull.points
+    points = sorted(points, key=lambda k: [k[0], k[1]])
+    if len(points) < 6:
+        return points
+    else:
+        return points[::len(points)//6]
+```
+
+Now, this function will return all points if there are fewer than 6, and if there are 6 or more, it will return six evenly spaced points as before. Please replace the old `get_six_even_points` function with this updated one, and run your code again.

@@ -18,27 +18,21 @@ Your response will be executed like this:
 exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles, local_scope)
 That is, you have access to the plot_bounds variable and the n_obstacles variable. 
 
+Remember that are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own.  
+
+I have included a list of helpful packages you should import: 
+*INSERT_IMPORTS*
+
 You can use this function to generate random points inside the plot boundaries. 
 
 def gen_random_points_in_plot_bounds(plot_bounds,num_points): 
-    contour = Path(plot_bounds)
-    points = []
-    while len(points) < num_points:
-        # Generate random points within the bounding box
-        random_points = np.random.rand(num_points, 2)
-        random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
-        random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
-        
-        # Check which points are inside the contour
-        mask = contour.contains_points(random_points)
-        points_inside = random_points[mask]
-        
-        # Add the valid points to the list
-        points.extend(points_inside.tolist())
-        
-        # Limit the number of points to the desired number
-        points = points[:num_points]
-    return points 
+    ""
+    Args: 
+        plot_bounds (shapely.Polygon) : Describes the boundaries of the plot
+        num_points (int) : # of random points desired 
+    Returns:
+        rand_points (np.ndarray) : nx2 nd array of random points inside the plot bounds 
+    """
 
 I have also written a function that ensures the new object doesn't intersect with any of the existing landmarks 
 
@@ -53,9 +47,7 @@ def check_overlap_w_existing_lms(shape,existing_landmarks):
 
 For example, if the best shape is circle, and the user has specified that the object in question is 30 cm across and that they are usually are found in clusters then a good response would be: 
 
-import numpy as np
-from shapely import Polygon,Point  
-import random 
+*INSERT_IMPORTS* 
 
 n_clusters = random.randint(1,num_points/2) #there should be at least two objects per cluster
 
@@ -102,4 +94,4 @@ for i in range(n_clusters):
             obstacles.append(Polygon(points))  
 
 Make sure that the output of your code is a list of shapely Polygon objects saved under the variable name 'obstacles'. 
-BE SURE TO SAVE THE SHAPES YOU COME UP WITH AS OBSTACLES SO I CAN ACCESS IT FROM THE MAIN SCRIPT! 
+BE SURE TO SAVE THE SHAPES YOU COME UP WITH AS obstacles SO I CAN ACCESS IT FROM THE MAIN SCRIPT! 

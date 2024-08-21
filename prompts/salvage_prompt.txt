@@ -1,0 +1,82 @@
+I want to make a 2D BEV plot to simulate an autonomous agent executing a task where the robot has to navigate with respect to *INSERT_OBJECT*. 
+
+Consider what shape and size the object is. For example, a desk might be represented by a rectangle, with a size of 1m x 0.5 m. 
+
+Be sure to also consider that this is a 2D BEV plot, so consider what the object would look like viewed from the top.
+
+For example, a tire should also be represented by a rectangle since that is its footprint when viewed from the top. 
+
+Finally, given you have determined the best shape, can you write a few lines of code to initialize a few of those shapes as shapely.Polygon objects within the given plot bounds? 
+
+The plot bounds are given as a nx2 np array describing the contour. Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the 
+shapely library). The plot_bounds describe an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
+
+In my simulation I need to initialize *INSERT_OBJECT*. I have saved this number in the n_obstacles variable (which is int type).
+
+Your response will be executed like this: 
+
+exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles,'existing_landmarks', self.existing_landmarks, local_scope)
+That is, you have access to the plot_bounds variable, the n_obstacles variable, and the existing landmarks (a list of shapely Polygon objects describing existing_landmarks). 
+
+Remember that are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own.  
+
+You can use this function to generate random points inside the plot boundaries. 
+
+def gen_random_points_in_plot_bounds(plot_bounds,num_points): 
+    ""
+    Args: 
+        plot_bounds (shapely.Polygon) : Describes the boundaries of the plot
+        num_points (int) : # of random points desired 
+    Returns:
+        rand_points (np.ndarray) : nx2 nd array of random points inside the plot bounds 
+    """
+
+Finally, consider you must ensure that this is no overlap with the shapes you initialize with any of the existing landmarks. 
+To help with that, you can call this function that ensures the new object doesn't intersect with any of the existing landmarks. 
+
+def check_overlap_w_existing_lms(shape,existing_landmarks):
+    """
+    Args: 
+        shape (shapely.Polygon) : Describes the shape in question 
+        existing_landmarks (list) : List of existing landmarks (shapely.Polygon objects) 
+    Returns:
+        overlap (bool) : Returns True if there is overlap (invalid object), and False otherwise 
+    """
+
+I tried using the following code but it wouldn't execute: 
+*INSERT_CODE* 
+
+I got this error: *INSERT_ERROR*
+
+Can you re-write it so it will run? This is how I have to call it: 
+
+exec(compile(code, 'Codex', 'exec'),global_scope,local_scope)   
+
+where global_scope is defined like this: 
+
+global_scope = globals().copy()  # Start with a copy of the current global scope
+        global_scope.update({
+            'config_path': self.config_path, 
+            'plot_bounds': self.plot_bounds, 
+            'init_pose': initted_pose, 
+            'targets': self.target_objs, 
+            'obstacles': self.obstacle_objs
+        })
+
+Remember that plot_bounds is a nx2 np.ndarray describing the contour of the plot boundaries, n_obstacles is an int describing how many obstacles there are,
+and existing_landmarks is a list of shapely Polygon objects 
+
+Also, remember that you are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
+
+Be sure to include (at least) these packages:
+
+*INSERT_IMPORTS* 
+
+There may be more packages that need to be imported in addition to these. If you imported these, then there won't be any issue with calling gen_random_points_in_plot_bounds or 
+check_overlap_w_existing_lms - remember that gen_random_points_in_plot_bounds can only return nx2 np.ndarrays and check_overlap_w_existing_lms can only return a bool - if you need
+them to return something else, you should write your own function to accomplish the same ends
+
+Remember that shapely Polygon objects can't be unpacked. If you want to access the points on the perimeter you can do so using foo.exeterior.coords, and you can subsequently access 
+the x and y coordinates of each point on the perimeter like so: point.x or point.y. That is each coord from foo.exeterior.coords is a shapely Point object. 
+
+*INSERT_DESCRIPTION* 

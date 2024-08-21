@@ -1,6 +1,6 @@
 from LLMGuidedSeeding_pkg.robot_client.robot import identified_object
 from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms
-from LLMGuidedSeeding_pkg.utils.rehearsal_utils import *
+from LLMGuidedSeeding_pkg.utils.rehearsal_utils import astar_pathfinding_w_polygonal_obstacles, select_pt_in_covar_ellipsoid, mahalanobis_distance, gaussian_likelihood, is_in_polygonal_obstacle
 import numpy as np 
 import toml 
 from shapely import Polygon,Point 
@@ -84,15 +84,17 @@ class simBot:
             fov = Polygon(fov_coords)
             #TODO: add additional relevant labels to current map using keywords from the user 
             for target_type in self.gt_targets.keys():
-                for x in self.gt_targets[target_type]:
-                    if fov.contains(Point(x)) and self.miss_detection_rate < np.random.rand():
-                        observation_pt = select_pt_in_covar_ellipsoid(x,self.sensor_noise_cov_matrix)
+                for target_polygon in self.gt_targets[target_type]:
+                    loc = np.array([target_polygon.centroid.x,target_polygon.centroid.y])
+                    if fov.contains(Point(loc)) and self.miss_detection_rate < np.random.rand():
+                        observation_pt = select_pt_in_covar_ellipsoid(loc,self.sensor_noise_cov_matrix)
                         results[camera]["labels"].append(target_type) 
                         results[camera]["coords"].append(observation_pt) 
             for obstacle_type in self.gt_obstacles.keys():
-                for x in self.gt_obstacles[obstacle_type]: 
-                    if fov.contains(Point(x)) and self.miss_detection_rate < np.random.rand():
-                        observation_pt = select_pt_in_covar_ellipsoid(x,self.sensor_noise_cov_matrix)
+                for obstacle_polygon in self.gt_obstacles[obstacle_type]: 
+                    loc = np.array([obstacle_polygon.centroid.x,obstacle_polygon.centroid.y])
+                    if fov.contains(Point(loc)) and self.miss_detection_rate < np.random.rand():
+                        observation_pt = select_pt_in_covar_ellipsoid(loc,self.sensor_noise_cov_matrix)
                         results[camera]["labels"].append(obstacle_type) 
                         results[camera]["coords"].append(observation_pt) 
 
@@ -218,6 +220,17 @@ class simBot:
                 if np.linalg.norm(obj.mu - point) < 1.0:  # 1.0 meter threshold
                     return False
         return True
+
+    def update_astar_obstacles(self):
+        astar_obstacles = []
+        for obstacle_type in self.gt_obstacles:
+            if obstacle_type in self.current_map:
+                obstacle_locations = self.gt_obstacles[obstacle_type] 
+                for location in obstacle_locations: 
+                    obstacle = {"center":location,"radius":0.2} #TODO: incoporate different radii
+                    #all_obstacle_locations.append((location[0],location[1])) 
+                    astar_obstacles.append(obstacle) 
+        return astar_obstacles 
     
     def generate_candidate_waypoints(self, exploration_area):
         """
@@ -242,7 +255,26 @@ class simBot:
 
         return candidate_waypoints
     
+
     def go_to_waypoint(self,sub_point=None):  
+        """
+        contour = Polygon(self.plot_bounds)
+        try:
+            if not contour.contains(self.current_waypoint):
+                if not contour.boundary.contains(self.current_waypoint): 
+                    print("this point is outside the plot bounds!")
+                    return False 
+        except: 
+            try: 
+                p0 = Point(self.current_waypoint[0],self.current_waypoint[1])
+            except:
+                p0 = self.current_waypoint[0]
+            if not contour.contains(p0):
+                if not contour.boundary.contains(p0):
+                    print("this point is outside the plot bounds!")
+                    return False 
+        """
+        
         self.plot_frame() 
 
         robot_pose = self.get_current_pose() 
@@ -251,10 +283,17 @@ class simBot:
             target = self.current_waypoint
             if len(self.current_waypoint) < 6:
                 tmp = np.zeros((6,)) 
-                tmp[0] = self.current_waypoint[0]; tmp[1] = self.current_waypoint[1] 
-                heading = np.arctan2(tmp[1] - robot_pose[1],tmp[0] - robot_pose[0]) 
-                tmp[5] = heading 
+                try: 
+                    tmp[0] = self.current_waypoint[0]; tmp[1] = self.current_waypoint[1] 
+                    heading = np.arctan2(tmp[1] - robot_pose[1],tmp[0] - robot_pose[0]) 
+                    tmp[5] = heading 
+                except:
+                    print("self.current_waypoint: ",self.current_waypoint)
+                    tmp[0] = self.current_waypoint[0].x; tmp[1] = self.current_waypoint[0].y 
+                    heading = np.arctan2(tmp[1] - robot_pose[1],tmp[0] - robot_pose[0])  
+                    tmp[5] = heading 
                 target = tmp 
+
         else:
             print("calling go to waypoint with sub point {} ...".format(sub_point))
             target = sub_point 
@@ -274,26 +313,50 @@ class simBot:
             self.traj_cache = np.vstack([self.traj_cache,target]) 
             self.get_current_observations() 
         else: 
-            #print("this waypoint is far, going to use astar to plan there!") 
-            #Return the waypoint plan from current location using Astar 
-            astar_obstacles = []
-            for obstacle_type in self.gt_obstacles:
-                obstacle_locations = self.gt_obstacles[obstacle_type] 
-                for location in obstacle_locations: 
-                    obstacle = {"center":location,"radius":0.2} #TODO: incoporate different radii
-                    #all_obstacle_locations.append((location[0],location[1])) 
-                    astar_obstacles.append(obstacle) 
+            astar_obstacles = self.update_astar_obstacles() 
 
-            #obstacles for a star planning should be list of dicts where the keys are "center" and "radius",
-            # where radius is the size of the obstacle 
-                    
-            self.current_path = astar_pathfinding(self.get_current_pose(),target,astar_obstacles)
+            print("calling astar pathfinding ...")
+            self.current_path = astar_pathfinding_w_polygonal_obstacles(self.get_current_pose(),target,astar_obstacles)
 
             if not isinstance(self.current_path,bool):
                 for x in self.current_path:  
-                    self.current_tstep += 1 
-                    self.traj_cache = np.vstack([self.traj_cache,target]) 
-                    self.get_current_observations() 
+                    if len(astar_obstacles) > 0:
+                        #print("astar_obstacles:",astar_obstacles)
+                        replan = False 
+                        for obs in astar_obstacles:
+                            #print("obs: ",obs)
+                            if is_in_polygonal_obstacle(x,obs['center']):
+                                replan = True 
+                                print("this plan goes through an obstacle we didnt observe before... need to replan")
+                                break 
+                        #check if this goes outside the plot bounds 
+                        pt = Point(x[0],x[1]) 
+                        if not Polygon(self.plot_bounds).contains(pt):
+                            print("this plan goes outside the plot bounds ... need to replan") 
+                            replan = True 
+
+                        if not replan:
+                            self.current_tstep += 1 
+                            #print("updating traj to: ",x)
+                            heading = np.arctan2(x[1] - robot_pose[1],x[0] - robot_pose[0])
+                            sub_pt = np.array([x[0],x[1],0,0,0,heading]) 
+                            self.traj_cache = np.vstack([self.traj_cache,sub_pt])    
+
+                        else:
+                            print("replanning ...")
+                            self.current_waypoint = target 
+                            self.go_to_waypoint()
+                        
+                    else:
+                        self.current_tstep += 1 
+                        heading = np.arctan2(x[1] - robot_pose[1],x[0] - robot_pose[0])
+                        sub_pt = np.array([x[0],x[1],0,0,0,heading]) 
+                        #print("updating traj to: ",x)
+                        self.traj_cache = np.vstack([self.traj_cache,sub_pt])  
+
+                    self.get_current_observations()  
+                    astar_obstacles = self.update_astar_obstacles() 
+                    self.plot_frame() 
             else: 
                 print("ERROR: COULD NOT FIND VALID PATH?")
                 robot_pose = self.get_current_pose()
@@ -335,8 +398,9 @@ class simBot:
     def plant(self):  
         #Return the planted coordinate
         planted_coord = self.static_transformer.get_planter_position(self.get_current_pose()) 
-        self.planted_locations.append(planted_coord)
-        self.plot_frame() 
+        if Polygon(self.plot_bounds).contains(Point(planted_coord[0],planted_coord[1])):
+            self.planted_locations.append(planted_coord)
+            self.plot_frame() 
 
     def update_map(self,results):   
         """
@@ -445,20 +509,31 @@ class simBot:
 
         # Plot the constraints & obstacles 
         for obstacle in self.gt_obstacles: 
-            X = self.gt_obstacles[obstacle]
-            for i,x in enumerate(X): 
+            obstacles_label = self.gt_obstacles[obstacle]
+            for i,obs in enumerate(obstacles_label): 
+                '''
                 if i == 0:
                     self.ax.scatter(x[0],x[1],color="red",marker="*",label=obstacle)
                 else: 
                     self.ax.scatter(x[0],x[1],color="red",marker="*")
+                '''
+                if  i == 0:
+                    x, y = obs.exterior.xy 
+                    self.ax.plot(x,y,color='red',label=obstacle)  
+                    self.ax.fill(x,y,color='r') 
+                else:
+                    x, y = obs.exterior.xy 
+                    self.ax.plot(x,y,color='red')  
+                    self.ax.fill(x,y,color='r') 
 
         for target in self.gt_targets:
             if target in self.current_map.keys():  
-                X = self.gt_targets[target]
-                for i,x in enumerate(X): 
+                targets_label = self.gt_targets[target]
+                for i,target in enumerate(targets_label): 
+                    target_center = np.array([target.centroid.x, target.centroid.y]) 
                     #want to also plot the id_  
                     target_object_locations = [x.mu for x in self.current_map[target]] 
-                    min_ds = [np.linalg.norm(target - x) for target in target_object_locations] 
+                    min_ds = [np.linalg.norm(target - target_center) for target in target_object_locations] 
                     if min(min_ds) < 1:
                         idx = np.argmin(min_ds)
                         object = self.current_map[target][idx] 
@@ -498,7 +573,11 @@ class simBot:
                 self.ax.scatter(location[0],location[1],color="orange",marker="*",s=15) 
 
         if self.current_waypoint is not None:
-            self.ax.scatter(self.current_waypoint[0],self.current_waypoint[1],color="m",label="goal waypoint") 
+            try: 
+                self.ax.scatter(self.current_waypoint[0],self.current_waypoint[1],color="m",label="goal waypoint") 
+            except: 
+                pt = self.current_waypoint[0]
+                self.ax.scatter(pt.x,pt.y,color="m",label="goal waypoint")  
 
         # Add a scale bar
         scalebar = AnchoredSizeBar(self.ax.transData,
@@ -515,8 +594,6 @@ class simBot:
 
         plt.legend() 
         plt.pause(0.1) 
-
-        #input("WAIT")
 
         if not os.path.exists("test_frames"):
             os.mkdir("test_frames") 

@@ -1,2 +1,2 @@
 Tape comes in rectangular strips. Blue tape is blue. The tape is on the floor. There could be large patches of it, or long skinny strips. The width is about 1 in and the 
-length is variable. 
+length is variable. The tape has a matte appearance. 

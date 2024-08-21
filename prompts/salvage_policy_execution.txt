@@ -3,6 +3,8 @@ In order to practice policy execution, you will first help control this simulate
 
 This is the prompt: *INSERT_QUERY*
 
+*INSERT_DESCRIPTION*
+
 The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. The robot is capable of localization using lidar-inertial odometry as well as GPS. 
 
 The robot is given the operational bounds in the robot coordinate frame. This variable is called "plot_bounds". The plot bounds are given as a nx2 np array describing the
@@ -12,27 +14,25 @@ first step will be to plan the shortest route possible to be inside the bounds.
 To execute the desired task, the ecologist has written you this list of steps:
 *INSERT_POLICY*
 
+The scale is in meters. That is, if an object is supposed to be 10 cm long, you should do: thing_length = 0.1 
+
 Please write some Python code that would execute this policy. 
 
 In order to do so, please use the following classes and functions. 
 
-The scale is in meters. That is, if an object is supposed to be 10 cm long, you should do: thing_length = 0.1 
-
 Consider the following guidelines:
 - Use base Python (comparison, sorting) for basic logical operations, left/right/up/down, math, etc.
-- You are encouraged to use the given functions BELOW and simBot class implementation but not all of it will always be applicable so you are encouraged to write your own 
+- You are encouraged to use the given functions below and the simBot class implementation but not all of it will always be applicable so you are encouraged to write your own 
   functions if need be. 
 - Use the given generate_with_openai function to access external information if necessary.
+- You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
 - Whatever you come up with will be executed like this: 
     # Execute the code directly
         exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'targets': self.targets, 'obstacles': self.obstacles}, local_scope) 
     That is, config_path, plot_bounds, init_pose, targets, obstacles are all in your local scope. These are everything you need to init the simBot and robotTransforms classes. 
-- You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
+
 - Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the shapely library). The plot_bounds describe 
  an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
-
-Don't worry about importing any of the functions or classes below - I will add all the necessary import statements so that you can use these functions and classes. 
-Just import any other packages you believe are necessary.
 
 def generate_with_openai(prompt): 
     """
@@ -195,7 +195,7 @@ class simBot:
     def go_to_waypoint(self):
         """
         Navigates to the self.current_waypoint. If the current waypoint is more that 0.5 m away, the function plans a path and then calls 
-        follow_path. Returns False if current_waypoint is outside plot bounds 
+        follow_path. Returns False if the waypoint is not inside the plot bounds. 
         """ 
 
     def follow_path(self): 
@@ -339,100 +339,21 @@ class robotTransforms:
         planter_coord : np.ndarray 
             This function returns the x,y coordinate of where the planter will plant given the robot pose. 
         """ 
-The robotTransforms class can be imported like this: from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms 
-If you write a function definition using this class be sure to import chatGPT_written_utils from inside the function definition to protect against scope errors.
 
-Here's an example. Suppose the prompt was "Plant 10 cm away from any shrubs in the plot", and this was the policy: 
-1. Ensure the robot is inside the plot bounds, if not, navigate to the closest waypoint inside the plot bounds. 
-2. Check if any shrubs are currently detected, if so add them to a queue and navigate to them to plant. 
-3. If no shrubs are detected, explore the plot bounds using volumetric gain until a shrub is observable. 
-4. Continue looking for shrubs and planting 10 cm away from them until the whole plot has been observed 
+I already tried this code: 
 
-Then a good response would be: 
+*INSERT_CODE* 
 
-bot = simBot(config_path,plot_bounds,init_pose,targets,obstacles) 
+But I get this error:
 
-#1. Navigate inside the plot bounds if not already in them 
-pose = bot.get_current_pose() 
+*INSERT_ERROR* 
 
-if not bot.in_plot_bounds():
-    nearest_point_on_perimeter, _ = nearest_points(Polygon(bot.plot_bounds), Point(pose[0],pose[1])) 
-    # Set waypoint 
-    bot.current_waypoint = np.zeros((6,)) 
-    bot.current_waypoint[0] = nearest_point_on_perimeter.x; bot.current_waypoint[1] = nearest_point_on_perimeter.y; 
-    heading = np.arctan2(nearest_point_on_perimeter.y - pose[1],nearest_point_on_perimeter.x - pose[0])  
-    bot.current_waypoint[5] = heading 
-    bot.go_to_waypoint() 
+Can you re-write this code so that it runs? 
 
-#2. Check if there are any shrubs, if so, plant in them 
-observed_shrubs = [] 
-unvisited_shrubs = []
-if "shrub" in bot.current_map.keys(): 
-    observed_shrubs = bot.current_map["shrub"]
-    unvisited_shrubs = [x for x in observed_shrubs if not x.visited]
+Remember that shapely Polygon objects can't be unpacked. If you want to access the points on the perimeter you can do so using foo.exeterior.coords, and you can subsequently access 
+the x and y coordinates of each point on the perimeter like so: point.x or point.y. That is each coord from foo.exeterior.coords is a shapely Point object. 
 
-#3. Plant in any observed shrubs
-if len(unvisited_shrubs) > 0:
-    if len(unvisited_shrubs) > 1:
-        NN_path = nearest_neighbor_path([x.mu for x in unvisited_shrubs])
-        for shrub_coord in NN_path: 
-            waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1) #pose,nearest_shrub_coord,offset
-            bot.current_waypoint = waypoint 
-            bot.go_to_waypoint()
-            bot.plant()
-            # Update visited bool 
-            shrubs = bot.current_map["shrub"] 
-            shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
-            idx = [x.object_id for x in shrubs].index(shrub_id)
-            bot.current_map["shrub"][idx].visited = True  
-    else: 
-        shrub_coord = unvisited_shrubs[0].mu 
-        waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1)  
-        bot.current_waypoint = waypoint 
-        bot.go_to_waypoint()
-        bot.plant() 
-        # Update visited bool 
-        shrubs = bot.current_map["shrub"] 
-        shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
-        idx = [x.object_id for x in shrubs].index(shrub_id)
-        bot.current_map["shrub"][idx].visited = True  
+You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
 
-#4. Continue looking for shrubs and planting 10 cm away until the whole plot has been observed
-check_all_observed = bot.check_all_observed() 
-while not check_all_observed or len(unvisited_shrubs) > 0:
-    #Either we havent observed the whole plot, either we have unvisted shrubs 
-    check_all_observed = bot.check_all_observed() #Check if we have observed the whole plot yet 
-    #Determine if there are any unvisted shrubs 
-    if "shrub" not in bot.current_map.keys(): 
-        observed_shrubs = [] 
-        unvisited_shrubs = []
-        visited_shrubs = []
-    else: 
-        observed_shrubs = bot.current_map["shrub"]
-        unvisited_shrubs = [x for x in observed_shrubs if not x.visited]
-        visited_shrubs = [x for x in observed_shrubs if x.visited] 
-
-    if len(unvisited_shrubs) == 0:
-        bot.explore_using_volumetric_gain() #Explore to try and find a shrub 
-    else:
-        if len(unvisited_shrubs) == 1:
-            nearest_shrub_coord = unvisited_shrubs[0].mu 
-            nearest_shrub_id = unvisited_shrubs[0].object_id 
-            # Update visited bool 
-            shrubs = bot.current_map["shrub"] 
-            idx = [x.object_id for x in shrubs].index(nearest_shrub_id)
-            bot.current_map["shrub"][idx].visited = True 
-        else: 
-            NN_path = nearest_neighbor_path([x.mu for x in unvisited_shrubs])
-            print("NN_path: ",NN_path)
-            for shrub_coord in NN_path: 
-                print("shrub_coord: ",shrub_coord)
-                waypoint = plant_with_offset(robot_transforms,bot.get_current_pose(),shrub_coord,0.1) 
-                bot.current_waypoint = waypoint 
-                bot.go_to_waypoint()
-                bot.plant()
-                # Update visited bool 
-                shrubs = bot.current_map["shrub"] 
-                shrub_id = get_id_given_coord(unvisited_shrubs,shrub_coord)
-                idx = [x.object_id for x in shrubs].index(shrub_id)
-                bot.current_map["shrub"][idx].visited = True  
+Remember that in order to drive the robot in the sim, you can do so by calling simBot.go_to_waypoint() or simBot.follow_path() - see those implementations for more information. 
+That is, if the user asks the robot to drive in a pattern, you need to initialize waypoints in that pattern within the plot bounds and then call simBot.go_to_waypoint()

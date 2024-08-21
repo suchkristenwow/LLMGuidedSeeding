@@ -20,8 +20,6 @@ Finally, the prompt: "Count how many shrubs are in the plot." would have the con
 
 Given the following prompt and the constraint dictionary, write a step by step policy which would accomplish the given task. Enumerate each of the steps like 1. Do foo, 2. Look for bar ...
 
-If there is a landmark in the "goal_lms" which you can't locate in the immediate environment, tell the user "I can't find {landmark}, where should I look?"
-
 If the "plant" boolean is True, be sure to maintain a list in the system memory of all the planted locations.
 
 You can assume that the robot is on, and the plot bounds and constraints are already loaded into the system memory. 

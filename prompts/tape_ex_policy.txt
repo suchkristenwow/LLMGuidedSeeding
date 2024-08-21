@@ -1,0 +1,3 @@
+1. Initialize the task by checking the robot's current location within the plot bounds. If it is not inside the plot bounds, plan the shortest route to enter the plot bounds.
+2. Find 6 evenly spaced points within the plot bounds. 
+3. Navigate the robot such that you can plant at those points, avoiding driving over the blue tape. 

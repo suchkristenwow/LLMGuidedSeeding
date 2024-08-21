@@ -2,6 +2,7 @@ import math
 import numpy as np 
 from shapely.geometry import Point, Polygon 
 from shapely.ops import nearest_points 
+from matplotlib.path import Path  
 
 def generate_circle_points(center, radius, n=5):
     """
@@ -48,3 +49,36 @@ def check_overlap_w_existing_lms(shape,existing_landmarks):
     """
     overlap_found = any(shape.intersects(landmark) for landmark in existing_landmarks)
     return overlap_found 
+
+def gen_random_points_in_plot_bounds(plot_bounds,num_points): 
+    if not isinstance(plot_bounds,np.ndarray): 
+        coords = plot_bounds.exterior.coords 
+        plot_bounds = np.array([[[x[0],x[1]]] for x in coords]); 
+        plot_bounds = np.reshape(plot_bounds,(len(coords),2))
+    
+    if len(plot_bounds.shape) > 2:
+        plot_bounds = np.reshape(plot_bounds,(len(plot_bounds,2))) 
+        plot_bounds = np.squeeze(plot_bounds)  
+
+    min_x = min(plot_bounds[:,0]); max_x = max(plot_bounds[:,0]); 
+    min_y = min(plot_bounds[:,1]); max_y = max(plot_bounds[:,1])
+
+    contour = Path(plot_bounds) 
+
+    points = []
+    while len(points) < num_points:
+        # Generate random points within the bounding box
+        random_points = np.random.rand(num_points, 2)
+        random_points[:, 0] = random_points[:, 0] * (max_x - min_x) + min_x
+        random_points[:, 1] = random_points[:, 1] * (max_y - min_y) + min_y
+        
+        # Check which points are inside the contour
+        mask = contour.contains_points(random_points)
+        points_inside = random_points[mask]
+        
+        # Add the valid points to the list
+        points.extend(points_inside.tolist())
+        
+        # Limit the number of points to the desired number
+        points = points[:num_points]
+    return points 

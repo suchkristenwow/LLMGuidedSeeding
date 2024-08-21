@@ -266,8 +266,6 @@ class ExperimentRunner:
 
         for name, logger in logger_dict.items():
             print(f"Logger name: {name}, Level: {logger.level}")
-
-   
     
     def run(self):
         self.create_logging_directory() 

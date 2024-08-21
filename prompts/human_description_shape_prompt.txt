@@ -33,16 +33,25 @@ Finally, given you have determined the best shape, can you write a few lines of 
 task and make sure that the robot avoids *INSERT_OBJECT*? 
 
 The plot bounds are given as a nx2 np array describing the contour. Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the 
-shapely library). The plot_bounds describe an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
+shapely library). 
+
+The plot_bounds describe an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
 
 There are already some objects I've initialized in the environment, these is saved under existing_landmarks - which is a list of shapely Polygon objects and Point objects 
 
 In my simulation I have already initialized the number of the *INSERT_OBJECT*. I have saved this number in the n_obstacles variable (which is int type).
 
+I have included a list of helpful packages you should import: 
+*INSERT_IMPORTS*
+
+The scale is in meters. That is, if an object is supposed to be 10 cm long, you should do: thing_length = 0.1 
+
 Your response will be executed like this: 
 
 exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles 'existing_landmarks' : self.existing_landmarks, local_scope)
 That is, you have access to the plot_bounds variable and the n_obstacles variable, and the existing_landmarks. 
+
+Remember that are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own.  
 
 You can use this function to generate random points inside the plot boundaries. 
 
@@ -79,9 +88,7 @@ def check_overlap_w_existing_lms(shape,existing_landmarks):
 
 For example, if the best shape is circle, and the user has specified that the object in question is 30 cm across and that they are usually are found in clusters then a good response would be: 
 
-import numpy as np
-from shapely import Polygon,Point  
-import random 
+*INSERT_IMPORTS* 
 
 n_clusters = random.randint(1,num_points/2) #there should be at least two objects per cluster
 
@@ -128,4 +135,4 @@ for i in range(n_clusters):
             obstacles.append(Polygon(points))  
 
 Make sure that the output of your code is a list of shapely Polygon objects saved under the variable name 'obstacles'. 
-BE SURE TO SAVE THE SHAPES YOU COME UP WITH AS OBSTACLES SO I CAN ACCESS IT FROM THE MAIN SCRIPT! 
+BE SURE TO SAVE THE SHAPES YOU COME UP WITH AS obstacles SO I CAN ACCESS IT FROM THE MAIN SCRIPT! 

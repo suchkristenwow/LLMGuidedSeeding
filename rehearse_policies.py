@@ -1,5 +1,3 @@
-from LLMGuidedSeeding_pkg import * 
-from LLMGuidedSeeding_pkg.utils.gen_utils import get_standard_vocab 
 from LLMGuidedSeeding_pkg.utils.rehearsal_utils import * 
 from UI import ConversationalInterface 
 import os 
@@ -9,16 +7,25 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import random 
 from matplotlib.path import Path 
-import pandas as pd 
-import shutil 
 import pickle 
 from shapely.geometry import Polygon, Point 
+from LLMGuidedSeeding_pkg.robot_client.simBot import simBot 
+from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms 
+from LLMGuidedSeeding_pkg.utils.rehearsal_utils import * 
+from chatGPT_written_utils import *  
+import math 
+
 
 class policyRehearsal: 
     def __init__(self,args):
         self.final_policy_path = args.final_policy_path
-        self.prompt_path = args.prompt_path  
+
+        with open(args.prompt_path,'r') as f:
+            self.query = f.read()
+
         self.logging_dir = args.logging_dir  
+
+
         with open(args.constraints_dict_path,"rb") as handle: 
             self.policy_constraints = pickle.load(handle) 
 
@@ -41,8 +48,6 @@ class policyRehearsal:
         self.current_step = 0 
 
         self.robot_transforms = robotTransforms(self.config_path)
-        
-        self.std_vocabulary = get_standard_vocab() 
 
         #TODO: UI ... idk how to integrate this, going to use command line for now 
         #self.conversational_interface = ConversationalInterface() 
@@ -53,6 +58,10 @@ class policyRehearsal:
 
         self.existing_landmarks = [] 
 
+        self.clip_model = CLIPModel() 
+
+        self.max_exec_tries = 3
+
     def ask_human(self,question): 
         print("Question: ",question)
         print()
@@ -60,120 +69,157 @@ class policyRehearsal:
         with open("feedback.txt","r") as f:
             self.feedback = f.read()
 
-    def init_obstacles(self,obstacles,max_obstacles=20):  
-        contour = Polygon(self.plot_bounds)
+    def init_obstacles(self,obstacles,lm_type,max_obstacles=20):  
+        """
+        n_obstacles = random.randint(2,max_obstacles)  
         for obstacle in obstacles: 
             self.obstacle_objs[obstacle] = [] 
+            if self.clip_model.in_distribution(obstacle):
+                print("obstacle: {} is in distribution".format(obstacle))
+                with open("prompts/shape_prompt.txt","r") as f: 
+                    prompt = f.read() 
+                enhanced_prompt = prompt.replace("*INSERT_OBJECT*",obstacle)
+                enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION*","") 
+                enhanced_prompt = enhanced_prompt.replace('*INSERT_IMPORTS*',self.std_imports)
+            else:
+                #save this object for later 
+                if not os.path.exists("prompts/custom_objects"):
+                    os.mkdir("prompts/custom_objects") 
 
-            if obstacle in self.std_vocabulary:
-                prompt = "prompts/shape_prompt.txt"
-                enhanced_prompt = prompt.replace("*INSERT_OBJECT",obstacle)
-            else: 
-                with open("prompts/object_clarification_prompt.txt","r") as f:
-                    question_prompt = f.read()
-                question = question_prompt.replace("*INSERT_OBJECT",obstacle) 
-                self.ask_human(question) 
-                prompt = "prompts/human_description_shape_prompt.txt" 
-                enhanced_prompt = prompt.replace("*INSERT_OBJECT",obstacle)
-                enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION",self.feedback) 
+                with open("prompts/human_description_shape_prompt.txt",'r') as f:
+                    prompt = f.read()
+
+                if obstacle in [x[:-4] for x in os.listdir("prompts/custom_objects")]:
+                    with open("prompts/custom_objects/"+obstacle+".txt","r") as f:
+                        description = f.read()
+
+                    enhanced_prompt = prompt.replace("*INSERT_OBJECT*",obstacle)
+                    desc_insert = build_description_prompt(description,obstacle)
+                    enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION*",desc_insert) 
+                    enhanced_prompt = enhanced_prompt.replace('*INSERT_IMPORTS*',self.std_imports)
+                else: 
+                    print("these are the custom objects: ", [x[:-4] for x in os.listdir("prompts/custom_objects")])
+                    print("obstacle: {} is out of distribution".format(obstacle)) 
+
+                    with open("prompts/object_clarification_prompt.txt","r") as f:
+                        question_prompt = f.read()
+                    question = question_prompt.replace("*INSERT_OBJECT*",obstacle) 
+                    self.ask_human(question) 
+
+                    enhanced_prompt = prompt.replace("*INSERT_OBJECT*",obstacle)
+                    desc_insert = build_description_prompt(self.feedback,obstacle)
+                    enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION*",desc_insert) 
+                    enhanced_prompt = enhanced_prompt.replace('*INSERT_IMPORTS*',self.std_imports)
+
+                    print("writing {} ....".format("prompts/custom_objects/"+obstacle+".txt"))
+                    with open("prompts/custom_objects/"+obstacle+".txt","w") as f:
+                        f.write(self.feedback) 
 
             n_obstacles = random.randint(2,max_obstacles) 
-            #exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles 'existing_landmarks' : self.existing_landmarks, local_scope)
-            try:                
-                raw_code = generate_with_openai(enhanced_prompt)
-                '''
-                with open("rawCode.txt","w") as f:
-                    f.write(raw_code)
-                ''' 
-                
-                clean_code = remove_chatGPT_commentary(raw_code)
-                '''
-                with open("cleaned_code.txt","w") as f: 
-                    f.write(clean_code)
-                '''
+
+            raw_code,_ = generate_with_openai(enhanced_prompt)
+
+            code = remove_chatGPT_commentary(raw_code)
+
+            code = ensure_imports(code,self.std_imports)
+        """
+        
+        for obstacle in obstacles: 
+            self.obstacle_objs[obstacle] = [] 
+            n_obstacles = random.randint(2,max_obstacles)  
+            local_scope = {}
+            local_scope.update({
+                'plot_bounds': self.plot_bounds,
+                'n_obstacles': n_obstacles,
+                'existing_landmarks': self.existing_landmarks,
+            })
+
+            global_scope = globals().copy()  # Start with a copy of the current global scope
+
+            local_scope = {}
+            local_scope.update({
+                'plot_bounds': self.plot_bounds,
+                'n_obstacles': n_obstacles,
+                'existing_landmarks': self.existing_landmarks,
+            }) 
+
+            global_scope.update(local_scope)
             
-                code = ensure_imports(clean_code,self.std_imports)
-                '''
-                with open("post-ensure_imports.txt","w") as f: 
-                    f.write(code)
-                '''
+            with open("self_critique_logs/inital_attempt_init_obstacles.py","r") as f:
+                code = f.read()
 
-                with open("attempted_init_obstacles.py",'w') as f:
-                    f.write(code)  
+            '''
+            with open("self_critique_logs/inital_attempt_init_obstacles.py",'w') as f:
+                print("writing {}".format("inital_attempt_init_obstacles.py")) 
+                f.write(code)   
+            '''
 
-                local_scope = {} 
-                exec(code, {'plot_bounds': contour, 'n_obstacles': n_obstacles, 'existing_landmarks':self.existing_landmarks}, local_scope) 
+            exec(compile(code, 'Codex', 'exec'),global_scope)  
 
-            except Exception as e: 
-                print("An error occurred during the execution of the code :(") 
-                print(e)
-                raise OSError 
+            """
+            try: 
+                print("first try!") 
+                exec(compile(code, 'Codex', 'exec'),global_scope)  
 
-            self.obstacle_objs[obstacle].extend(local_scope['obstacles']) 
-            self.existing_landmarks.extend(local_scope['obstacles']) 
+            except Exception as e:
+                print("initial attempt failed: ",str(e)) 
+                inserts = {} 
+                if obstacle in [x[:-4] for x in os.listdir("prompts/custom_objects")]:
+                    with open("prompts/custom_objects/"+obstacle+".txt","r") as f:
+                        obstacle_description = f.read()  
+                        desc_insert = build_description_prompt(description,obstacle_description) 
+                else:
+                    desc_insert = ""
 
-    def init_goals(self,goals,max_goals=20): 
-        contour = Polygon(self.plot_bounds)
-        for target in goals: 
-            self.target_objs[target] = []
-            if target in self.std_vocabulary:
-                prompt = "prompts/shape_prompt.txt"
-                enhanced_prompt = prompt.replace("*INSERT_OBJECT",target)
+                inserts["*INSERT_DESCRIPTION*"] = desc_insert
+                inserts["*INSERT_OBJECT*"] = obstacle 
+                inserts["*INSERT_IMPORTS*"] = self.std_imports 
+                inserts["*INSERT_CODE*"] = code 
+                inserts["*INSERT_ERROR*"] = str(e) 
+
+                with open("prompts/salvage_prompt.txt","r") as f: 
+                    critique_prompt =f.read()
+
+                print("entering self critique mode")
+                #task_name,prompt,insert_dict,local_scope,global_scope,std_imports,max_attempts 
+                local_scope = self_critique_code("init_obstacles",critique_prompt,inserts,local_scope,global_scope,self.std_imports,self.max_exec_tries) 
+            """
+            
+            if 'obstacles' in global_scope.keys():
+                if lm_type == "obstacle": 
+                    self.obstacle_objs[obstacle].extend(global_scope['obstacles']) 
+                elif lm_type == "target": 
+                    self.target_objs[obstacle].extend(global_scope['obstacles'])  
+
+                self.existing_landmarks.extend(global_scope['obstacles']) 
+                
             else: 
-                with open("prompts/object_clarification_prompt.txt","r") as f:
-                    question_prompt = f.read()
-                question = question_prompt.replace("*INSERT_OBJECT",target) 
-                self.ask_human(question) 
-                prompt = "prompts/human_description_shape_prompt.txt" 
-                enhanced_prompt = prompt.replace("*INSERT_OBJECT",target)
-                enhanced_prompt = enhanced_prompt.replace("*INSERT_DESCRIPTION",self.feedback) 
-
-            n_obstacles = random.randint(2,max_goals) 
-            #exec(code,'plot_bounds': self.plot_bounds, 'n_obstacles': self.n_obstacles 'existing_landmarks' : self.existing_landmarks, local_scope)
-            try:                
-                raw_code = generate_with_openai(enhanced_prompt)
-                '''
-                with open("rawCode.txt","w") as f:
-                    f.write(raw_code)
-                ''' 
-                
-                clean_code = remove_chatGPT_commentary(raw_code)
-                '''
-                with open("cleaned_code.txt","w") as f: 
-                    f.write(clean_code)
-                '''
+                if lm_type == "obstacle": 
+                    self.obstacle_objs[obstacle].extend(local_scope['obstacles']) 
+                elif lm_type == "target": 
+                    self.target_objs[obstacle].extend(local_scope['obstacles'])  
+                else:
+                    raise OSError 
             
-                code = ensure_imports(clean_code,self.std_imports)
-                '''
-                with open("post-ensure_imports.txt","w") as f: 
-                    f.write(code)
-                '''
-
-                with open("attempted_init_obstacles.py",'w') as f:
-                    f.write(code)  
-
-                local_scope = {} 
-                exec(code, {'plot_bounds': contour, 'n_obstacles': n_obstacles, 'existing_landmarks':self.existing_landmarks}, local_scope) 
-
-            except Exception as e: 
-                print("An error occurred during the execution of the code :(") 
-                print(e)
-                raise OSError 
-
-            self.target_objs[target].extend(local_scope['obstacles']) 
-            self.existing_landmarks.extend(local_scope['obstacles']) 
+                self.existing_landmarks.extend(local_scope['obstacles']) 
+            
+            print("Successfully initted {}".format(obstacle))  
+            print()  
 
     def init_constraints(self,constraints): 
         print("these are the constraints: ",constraints)
 
         if "avoid" in constraints.keys(): 
-            self.init_obstacles(constraints["avoid"])  
-        
+            self.init_obstacles(constraints["avoid"],'obstacle')  
+            print("Done initting obstacles!") 
+
         if "goal_lms" in constraints.keys(): 
-            self.init_goals(constraints["goal_lms"]) 
+            self.init_obstacles(constraints["avoid"],'target')  
+            print("Done initting goal lms") 
 
         if "search" in constraints.keys(): 
-            self.init_goals(constraints["goal_lms"]) 
+            self.init_obstacles(constraints["avoid"],'target')  
+            print("Done initting search things")
 
     def init_pose(self,max_distance=10): 
         path = Path(self.plot_bounds)
@@ -247,66 +293,79 @@ class policyRehearsal:
 
         print("initting constraints...")
         self.init_constraints(self.policy_constraints)
-    
+
         initted_pose = self.init_pose() 
 
+        """
         with open("prompts/step_parser_codeGen.txt","r") as f: 
             prompt = f.read() 
 
-        enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.prompt_path)
+        enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.query)
         enhanced_prompt = enhanced_prompt.replace("*INSERT_POLICY*",policy)
 
-        raw_code = generate_with_openai(enhanced_prompt)
-        '''
-        with open("rawCode.txt","w") as f:
-            f.write(raw_code)
-        ''' 
+        raw_code,_ = generate_with_openai(enhanced_prompt)
+
+        code = remove_chatGPT_commentary(raw_code)
+        """
         
-        clean_code = remove_chatGPT_commentary(raw_code)
-        '''
-        with open("cleaned_code.txt","w") as f: 
-            f.write(clean_code)
-        '''
-    
-        code = ensure_imports(clean_code,self.std_imports)
-        '''
-        with open("post-ensure_imports.txt","w") as f: 
-            f.write(code)
-        '''
-
-        local_scope = {} 
-
-        try:
-            with open("attempted_policy.py",'w') as f:
-                f.write(code)  
-            exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'targets': self.target_objs, 'obstacles': self.obstacle_objs}, local_scope)
-        
-        except Exception as e: 
-            print("An error occurred during the execution of the code :(") 
-            print(e)
-            raise OSError 
-
-    def test_existing_code(self,code_path):
-        '''
-        This function is to test the non-code gen parts 
-        '''
-        #instantiate obstacles and targets 
-        print("initting constraints...")
-        self.init_constraints(self.policy_constraints)
-
-        initted_pose = self.init_pose() 
-        print("initted_pose:",initted_pose)  
+        global_scope = globals().copy()  # Start with a copy of the current global scope 
 
         local_scope = {}
 
-        with open(code_path) as file:
-            code = file.read()
+        local_scope.update({
+            'config_path': self.config_path, 
+            'plot_bounds': self.plot_bounds, 
+            'init_pose': initted_pose, 
+            'targets': self.target_objs, 
+            'obstacles': self.obstacle_objs
+        })
 
-        code = ensure_imports(code,self.std_imports)
+        global_scope.update(local_scope)
 
-        # Execute the code directly
-        exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'target_locations': self.target_locations, 'obstacle_locations': self.obstacle_locations}, local_scope)
+        with open("self_critique_logs/initial_attempt_policy_execution.py","r") as f:
+            code = f.read() 
+            
+        exec(compile(code, 'Codex', 'exec'),global_scope)  
 
+        """
+        with open("self_critique_logs/initial_attempt_policy_execution.py","w") as f:
+            f.write(code) 
+
+        print("trying to execute: ","initial_attempt_policy_execution.py")
+
+        try: 
+            exec(compile(code, 'Codex', 'exec'),global_scope)  
+        except Exception as e: 
+            inserts = {} 
+            custom_objs = []
+            for obstacle in self.obstacle_objs:
+                if obstacle in [x[:-4] for x in os.listdir("prompts/custom_objects")]:
+                    custom_objs.append(obstacle) 
+            for obstacle in self.target_objs:
+                if obstacle in [x[:-4] for x in os.listdir("prompts/custom_objects")]:
+                    custom_objs.append(obstacle)  
+            
+            desc_insert = "The user has provided a description of the following objects which are important to completing this task: " + "\n" 
+            for obj in custom_objs: 
+                with open("prompts/custom_objects/"+obj+".txt","r") as f:
+                    obj_description = f.read() 
+                desc_insert += obj_description + "\n"
+
+            inserts['*INSERT_QUERY*'] = self.query
+            inserts["*INSERT_DESCRIPTION*"] = desc_insert
+            inserts["*INSERT_POLICY*"] = policy 
+            inserts["*INSERT_IMPORTS*"] = self.std_imports 
+            inserts["*INSERT_CODE*"] = code 
+            inserts["*INSERT_ERROR*"] = str(e) 
+
+            with open("prompts/salvage_policy_execution.txt","r") as f: 
+                critique_prompt =f.read()
+
+            print("entering self critique mode") 
+            #task_name,prompt,insert_dict,local_scope,global_scope,std_imports,max_attempts 
+            local_scope = self_critique_code("policy_execution",critique_prompt,inserts,local_scope,global_scope,self.std_imports,self.max_exec_tries) 
+        """
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Explore Test")
 
