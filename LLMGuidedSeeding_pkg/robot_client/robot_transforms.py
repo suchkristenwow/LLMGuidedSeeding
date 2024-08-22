@@ -92,9 +92,9 @@ def find_bottom_left_point(points):
 class CamProjector:
     def __init__(self, depth, cameraInfo_topic, camera_pose, robot_pose) -> None:
         #TO DO: subscribe to camera info topic instead of this 
-        #self.cam_model = CamProjector.get_camera_model()
+        #self.camera_model = CamProjector.get_camera_model()
         # Initialize the node
-        rospy.init_node('camera_model_node')
+        #rospy.init_node('camera_model_node')
         # Create a PinholeCameraModel object
         self.camera_model = PinholeCameraModel()
         # Subscribe to the CameraInfo topic
@@ -131,7 +131,7 @@ class CamProjector:
         return tf_matrix
 
     def project_pixel(self, pixel):
-        ray = np.asarray(self.cam_model.projectPixelTo3dRay(pixel))
+        ray = np.asarray(self.camera_model.projectPixelTo3dRay(pixel))
         # Convert to Point
         point = ray * self.depth
         return point
@@ -154,6 +154,7 @@ class CamProjector:
         return new_point
 
     def project(self,pixel):
+        print("pixel: ",pixel) 
         # Project To A Point in Camera frame
         cam_point = self.project_pixel(pixel)
         # Camera Point To Cam Nav Frame

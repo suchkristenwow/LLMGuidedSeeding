@@ -16,6 +16,9 @@ husky_length = 0.927
 husky_width = 0.635
 observation_frequency = 1
 confidence_threshold = 0.75 
+front_cam_intrinsics = [510.1259, 0.0, 420.6644, 0.0, 509.4401, 306.44069, 0.0, 0.0, 1.0]
+right_cam_intrinsics = [496.36019, 0.0, 389.41303, 0.0, 495.20248, 301.6506, 0.0, 0.0, 1.0]
+left_cam_intrinsics = [490.48909, 0.0, 413.2397, 0.0, 492.63605, 325.99985, 0.0, 0.0, 1.0]
 
 [sensor_transforms]
 left_down_camera_tf =  [0.1, 0.15,  0.5, 0.0, -1.571, 0.0] 

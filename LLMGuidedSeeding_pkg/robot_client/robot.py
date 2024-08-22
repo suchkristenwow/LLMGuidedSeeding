@@ -14,6 +14,7 @@ import octomap
 from LLMGuidedSeeding_pkg import *
 from collections import deque 
 import toml 
+import open3d as o3d
 
 class identified_object: 
     def __init__(self,object_id,init_observation,label,history_size=10): 
@@ -49,8 +50,12 @@ class identified_object:
 def pixel_to_ray(pixel_coord, camera_intrinsics):
     """Convert a pixel coordinate to a normalized ray in the camera frame."""
     u, v = pixel_coord
+    '''
     fx, fy = camera_intrinsics['fx'], camera_intrinsics['fy']
     cx, cy = camera_intrinsics['cx'], camera_intrinsics['cy']
+    '''
+    fx = camera_intrinsics[0,0]; fy = camera_intrinsics[1,1]    
+    cx = camera_intrinsics[0,2]; cy = camera_intrinsics[1,2] 
 
     # Convert pixel coordinate to normalized ray
     x = (u - cx) / fx
@@ -65,43 +70,48 @@ def pixel_to_ray(pixel_coord, camera_intrinsics):
 def transform_ray_to_world(ray, camera_pose):
     """Transform a ray from the camera frame to the world frame using the camera pose."""
     # Extract the rotation (as a matrix) and translation from the camera pose
-    rotation_matrix = tf.transformations.quaternion_matrix([camera_pose.orientation.x,
-                                                            camera_pose.orientation.y,
-                                                            camera_pose.orientation.z,
-                                                            camera_pose.orientation.w])[:3, :3]
-    translation = np.array([camera_pose.position.x,
-                            camera_pose.position.y,
-                            camera_pose.position.z])
+    rotation_matrix = camera_pose[:3,:3]
+
+    translation = camera_pose[:3,3]
 
     # Transform the ray to the world frame
     ray_world = rotation_matrix.dot(ray) + translation
 
     return ray_world
 
-def ray_cast_octomap(octomap_obj, origin, direction):
+def ray_cast_octomap(octomap_obj, origin, direction,max_range): 
     """Perform ray casting in the octomap to find the intersection with occupied space."""
-    max_range = 100.0  # Set maximum range for ray casting
-    key = octomap_obj.searchRay(origin, direction, max_range)
+    # Normalize the direction vector to ensure it's a unit vector
+    direction = direction / np.linalg.norm(direction)
 
-    if key is not None:
-        endpoint = octomap_obj.keyToCoord(key)
-        return np.linalg.norm(endpoint - origin)  # Distance from the origin
+    # Perform the ray casting
+    result = octomap_obj.castRay(origin, direction, np.zeros((3,)), ignoreUnknownCells=True, maxRange=max_range)
+
+    if result:
+        # If the ray hits an occupied voxel, calculate the distance
+        endpoint = np.array([hit_point.x(), hit_point.y(), hit_point.z()])
+        return np.linalg.norm(endpoint - origin)  # Distance from the origin to the hit point
     else:
-        return None  # No intersection found
+        return None  # No intersection found 
     
 class Robot:
-    def __init__(self, config_path, plot_bounds, vehicle_prefix='/H03'):
+    def __init__(self, config_path, plot_bounds_path, vehicle_prefix='/H03'):
         self.static_transformer = robotTransforms(config_path)
-        
+
         with open(config_path, "r") as f:
             self.settings = toml.load(f)
 
-        self.plot_bounds = plot_bounds 
-        if not np.array_equal(self.plot_bounds[0], self.plot_bounds[-1]):
-            self.plot_bounds = np.vstack([self.plot_bounds, self.plot_bounds[0]])   
+        self.front_camera_tf = self.settings["sensor_transforms"]["front_camera_tf"]
+        self.right_camera_tf = self.settings["sensor_transforms"]["right_camera_tf"]
+        self.left_camera_tf = self.settings["sensor_transforms"]["left_camera_tf"]
         
-        self.maxD = self.settings["robot"]["vision_range"] 
-        self.fov = self.settings["robot"]["front_cam_fov_deg"] 
+        self.plot_bounds = np.genfromtxt(plot_bounds_path,delimiter=",")  
+        self.plot_bounds = self.plot_bounds[~np.isnan(self.plot_bounds).any(axis=1)]
+        if not np.array_equal(self.plot_bounds[0], self.plot_bounds[-1]):
+            self.plot_bounds = np.vstack([self.plot_bounds, self.plot_bounds[0]]) 
+
+        self.maxD = self.settings["robot"]["frustrum_length"] 
+        self.fov = self.settings["robot"]["front_camera_fov_deg"] 
         self.observation_frequency  = self.settings["robot"]["observation_frequency"]
         self.confidence_threshold = self.settings["robot"]["confidence_threshold"]
 
@@ -127,16 +137,16 @@ class Robot:
         rospy.init_node("robot_control_api", anonymous=True)
         self.task_publisher = rospy.Publisher(vehicle_prefix + "forceTask", String, queue_size=10)
         self.path_publisher = rospy.Publisher(vehicle_prefix + "path_out", Path, queue_size=10)
-        self.waypoint_publisher = rospy.Publisher(vehicle_prefix + "/frontier_goal_point", queue_size=10)
+        self.waypoint_publisher = rospy.Publisher(vehicle_prefix + "/frontier_goal_point", PoseStamped,queue_size=10)
 
         odom_topic = vehicle_prefix + "/odometry"
         rospy.Subscriber(odom_topic, Odometry, self.odometry_callback)
 
         # Cameras
         self.camera_topics = {
-            "front": vehicle_prefix + "/cam_front",
-            "left": vehicle_prefix + "/cam_left",
-            "right": vehicle_prefix + "/cam_right"
+            "cam_front": vehicle_prefix + "/cam_front",
+            "cam_left": vehicle_prefix + "/cam_left",
+            "cam_right": vehicle_prefix + "/cam_right"
         }
         self.camera_images = {key: None for key in self.camera_topics.keys()}
 
@@ -148,10 +158,24 @@ class Robot:
         for key, topic in self.camera_topics.items():
             rospy.Subscriber(topic, Image, self.image_callback, callback_args=key)
         
+        '''
         for key, topic in self.down_camera_topics.items():
             rospy.Subscriber(topic, Image, self.down_image_callback, callback_args=key)  
+        '''
+
+        self.camera_intrinsics = {} 
+        self.camera_intrinsics["cam_front"] = np.array(self.settings["robot"]["front_cam_intrinsics"]); 
+        self.camera_intrinsics["cam_front"] = np.reshape(self.camera_intrinsics["cam_front"],(3,3))
+
+        self.camera_intrinsics["cam_right"] = np.array(self.settings["robot"]["right_cam_intrinsics"]) 
+        self.camera_intrinsics["cam_right"] = np.reshape(self.camera_intrinsics["cam_right"],(3,3)) 
+
+        self.camera_intrinsics["cam_left"] = np.array(self.settings["robot"]["left_cam_intrinsics"]) 
+        self.camera_intrinsics["cam_left"] = np.reshape(self.camera_intrinsics["cam_left"],(3,3)) 
 
         rospy.Subscriber("arduino_serial",Int16,self.planter_callback)
+
+        self.previous_pose = None 
 
         # Initialize YoloWorldInference
         self.yolo_world = YoloWorldInference()
@@ -164,7 +188,7 @@ class Robot:
         self.movement_monitor_thread = threading.Thread(target=self.monitor_movement)
         self.movement_monitor_thread.daemon = True
         self.movement_monitor_thread.start()
-
+        
         #MAPPING 
         self.sized_labels = {} 
 
@@ -384,6 +408,37 @@ class Robot:
         return results 
 
     # MAPPING 
+    def test_get_depth_px_coord(self,camera_name,pixel_coord,octomap_obj): 
+        '''Query the octomap, ray cast projection to get estimated depth'''
+        robot_pose = self.get_current_pose() 
+
+        if "front" in camera_name: 
+            camera_pose = CamProjector.pose_to_transformation_matrix(robot_pose).dot(CamProjector.pose_to_transformation_matrix(self.front_camera_tf))  
+        elif "left" in camera_name: 
+            camera_pose = CamProjector.pose_to_transformation_matrix(robot_pose).dot(CamProjector.pose_to_transformation_matrix(self.left_camera_tf))  
+        elif "right" in camera_name: 
+            camera_pose = CamProjector.pose_to_transformation_matrix(robot_pose).dot(CamProjector.pose_to_transformation_matrix(self.right_camera_tf))  
+
+        # Convert the pixel to a 3D ray in the camera frame
+        ray_camera = pixel_to_ray(pixel_coord, self.camera_intrinsics[camera_name])
+
+        # Transform the ray to the world frame
+        ray_world = transform_ray_to_world(ray_camera, camera_pose)
+        
+        # Perform ray casting
+
+        origin = camera_pose[:3,3] 
+
+        '''
+        origin = np.array([camera_pose.position.x,
+                        camera_pose.position.y,
+                        camera_pose.position.z]) 
+        '''
+        
+        depth = ray_cast_octomap(octomap_obj, origin, ray_world, self.maxD)
+
+        return depth
+
     def get_depth_px_coord(self,pixel_coord,camera_name): 
         '''Query the octomap, ray cast projection to get estimated depth'''
         robot_pose = self.get_current_pose() 
@@ -408,7 +463,7 @@ class Robot:
         origin = np.array([camera_pose.position.x,
                         camera_pose.position.y,
                         camera_pose.position.z])
-        depth = ray_cast_octomap(octomap_obj, origin, ray_world)
+        depth = ray_cast_octomap(octomap_obj, origin, ray_world, self.maxD)
 
         return depth
 
@@ -421,6 +476,23 @@ class Robot:
                 max_id = label_max_id
         return max_id + 1
     
+    def test_estimate_obj_center(self,camera_name,px_coord,depth): 
+        camera_topic = self.camera_topics[camera_name] 
+
+        robot_pose = self.get_current_pose() 
+
+        if "front" in camera_name: 
+            camera_pose = CamProjector.pose_to_transformation_matrix(robot_pose).dot(CamProjector.pose_to_transformation_matrix(self.front_camera_tf))  
+        elif "left" in camera_name: 
+            camera_pose = CamProjector.pose_to_transformation_matrix(robot_pose).dot(CamProjector.pose_to_transformation_matrix(self.left_camera_tf))  
+        elif "right" in camera_name: 
+            camera_pose = CamProjector.pose_to_transformation_matrix(robot_pose).dot(CamProjector.pose_to_transformation_matrix(self.right_camera_tf))  
+
+        cam_projector = CamProjector(depth,camera_topic,camera_pose,robot_pose) 
+        object_center = cam_projector.project(px_coord)
+
+        return object_center 
+
     def update_map(self,results):   
         """
         Update the robot's map with new observations.
@@ -456,7 +528,7 @@ class Robot:
 
                 object_center = CamProjector(depth,camera_topic,camera_pose,robot_pose) 
 
-               if label in self.current_map:
+                if label in self.current_map:
                     label_size = 0.3
                     existing_objects = self.current_map[label]
                     # Find the closest existing object using Euclidean distance
@@ -636,3 +708,35 @@ class Robot:
         #    os.mkdir("test_frames") 
 
         #self.fig.savefig("test_frames/frame"+str(self.current_tstep).zfill(5)+".png") 
+
+if __name__ == "__main__":
+    px_coords = np.genfromtxt("/home/kristen/testing_px_projection.csv")
+
+    obj_center_px_coord = (np.mean(px_coords[:,0]), np.mean(px_coords[:,1]))
+
+    # Load the PCD file
+    pcd = o3d.io.read_point_cloud("/home/kristen/ex_point_cloud.pcd")
+
+    # Convert to numpy array
+    points = np.asarray(pcd.points)
+
+    # Create a voxel grid (which is similar to an octree)
+    #voxel_size = 0.15  # Set your desired voxel size
+    #tree = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=voxel_size)
+
+    tree = octomap.OcTree(0.15)
+
+    # Insert points into the OcTree
+    for point in points:
+        tree.updateNode([point[0], point[1], point[2]], True)
+
+    # Optionally, you can update the inner occupancy (prune the tree)
+    tree.updateInnerOccupancy() 
+
+    config_path = "/home/kristen/LLMGuidedSeeding/configs/example_config.toml" 
+    plot_bounds_path = "/home/kristen/LLMGuidedSeeding/random_path.csv"
+    bot = Robot(config_path, plot_bounds_path) 
+
+    depth = bot.test_get_depth_px_coord("cam_front",obj_center_px_coord,tree) 
+    robot_pose = np.zeros((6,))
+    print(bot.test_estimate_obj_center("cam_front",obj_center_px_coord,depth)) 
