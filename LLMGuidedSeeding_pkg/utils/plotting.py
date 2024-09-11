@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 from scipy.spatial.transform import Rotation as R 
 
 class CamProjector:
-    def __init__(self, depth, camera_pose, robot_pose) -> None:
+    def __init__(self, depth, camera_pose, robot_pose):
         self.cam_model = CamProjector.get_camera_model()
         self.camera_pose = camera_pose
         self.robot_pose = robot_pose

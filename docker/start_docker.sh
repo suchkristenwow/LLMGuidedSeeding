@@ -1,1 +1,0 @@
-docker run -it --name ros1_container -p 5000:5000 -v /home/kristen/LLMGuidedSeeding:/home/kristen/LLMGuidedSeeding:rw --user $(id -u):$(id -g) --group-add $(id -g) ros_flask_image bash

@@ -5,6 +5,8 @@ commonObj_path = "/configs/commonObjs.txt"
 
 common_ip = "40.78.49.78"
 
+max_masks = 10 
+
 [robot]
 object_sever_url = "http://0.0.0.0:5005"
 host_url = "http://0.0.0.0:5000"

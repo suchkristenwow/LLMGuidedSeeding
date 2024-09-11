@@ -109,7 +109,8 @@ def insert_import_into_function(script_text, function_name, import_statement):
         stripped_line = line.strip()
         
         # Detect the start of the function
-        if stripped_line.startswith(f"def {function_name}("):
+        #if stripped_line.startswith(f"def {function_name}("):
+        if stripped_line.startswith("def "+ function_name + '("'):
             in_function = True
             function_indent = len(line) - len(stripped_line)
             modified_lines.append(line)
@@ -186,7 +187,7 @@ def is_inside_function(script_text, target_line):
     return False, ''
 
 def build_description_prompt(description,object):
-    prompt = f"Remember the user defined {object} like this: " + "\n" + description 
+    prompt = "Remember the user defined "+str(object)+" like this: " + "\n" + description 
     return prompt 
 
 def get_imagenet_classes(): 
@@ -373,6 +374,7 @@ def ensure_imports(code, imports):
 
     return code 
 
+
 def mahalanobis_distance(x, mu, sigma):
     """
     Calculate the Mahalanobis distance between an observation and a landmark.
@@ -387,7 +389,7 @@ def mahalanobis_distance(x, mu, sigma):
     """
     delta = x - mu
     inv_sigma = np.linalg.inv(sigma)
-    return np.sqrt(delta.T @ inv_sigma @ delta)
+    return np.sqrt(np.dot(np.dot(delta.T, inv_sigma), delta)) 
 
 def gaussian_likelihood(x, mu, sigma):
     """
@@ -464,7 +466,7 @@ def select_pt_in_covar_ellipsoid(mu,cov_matrix):
     point_on_unit_circle = np.array([np.cos(theta), np.sin(theta)])
 
     # Transform the point into the ellipsoid space
-    point_in_ellipsoid = mu + L @ point_on_unit_circle
+    point_in_ellipsoid = mu + np.dot(L ,point_on_unit_circle) 
 
     return point_in_ellipsoid
 

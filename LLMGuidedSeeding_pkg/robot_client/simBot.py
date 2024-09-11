@@ -1,4 +1,4 @@
-from LLMGuidedSeeding_pkg.robot_client.robot import identified_object
+#from LLMGuidedSeeding_pkg.robot_client.robot import identified_object
 from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms
 from LLMGuidedSeeding_pkg.utils.rehearsal_utils import astar_pathfinding_w_polygonal_obstacles, select_pt_in_covar_ellipsoid, mahalanobis_distance, gaussian_likelihood, is_in_polygonal_obstacle
 import numpy as np 
@@ -11,6 +11,38 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as fm
 from shapely.ops import nearest_points
 
+
+class identified_object: 
+    def __init__(self,object_id,init_observation,label,history_size=10): 
+        self.mu = init_observation 
+        self.sigma = np.eye(2) 
+        self.label = label 
+        self.object_id = object_id 
+        self.visited = False 
+        self.observation_history = deque([init_observation], maxlen=history_size)
+
+    def integrate_new_observation(self,observation): 
+        self.observation_history.append(observation)
+        self.mu = np.median(self.observation_history, axis=0)
+        
+        z = np.array(observation[:2])  # Observed x, y position
+
+        # Predict step: (In a static case, we don't have a motion model, so the predict step does nothing)
+        mu_pred = self.mu
+        sigma_pred = self.sigma + np.eye(2) * 0.05  # Add process noise
+
+        # Update step:
+        H = np.eye(2)  # Observation model (we directly observe x, y)
+        R = np.eye(2) * 0.1  # Observation noise covariance
+        y = z - mu_pred  # Innovation: difference between prediction and observation
+        S = H @ sigma_pred @ H.T + R  # Innovation covariance
+        K = sigma_pred @ H.T @ np.linalg.inv(S)  # Kalman gain
+
+        self.mu = mu_pred + K @ y  # Updated state estimate
+        self.sigma = (np.eye(2) - K @ H) @ sigma_pred 
+
+        self.plot_colors = {} 
+        
 class simBot: 
     def __init__(self,config_path,plot_bounds,init_pose,target_locations,obstacle_locations): 
         self.static_transformer = robotTransforms(config_path) 

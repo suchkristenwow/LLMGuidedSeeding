@@ -90,7 +90,7 @@ def find_bottom_left_point(points):
     return bottom_left_point
 
 class CamProjector:
-    def __init__(self, depth, cameraInfo_topic, camera_pose, robot_pose) -> None:
+    def __init__(self, depth, cameraInfo_topic, camera_pose, robot_pose):
         #TO DO: subscribe to camera info topic instead of this 
         #self.camera_model = CamProjector.get_camera_model()
         # Initialize the node

@@ -1,7 +1,0 @@
-# Determine if the current position of the robot is within the plot bounds.
-if not self.simBot.in_plot_bounds():
-    # If the robot is not within the plot bounds
-    print("The robot is not within the plot bounds.")
-else:
-    # If the robot is within the plot bounds
-    print("The robot is within the plot bounds.")
