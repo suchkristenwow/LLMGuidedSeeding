@@ -14,7 +14,7 @@ authors = [
 packages = [
     { include = "LLMGuidedSeeding"},
     { include = "LLMGuidedSeeding_pkg.utils" },
-    { inclue = "LLMGuidedSeeding_pkg.robot_client"},
+    { inclue = "LLMGuidedSeeding_pkg.simBot_client"},
     { include = "UI_pkg"},
     { include = "llm_robot_client"}
 ]

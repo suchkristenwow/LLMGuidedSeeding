@@ -1,6 +1,6 @@
 #from LLMGuidedSeeding_pkg.robot_client.robot import identified_object
-from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms
-from LLMGuidedSeeding_pkg.utils.rehearsal_utils import astar_pathfinding_w_polygonal_obstacles, select_pt_in_covar_ellipsoid, mahalanobis_distance, gaussian_likelihood, is_in_polygonal_obstacle
+from LLMGuidedSeeding_pkg.simBot_client.robot_transforms import robotTransforms
+from LLMGuidedSeeding_pkg.utils.rehearsal_utils import select_pt_in_covar_ellipsoid, mahalanobis_distance, gaussian_likelihood, is_in_polygonal_obstacle
 import numpy as np 
 import toml 
 from shapely import Polygon,Point 
@@ -10,16 +10,18 @@ import os
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as fm
 from shapely.ops import nearest_points
-
+from collections import deque 
+from ros import simBot_rosPublisher
 
 class identified_object: 
-    def __init__(self,object_id,init_observation,label,history_size=10): 
+    def __init__(self,shape,object_id,init_observation,label,history_size=10): 
         self.mu = init_observation 
         self.sigma = np.eye(2) 
         self.label = label 
         self.object_id = object_id 
         self.visited = False 
         self.observation_history = deque([init_observation], maxlen=history_size)
+        self.polygon_object = shape 
 
     def integrate_new_observation(self,observation): 
         self.observation_history.append(observation)
@@ -77,6 +79,21 @@ class simBot:
         plt.ion() 
         fig, ax = plt.subplots(figsize=(12,12)) #this is for the BEV animation thing 
         self.fig = fig; self.ax = ax 
+        # Fire up the Planner 
+        self.rrt_planner = simBot_rosPublisher(self.settings,self.plot_bounds,init_pose) 
+        self.rrt_planner.update_pose(init_pose) 
+        # Convert the numpy array to a list of strings
+        data_str = "\n".join(",".join(map(str, row)) for row in self.plot_bounds)
+
+        # Append an empty line at the end
+        data_str += "\n"
+
+        data_str += "\n".join(",".join(np.array([init_pose[0],init_pose[1]]))) 
+
+        planner_dir = self.settings["simulation_paramers"]["planner_path"]  
+        # Write the data to a CSV file
+        with open(os.path.join(planner_dir,"plot_bounds.csv"), "w") as f:
+            f.write(data_str) 
 
     def ask_human(self,question): 
         print("question: ",question)
@@ -252,17 +269,6 @@ class simBot:
                 if np.linalg.norm(obj.mu - point) < 1.0:  # 1.0 meter threshold
                     return False
         return True
-
-    def update_astar_obstacles(self):
-        astar_obstacles = []
-        for obstacle_type in self.gt_obstacles:
-            if obstacle_type in self.current_map:
-                obstacle_locations = self.gt_obstacles[obstacle_type] 
-                for location in obstacle_locations: 
-                    obstacle = {"center":location,"radius":0.2} #TODO: incoporate different radii
-                    #all_obstacle_locations.append((location[0],location[1])) 
-                    astar_obstacles.append(obstacle) 
-        return astar_obstacles 
     
     def generate_candidate_waypoints(self, exploration_area):
         """
@@ -338,85 +344,11 @@ class simBot:
 
         if np.linalg.norm(self.traj_cache[-1,:2] - target[:2]) < self.robot_length:  
             self.current_tstep += 1 
-            '''
-            if np.all(target == self.traj_cache[-1,:]):
-                print("WHY IS THE TARGET NOT CHANGING")
-            '''
             self.traj_cache = np.vstack([self.traj_cache,target]) 
+            self.update_pose(target)
             self.get_current_observations() 
         else: 
-            astar_obstacles = self.update_astar_obstacles() 
-
-            print("calling astar pathfinding ...")
-            self.current_path = astar_pathfinding_w_polygonal_obstacles(self.get_current_pose(),target,astar_obstacles)
-
-            if not isinstance(self.current_path,bool):
-                for x in self.current_path:  
-                    if len(astar_obstacles) > 0:
-                        #print("astar_obstacles:",astar_obstacles)
-                        replan = False 
-                        for obs in astar_obstacles:
-                            #print("obs: ",obs)
-                            if is_in_polygonal_obstacle(x,obs['center']):
-                                replan = True 
-                                print("this plan goes through an obstacle we didnt observe before... need to replan")
-                                break 
-                        #check if this goes outside the plot bounds 
-                        pt = Point(x[0],x[1]) 
-                        if not Polygon(self.plot_bounds).contains(pt):
-                            print("this plan goes outside the plot bounds ... need to replan") 
-                            replan = True 
-
-                        if not replan:
-                            self.current_tstep += 1 
-                            #print("updating traj to: ",x)
-                            heading = np.arctan2(x[1] - robot_pose[1],x[0] - robot_pose[0])
-                            sub_pt = np.array([x[0],x[1],0,0,0,heading]) 
-                            self.traj_cache = np.vstack([self.traj_cache,sub_pt])    
-
-                        else:
-                            print("replanning ...")
-                            self.current_waypoint = target 
-                            self.go_to_waypoint()
-                        
-                    else:
-                        self.current_tstep += 1 
-                        heading = np.arctan2(x[1] - robot_pose[1],x[0] - robot_pose[0])
-                        sub_pt = np.array([x[0],x[1],0,0,0,heading]) 
-                        #print("updating traj to: ",x)
-                        self.traj_cache = np.vstack([self.traj_cache,sub_pt])  
-
-                    self.get_current_observations()  
-                    astar_obstacles = self.update_astar_obstacles() 
-                    self.plot_frame() 
-            else: 
-                print("ERROR: COULD NOT FIND VALID PATH?")
-                robot_pose = self.get_current_pose()
-                plt.scatter(robot_pose[0],robot_pose[1],color="blue",label="robot pose")  
-                plt.scatter(target[0],target[1],color="magenta",label="target")              
-                for obstacle in self.gt_obstacles: 
-                    X = self.gt_obstacles[obstacle]
-                    for i,x in enumerate(X): 
-                        if i == 0:
-                            plt.scatter(x[0],x[1],color="red",marker="*",label=obstacle)
-                        else: 
-                            plt.scatter(x[0],x[1],color="red",marker="*")
-
-                for target in self.gt_targets: 
-                    X = self.gt_targets[target]
-                    for i,x in enumerate(X): 
-                        if i==0:
-                            plt.scatter(x[0],x[1],color="green",label=target)  
-                        else: 
-                            plt.scatter(x[0],x[1],color="green")
-
-                for x in self.observed_areas:
-                    x,y = x.exterior.xy
-                    self.ax.fill(x,y,color="yellow",alpha=0.)
-
-                plt.show(block=True) 
-                plt.legend()
-                raise OSError 
+            self.current_path = self.rrt_planner.get_path(target)  
 
         self.plot_frame()
 
@@ -498,14 +430,16 @@ class simBot:
                 else:
                     # If this label is not in the map, create a new entry
                     self.current_map[label] = [identified_object(0, object_center, label)] 
-    
+
+        self.rrt_planner.update_occupancy_map(self.current_map) 
+
     #PLOTTING FUNCTIONS 
                     
     def plot_robot(self):
         self.ax.scatter(self.traj_cache[-1,0],self.traj_cache[-1,1],color="k")  
     
         x = self.traj_cache[-1,0]; y = self.traj_cache[-1,1]; yaw = self.traj_cache[-1,-1] 
-            
+
         # Calculate the bottom-left corner of the rectangle considering the yaw angle
         corner_x = x - self.robot_length * np.cos(yaw) + (self.robot_width / 2) * np.sin(yaw)
         corner_y = y - self.robot_length * np.sin(yaw) - (self.robot_width / 2) * np.cos(yaw) 

@@ -5,8 +5,6 @@ commonObj_path = "/configs/commonObjs.txt"
 
 common_ip = "40.78.49.78"
 
-max_masks = 10 
-
 [robot]
 object_sever_url = "http://0.0.0.0:5005"
 host_url = "http://0.0.0.0:5000"
@@ -58,3 +56,6 @@ miss_detection_rate = 0.15
 measurement_var_x = 0.5 
 measurement_var_y = 0.5
 measurement_var_xy = 0.2
+simBot_map_topic = "/simBot/map"
+goal_point_topic = "/simBot/goal_point" 
+planner_path = "/home/kristen/multi-robot-rrt-exploration-noetic/src/rrt_exploration/src"
