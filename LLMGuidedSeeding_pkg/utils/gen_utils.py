@@ -34,10 +34,16 @@ def dictify(results_str):
     '''
     This function returns a dictionary from the string of a dictionary 
     '''
+    # Replace Python None with JSON null
+    results_str = results_str.replace("None", "null")
+    
     # Convert the string to a dictionary
-    print("results_str: ",results_str)
+    print("results_str: ", results_str)
     data_dict = json.loads(results_str)
+    
+    # Convert the "seed" value to a boolean
     data_dict["seed"] = bool(data_dict["seed"])
+    
     return data_dict
 
 def check_plot_bounds(point,contour):

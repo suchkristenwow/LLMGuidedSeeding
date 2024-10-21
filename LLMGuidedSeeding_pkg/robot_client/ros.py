@@ -48,7 +48,7 @@ def launch_ros_node(node_name,ros_package,launch_file):
         # Shutdown the launch process
         launch.shutdown() 
 
-class simBot_rosPublisher: 
+class rosPublisher: 
     def __init__(self,settings,plot_bounds,init_pose,robot_length):  
         self.rrt_planner_node = launch_ros_node("rrt_planner","ros_multi_tb3","single_robot.launch")
         self.exploration_node = launch_ros_node("rrt_exploration","rrt_exploration","single_robot.launch")

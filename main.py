@@ -192,24 +192,6 @@ class ExperimentRunner:
         #explore_runner_dir = os.path.abspath(os.path.join("../"))
         self.policyGeneration_process = self.start_process_with_terminal(launch_command, "generate_policies", cwd=os.getcwd())
 
-    def launch_policy_rehearsal(self,policy): 
-        logs_dir = os.path.join(self.uuid_logging_dir, "policy_rehearsal_logs")
-        logs_dir_absolute = os.path.abspath(logs_dir)
-        logging.ingo(f"Explore logs dir {logs_dir_absolute}")
-        os.makedirs(logs_dir_absolute, exist_ok=True)
-        
-        config_path = os.path.abspath(self.args.config)
-        # Split the command into a list of arguments
-        launch_command = [
-            "python", "rehearse_policies.py",
-            "--policy", policy,
-            "--config_path", config_path,
-            "--logging_dir", logs_dir_absolute
-        ]
-        
-        #explore_runner_dir = os.path.abspath(os.path.join("../"))
-        self.policyRehearsal_process = self.start_process_with_terminal(launch_command, "rehearse_policies", cwd=os.getcwd())
-
     def launch_policy_execution(self,policy):
         logs_dir = os.path.join(self.uuid_logging_dir, "policy_execution_logs")
         logs_dir_absolute = os.path.abspath(logs_dir)
@@ -233,7 +215,7 @@ class ExperimentRunner:
         log_file_path = os.path.join(self.uuid_logging_dir,"application_logs", "flask_server.log")
         log_file_path_abs = os.path.abspath(log_file_path)
     
-        # app_dir = os.path.join("UI_pkg", "UserInterface", "backend")
+        # app_dir = os.path.jfrom LLMGuidedSeeding_pkg import *oin("UI_pkg", "UserInterface", "backend")
         app_dir = os.path.join("UI", "backend" )
         app_path = os.path.join(app_dir, "application.py")
 
@@ -271,17 +253,16 @@ class ExperimentRunner:
         self.create_logging_directory() 
         self.launch_flask_app()
         self.print_all_loggers()
-        # self.launch_react()
-        # print("Done launching the react server!")
+
+        self.launch_react()
+        print("Done launching the react server!")
         # Print all active loggers
     
         #launch the robot 
         self.launch_policy_gen()
-        #self.launch_policy_rehearsal()
-        '''
-        self.launch_policy_execution(rehearsed_policy)
-        self.start_process_monitoring()
-        '''
+
+        #self.launch_policy_execution()
+        #self.start_process_monitoring()
         
         try:
             while not self.shutdown_event.is_set():

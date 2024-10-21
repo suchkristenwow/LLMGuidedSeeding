@@ -1,12 +1,14 @@
-from LLMGuidedSeeding_pkg import *
+from LLMGuidedSeeding_pkg.utils.codeGen_utils import remove_chatGPT_commentary
+from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai 
+from LLMGuidedSeeding_pkg.utils.gen_utils import dictify 
 
 import argparse
 import numpy as np 
 import os 
 import toml 
-# from UI_pkg import ConversationalInterface
+import shutil 
+
 from UI import ConversationalInterface
-import logging 
 
 class PolicyGenerator: 
     def __init__(
@@ -24,31 +26,39 @@ class PolicyGenerator:
         self.validPolicy = False 
         self.feedback= None 
         self.init_waypoint = None #this is a waypoint to get the robot within bounds if it's initially out of bounds 
-        self.conversational_interface = ConversationalInterface()
         self.base_url = os.path.dirname(os.path.abspath(__file__))
-        #print("self.settings: ",self.settings)
-        with open(self.base_url + self.settings["commonObj_path"],"r") as f: 
-            self.common_objects = [line.strip() for line in f]
         self.learned_objects = []
-        self.policy_iters = 0 
-        self.max_policy_iters = 5
-         
+
     def read(self,file): 
         with open(file,"r") as f:
             return f.read() 
 
+    def ask_object_clarification(self,object_name):
+        print(f'I dont know what a {object_name} is. Can you write a description in OOD_obj_description.txt and press Enter to continue?')
+        input("Press Enter to continue") 
+        with open("OOD_obj_description.txt","r") as f:
+            obj_description = f.read()
+        filename = object_name.replace(" ", "_") + ".txt" 
+        if not os.path.exists("./custom_obj_descriptions"):
+            os.mkdir("./custom_obj_descriptions")
+        shutil.copyfile("OOD_obj_description.txt",os.path.join("custom_obj_descriptions",filename)) 
+
+    def ask_policy_verification(self,policy):
+        print("What do you think of this policy? " + "\n" + policy) 
+        input("Enter any feedback into feedback.txt (or leave it empty if you have no feedback) and press Enter to continue ...")        
+        with open("feedback.txt","r") as f:
+            self.feedback = f.read()
+        if len(self.feedback) == 0:
+            return True 
+        else:
+            return False 
+        
     def verify_policy(self,policy): 
-        #ask the user if they approve of this policy 
-        #print("policy verification result:",self.conversational_interface.ask_policy_verification(policy))
-        #print("policy: ",policy) 
-        if self.conversational_interface.ask_policy_verification(policy):
+        if self.ask_policy_verification(policy):
             self.validPolicy = True 
             print("Found a valid policy approved by the human!")
             with open(os.path.join(self.logging_directory,"finalPolicy.txt"),"w") as f:
                 f.write(policy)
-        else: 
-            print("Updating feedback!")
-            self.feedback = self.conversational_interface.feedback
 
     def build_policy(self,constraints): 
         print("building policy...")
@@ -57,48 +67,44 @@ class PolicyGenerator:
             #1. Navigate to goal points, respecting the constraints 
             # "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset","seed" = True/False.
             # check all of these landmarks  
-            prompt_lms = []
+            prompt_lms = {} 
             for k in constraints.keys(): 
-                print("constraints[k]: ",constraints[k]) 
-                print(type(constraints[k])) 
+                #print("constraints[k]: ",constraints[k]) 
+                #print(type(constraints[k])) 
                 if isinstance(constraints[k],str): 
                     if "and" in constraints[k]:
-                        print("And is in the constraints!") 
+                        #print("And is in the constraints!") 
                         split_constraints = constraints[k].split("and") 
                         constraints_list = [split_constraints[0],split_constraints[1]] 
-                        constraints[k] = constraints_list 
-                    elif "," in constraints[k]: 
+    
+                        query = "Should '" +  split_constraints[0] + "' and '" + split_constraints[1] + """' be considered as separate objects? Or are these just adjectives to describe an object?
+                        Return yes is they should be considered separately.""" 
+                        response,_ = generate_with_openai(query) 
+                        if "yes" in response.lower():
+                            constraints[k] = constraints_list 
+
+                    if "," in constraints[k]: 
                         split_constraint = constraints[k].split(",") 
-                        print("split_constraint: ",split_constraint)
+                        #print("split_constraint: ",split_constraint)
                         constraints[k] = split_constraint 
 
                 if isinstance(constraints[k],list):  
-                    print("this is  a list!")
+                    #print("this is  a list!")
                     if isinstance(constraints[k][0],str): 
                         if "," in constraints[k][0]:
                             split_constraint = constraints[k][0].split(",") 
-                            print("split_constraint: ",split_constraint)
+                            #print("split_constraint: ",split_constraint)
                             constraints[k] = split_constraint 
 
-            if "goal_lms" in constraints.keys():
-                if isinstance(constraints["goal_lms"],list):
-                    prompt_lms.extend(constraints["goal_lms"])
-                elif isinstance(constraints["goal_lms"],str): 
-                    prompt_lms.append(constraints["goal_lms"]) 
+            print("constraints: ",constraints) 
 
-            if "avoid" in constraints.keys(): 
-                if isinstance(constraints['avoid'],list):  
-                    print("extending prompt lms")
-                    prompt_lms.extend(constraints["avoid"])
-                elif isinstance(constraints["avoid"],str): 
-                    print("appending to prompt lms")
-                    prompt_lms.append(constraints["avoid"])
-
-            print("prompt lms: ",prompt_lms) 
             for lm in prompt_lms:
-                if not lm.lower() in self.common_objects and lm.lower() not in self.learned_objects:
+                #is the lm in or out of distribution 
+                query = "Would a " + lm + " be in-distribution for object detectors like yolo world? Yes or no."  
+                response,_ = generate_with_openai(query) 
+                if not "yes" in response.lower() and lm not in self.learned_objects:
                     print("I dont know what {} is. Ill have to ask.".format(lm))
-                    self.conversational_interface.ask_object_clarification(lm) 
+                    self.ask_object_clarification(lm) 
                     #because the interface doesnt exist yet im just going to write the object descriptors and save them in txt files 
                     self.learned_objects.append(lm)  
 
@@ -108,66 +114,74 @@ class PolicyGenerator:
             enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.query)
             enhanced_prompt = enhanced_prompt.replace("*INSERT_CONSTRAINTS*",str(constraints))
             print("using enhanced prompt to generate a policy") 
-            self.current_policy = generate_with_openai(enhanced_prompt) 
+            self.current_policy,_ = generate_with_openai(enhanced_prompt) 
+            #self.verify_policy(self.current_policy)
+        '''
         else: 
             with open("prompts/modify_policy.txt","r") as f: 
                 prompt = f.read() 
+
+            print("constraints: ",constraints) 
+
             enhanced_prompt = prompt.replace("*INSERT_PROMPT*",self.query)
-            enhanced_prompt = prompt.replace("*INSERT_CONSTRAINT_DICTIONARY*",constraints)
+            enhanced_prompt = prompt.replace("*INSERT_CONSTRAINT_DICTIONARY*",str(constraints) ) 
             enhanced_prompt = prompt.replace("*INSERT_POLICY*",self.current_policy)
             enhanced_prompt = prompt.replace("*INSERT_FEEDBACK*",self.feedback)
-            #print("this is the new prompt: ",enhanced_prompt)
-            #print("this is the new prompt: ",enhanced_prompt)
             print("modifying policy...")
-            modified_policy = generate_with_openai(enhanced_prompt)
+            modified_policy,_ = generate_with_openai(enhanced_prompt)
             print("modified_policy: ",modified_policy)
             self.current_policy = modified_policy 
+            self.verify_policy(self.current_policy) 
+        '''
 
     def parse_prompt(self): 
         print("parsing prompt to get constraints ...")
         with open("prompts/get_prompt_constraints.txt","r") as f:
             constraints_prompt = f.read()
         enhanced_query = constraints_prompt.replace("*INSERT_QUERY*",self.query)
-        llm_result = generate_with_openai(enhanced_query) 
-        print("llm_result:",llm_result)
-        '''
-        #Debug
-        with open("tmp.txt","w") as f:
-            f.write(llm_result)
-            f.close()
-        ''' 
+        llm_result,_ = generate_with_openai(enhanced_query) 
         constraints = {} 
-        #if "?" not in llm_result:
         i0 = llm_result.index("{"); i1 = llm_result.index("}")
         parsed_results = llm_result[i0:i1+1]
         if "}" not in parsed_results:
             parsed_results = parsed_results + "}"
         constraints = dictify(parsed_results) 
-        
+        print("constraints: ",constraints)
         return constraints
         
     def gen_policy(self): 
         print("identifying constraints ...") 
         #1. Identify constraints and goal landmarks from the prompt 
         constraints = self.parse_prompt()
-        print("constraints: ",constraints)
-        while not self.validPolicy:
-            if self.policy_iters < self.max_policy_iters:
-                #2. Come up with policy
-                if self.policy_iters == 0:
-                    self.build_policy(constraints)
-                #3. Verfiy with user 
-                self.verify_policy(self.current_policy)
-                #4. Integrate user feedback 
-                if not self.validPolicy:
-                    self.build_policy(constraints) 
-            else:
-                raise Exception("Cannot come up with an acceptable policy :(")
-            self.policy_iters += 1 
+        self.build_policy(constraints) 
+        with open("policy.txt","w") as f:
+            f.write(self.current_policy)
 
-        #code =  code_gen(self.policy)
+        print("Edit policy.txt until youre happy with it")
+        input("Press Enter to Continue") 
 
-        
+        with open("policy.txt","r") as f:
+            policy = f.read()
+
+        self.gen_code_from_policy(policy) 
+
+    def gen_code_from_policy(self,policy):
+        print("reading the policy...")
+
+        with open("prompts/step_parser_codeGen.txt","r") as f: 
+            prompt = f.read() 
+
+        enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.query)
+        enhanced_prompt = enhanced_prompt.replace("*INSERT_POLICY*",policy)
+
+        raw_code,_ = generate_with_openai(enhanced_prompt)
+
+        code = remove_chatGPT_commentary(raw_code)
+
+        print("writing code to self_critique_logs/policy_execution.py")
+        with open("self_critique_logs/policy_execution.py","w") as f:
+            f.write(code) 
+
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description="Explore Test")
@@ -183,7 +197,7 @@ if __name__ == "__main__":
         "--config_path",
         type=str,
         help="Path to the configuration file",
-        default="experiment_runner/config/example_config.toml",
+        default="configs/example_config.toml",
     )
     
     parser.add_argument(

@@ -1,13 +1,12 @@
 prompt_file = "/home/kristen/LLMGuidedSeeding/prompts/ex_query.txt"
 waypoint_threshold = 0.5
 logging_directory = "experiment_data/"
-commonObj_path = "/configs/commonObjs.txt"
 
 common_ip = "40.78.49.78"
 
 [robot]
-object_sever_url = "http://0.0.0.0:5005"
-host_url = "http://0.0.0.0:5000"
+object_server_url = "http://0.0.0.0:5005"
+host_url = "http://0.0.0.0:7000"
 frustrum_length = 20 
 front_camera_fov_deg = 90 
 down_cam_img_width = 640 

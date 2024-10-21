@@ -1,0 +1,17 @@
+1. Verify that the robot is located within the plot bounds. If not, plan and execute the shortest route to enter the plot bounds.
+
+2. Initialize an empty list in the system memory to store all the locations where seeds have been planted.
+
+3. Identify the landmarks marked as "yellow and black striped tape" using the RGB cameras.
+
+4. Choose 6 evenly spaced points within the plot bounds 
+
+5. Find a lawnmower pattern which intersects these points. A lawnmower pattern is one that moves back and forth in parallel lines.
+
+6. Following the lawnmower pattern, continually check for pieces of yellow and black striped tape. If the tape is detected, plan around it and navigate back to the main path. 
+
+7. Once the robot has reached the position such that the planter is over one of the chosen points from Step 4, stop driving and plant a seed. 
+
+8. Record the planting location in the list initialized in Step 2. 
+
+9. Continue this process until all 6 seeds have been planted. 

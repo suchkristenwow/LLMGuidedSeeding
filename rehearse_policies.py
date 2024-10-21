@@ -9,9 +9,9 @@ import random
 from matplotlib.path import Path 
 import pickle 
 from shapely.geometry import Polygon, Point 
-from LLMGuidedSeeding_pkg.robot_client.simBot import simBot 
+from LLMGuidedSeeding_pkg.robot_client.robot import Robot 
 from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms 
-from LLMGuidedSeeding_pkg.utils.rehearsal_utils import * 
+from LLMGuidedSeeding_pkg.utils.codeGen_utils import * 
 from chatGPT_written_utils import *  
 import math 
 

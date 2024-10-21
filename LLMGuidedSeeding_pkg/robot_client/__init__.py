@@ -1,8 +1,9 @@
 from .robot_transforms import robotTransforms,CamProjector
-from .simBot import simBot 
+from .robot import Robot,identified_object 
 
 all = [
     "robotTransforms",
     "CamProjector",
-    "simBot"
+    "Robot",
+    "identified_object"
 ]

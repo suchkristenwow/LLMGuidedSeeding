@@ -13,7 +13,7 @@ def generate_with_openai(prompt, conversation_history=None, max_retries=25, retr
     print("Trying to get an answer from ChatGPT, hold on ...")
     attempts = 0
     openai_api_key = os.getenv("openai_key")
-    
+
     if conversation_history is None:
         conversation_history = [
             {
@@ -94,7 +94,7 @@ def generate_with_openai(prompt, conversation_history=None, max_retries=25, retr
             attempts += 1
             if attempts < max_retries:
                 #print(f"Retrying in {retry_delay} seconds...")
-                print("Retrying in "+ string(retry_delay) + " seconds...")
+                print("Retrying in "+ str(retry_delay) + " seconds...")
                 time.sleep(retry_delay)
             else:
                 print("Max retries reached. Unable to complete request.")
@@ -102,4 +102,9 @@ def generate_with_openai(prompt, conversation_history=None, max_retries=25, retr
         except Exception as e:
             #print(f"Unexpected error: {e}")
             print("Unexpected error: "+str(e))
-            raise
+            raise 
+
+if __name__ == "__main__":
+    prompt = "What city is in this image?" 
+    response,_ = generate_with_openai(prompt,image_path="/home/kristen/Downloads/seattle.jpeg")
+    print("response:",response)     

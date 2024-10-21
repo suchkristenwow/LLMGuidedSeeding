@@ -20,13 +20,13 @@ The scale is in meters. That is, if an object is supposed to be 10 cm long, you 
 
 Consider the following guidelines:
 - Use base Python (comparison, sorting) for basic logical operations, left/right/up/down, math, etc.
-- You are encouraged to use the given functions BELOW and simBot class implementation but not all of it will always be applicable so you are encouraged to write your own 
+- You are encouraged to use the given functions BELOW and Robot class implementation but not all of it will always be applicable so you are encouraged to write your own 
   functions if need be. 
 - Use the given generate_with_openai function to access external information if necessary.
 - Whatever you come up with will be executed like this: 
     # Execute the code directly
         exec(code, {'config_path': self.config_path, 'plot_bounds': self.plot_bounds, 'init_pose': initted_pose, 'targets': self.targets, 'obstacles': self.obstacles}, local_scope) 
-    That is, config_path, plot_bounds, init_pose, targets, obstacles are all in your local scope. These are everything you need to init the simBot and robotTransforms classes. 
+    That is, config_path, plot_bounds, init_pose, targets, obstacles are all in your local scope. These are everything you need to init the Robot and robotTransforms classes. 
 - You are operating autonomously so you cannot call any functions or classes that haven't already been named and expect the user to implement them on their own. 
 - Note that the first and last coordinate of plot_bounds is the same (as this is a requirement for making Polygon objects using the shapely library). The plot_bounds describe 
  an arbitrary shape drawn by the user. If you want to iterate over the bounds (to navigate using a pattern, for example) you should use the shapely library to operate over the contour. 
@@ -69,9 +69,9 @@ def get_id_given_coord(objects,coord):
         object_id (int): This is the most likely object id given the coordinate 
     """
 
-class simBot:
+class Robot:
     """ A Python class which allows for control of a simulated robot for ecological restoration which can navigate using lidar-inertial SLAM as well as GPS, make 
-    observations using 3 RGB cameras and YoloWorld, and plant seeds, if desired. Query Attributes or call Methods from this class by calling self.simBot (this is 
+    observations using 3 RGB cameras and YoloWorld, and plant seeds, if desired. Query Attributes or call Methods from this class by calling self.Robot (this is 
     where we saved the class instance)
     """
     Attributes
@@ -105,7 +105,7 @@ class simBot:
         This is a nx6 np array where the rows describe the robot pose at that timestep. The rows contain: x,y,z,roll,pitch,yaw 
 
     observation_cache : dict 
-        This is a dictionary where the keys are timesteps and the entries are the results. This maintains the history of all observations made by the simBot. 
+        This is a dictionary where the keys are timesteps and the entries are the results. This maintains the history of all observations made by the Robot. 
         The entries are dictionaries where the keys are the camera names and the entries are "labels" and "coords" which in turn are lists of detected object labels 
         and their observed coordinate. 
 
@@ -128,7 +128,7 @@ class simBot:
     -------
     def __init__(self,config_path,plot_bounds,init_pose,targets,obstacles):
         """
-        Instatiates the simBot class. 
+        Instantiates the Robot class. 
 
         Args:
             config_path (str) : Path to user configs.  
@@ -350,7 +350,7 @@ Here's an example. Suppose the prompt was "Plant 10 cm away from any shrubs in t
 
 Then a good response would be: 
 
-bot = simBot(config_path,plot_bounds,init_pose,targets,obstacles) 
+bot = Robot(config_path,plot_bounds,init_pose,targets,obstacles) 
 
 #1. Navigate inside the plot bounds if not already in them 
 pose = bot.get_current_pose() 

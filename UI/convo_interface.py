@@ -16,7 +16,7 @@ class ConversationalInterface:
             self.feedback = data
             self.human_response = True
 
-        self.sio.connect('http://localhost:5000')
+        self.sio.connect('http://localhost:7000')
         
 
     def ask_human(self,content):

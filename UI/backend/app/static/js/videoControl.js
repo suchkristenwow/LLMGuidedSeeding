@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         isPaused = !isPaused;
         if (isPaused) {
-            fetch("http://127.0.0.1:5000/backend/pause").then(response => {
+            fetch("http://127.0.0.1:7000/backend/pause").then(response => {
                 if (!response.ok) {
             throw new Error('Network response was not ok');
           } else {
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         console.log("drawing button clicked");
         
-        fetch("http://127.0.0.1:5000/backend/sketch_boundary").then(response => {
+        fetch("http://127.0.0.1:7000/backend/sketch_boundary").then(response => {
             if (!response.ok) {
                 console.log("Sketch_boundary FAILURE: ", response)
                 throw new Error('Network response was not ok');  

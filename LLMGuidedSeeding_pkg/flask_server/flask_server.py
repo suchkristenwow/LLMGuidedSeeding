@@ -126,7 +126,7 @@ class CameraServer:
             return jsonify({"error": str(e)}), 500
 
     def run_flask(self):
-        self.app.run(debug=False, host='0.0.0.0', port=5000)
+        self.app.run(debug=False, host='0.0.0.0', port=7000)
 
     def concatenate_images(self):
         images = [self.images[camera] for camera in ['left', 'front', 'right'] if self.images[camera] is not None]
@@ -155,7 +155,7 @@ class CameraServer:
                 headers = {'Content-Type': 'image/jpeg'}
 
                 # Send the image to the GLIP server
-                response = requests.post('http://localhost:5000/process', data=encoded_image.tobytes(), headers=headers)
+                response = requests.post('http://localhost:7000/process', data=encoded_image.tobytes(), headers=headers)
 
                 # Check if the request was successful
                 if response.status_code == 200:

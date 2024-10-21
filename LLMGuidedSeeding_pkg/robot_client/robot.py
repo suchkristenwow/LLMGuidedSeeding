@@ -1,6 +1,6 @@
 #from LLMGuidedSeeding_pkg.robot_client.robot import identified_object
-from LLMGuidedSeeding_pkg.simBot_client.robot_transforms import robotTransforms
-from LLMGuidedSeeding_pkg.utils.rehearsal_utils import select_pt_in_covar_ellipsoid, mahalanobis_distance, gaussian_likelihood, is_in_polygonal_obstacle
+from LLMGuidedSeeding_pkg.robot_client.robot_transforms import robotTransforms
+from LLMGuidedSeeding_pkg.utils.codeGen_utils import select_pt_in_covar_ellipsoid, mahalanobis_distance, gaussian_likelihood
 import numpy as np 
 import toml 
 from shapely import Polygon,Point 
@@ -11,7 +11,7 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as fm
 from shapely.ops import nearest_points
 from collections import deque 
-from ros import simBot_rosPublisher
+from .ros import rosPublisher
 
 class identified_object: 
     def __init__(self,shape,object_id,init_observation,label,history_size=10): 
@@ -45,7 +45,7 @@ class identified_object:
 
         self.plot_colors = {} 
         
-class simBot: 
+class Robot: 
     def __init__(self,config_path,plot_bounds,init_pose,target_locations,obstacle_locations): 
         self.static_transformer = robotTransforms(config_path) 
         with open(config_path, "r") as f:
@@ -80,7 +80,7 @@ class simBot:
         fig, ax = plt.subplots(figsize=(12,12)) #this is for the BEV animation thing 
         self.fig = fig; self.ax = ax 
         # Fire up the Planner 
-        self.rrt_planner = simBot_rosPublisher(self.settings,self.plot_bounds,init_pose) 
+        self.rrt_planner = rosPublisher(self.settings,self.plot_bounds,init_pose) 
         self.rrt_planner.update_pose(init_pose) 
         # Convert the numpy array to a list of strings
         data_str = "\n".join(",".join(map(str, row)) for row in self.plot_bounds)
