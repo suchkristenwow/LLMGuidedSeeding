@@ -1,17 +1,21 @@
-1. Verify that the robot is located within the plot bounds. If not, plan and execute the shortest route to enter the plot bounds.
+1. Start the robot's initial localization using its lidar-inertial odometry and GPS systems. Capture an initial snapshot of the environment using the RGB cameras. 
 
-2. Initialize an empty list in the system memory to store all the locations where seeds have been planted.
+2. If the robot's initial position is outside the plot bounds, use the navigation system to plan and execute the shortest path to move inside the plot bounds. 
 
-3. Identify the landmarks marked as "yellow and black striped tape" using the RGB cameras.
+3. Begin monitoring the robot's surroundings continuously using its RGB cameras. If an object matching the description of 'yellow and black striped tape' is detected, remove the corresponding vertex in the planner graph to avoid this object.
 
-4. Choose 6 evenly spaced points within the plot bounds 
+4. Start to execute the lawn-mower pattern drive. This involves moving in straight lines within the plot bounds, then turning 180 degrees at each edge of the plot to move in a parallel line, repeating this pattern until the entire plot is covered. This should be done while maintaining an even distance between each pass to ensure the 'evenly spaced' requirement is met.
 
-5. Find a lawnmower pattern which intersects these points. A lawnmower pattern is one that moves back and forth in parallel lines.
+5. At the first location in the lawn-mower pattern (i.e., each time the robot completes a full straight line pass), activate the planting system to plant a seed. Make sure that this action is performed while the robot is stationary to ensure accuracy.
 
-6. Following the lawnmower pattern, continually check for pieces of yellow and black striped tape. If the tape is detected, plan around it and navigate back to the main path. 
+6. After planting, store the location of the planted seed in the system memory. This will create a list of all planted locations that can be referred back to later if necessary.
 
-7. Once the robot has reached the position such that the planter is over one of the chosen points from Step 4, stop driving and plant a seed. 
+7. Repeat steps 4 to 6 five more times to achieve a total of six planted locations evenly spaced over the plot. Ensure that the planting locations avoid any areas where 'yellow and black striped tape' has been detected.
 
-8. Record the planting location in the list initialized in Step 2. 
+8. After the sixth planting location has been reached and the seed has been planted, stop the lawn-mower pattern drive. 
 
-9. Continue this process until all 6 seeds have been planted. 
+9. Use the RGB cameras to capture a final snapshot of the environment and the six planted locations. 
+
+10. Save this information and the list of planted locations in the system memory for future reference.
+
+11. Finally, communicate to the user that the task has been successfully completed and provide a summary of the planted locations.

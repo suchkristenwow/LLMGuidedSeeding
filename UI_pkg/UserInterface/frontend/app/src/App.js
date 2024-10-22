@@ -10,13 +10,13 @@ import io from 'socket.io-client'
 function ImageStream() {
   const [paused, setPaused] = useState(false)
   const [drawing, setDrawing] = useState(false) 
-  const [url, setUrl] = useState("http://127.0.0.1:5000/backend/image_stream");
+  const [url, setUrl] = useState("http://127.0.0.1:7000/backend/image_stream");
 
   const togglePause = () => {
     setPaused(paused => !paused); // Toggle the paused state
     
     // Construct the URL based on the new paused state
-    const newUrl = paused ? "http://127.0.0.1:5000/backend/image_stream" : "http://127.0.0.1:5000/backend/pause";
+    const newUrl = paused ? "http://127.0.0.1:7000/backend/image_stream" : "http://127.0.0.1:7000/backend/pause";
     setUrl(newUrl);
     
     // If the new state is not paused, trigger a fetch request to pause
@@ -37,11 +37,11 @@ function ImageStream() {
 
   const toggleDrawing = () => {
     // if not in drawing mode switch to drawing mode
-    const newUrl = (paused && drawing) ? "http://127.0.0.1:5000/backend/pause":"http://127.0.0.1:5000/backend/sketch_boundary"; 
+    const newUrl = (paused && drawing) ? "http://127.0.0.1:7000/backend/pause":"http://127.0.0.1:7000/backend/sketch_boundary"; 
     setUrl(newUrl)
     setDrawing(drawing => !drawing) 
     if (drawing){
-      fetch("http://127.0.0.1:5000/backend/sketch_boundary")
+      fetch("http://127.0.0.1:7000/backend/sketch_boundary")
       .then(response => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

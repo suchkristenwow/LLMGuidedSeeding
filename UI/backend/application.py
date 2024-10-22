@@ -50,4 +50,4 @@ if __name__ == "__main__":
         # Set propagate to False to prevent messages from being printed to the terminal
         logger.propagate = False
     #app.run(host='0.0.0.0', debug=True)
-    application.run(host='0.0.0.0', port=5000, debug = True)
+    application.run(host='0.0.0.0', port=7000, debug = True)

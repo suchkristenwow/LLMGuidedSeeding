@@ -1,4 +1,3 @@
-from LLMGuidedSeeding_pkg.utils.codeGen_utils import remove_chatGPT_commentary
 from LLMGuidedSeeding_pkg.utils.llm_utils import generate_with_openai 
 from LLMGuidedSeeding_pkg.utils.gen_utils import dictify 
 
@@ -28,6 +27,7 @@ class PolicyGenerator:
         self.init_waypoint = None #this is a waypoint to get the robot within bounds if it's initially out of bounds 
         self.base_url = os.path.dirname(os.path.abspath(__file__))
         self.learned_objects = []
+        #self.ConversationalInterface = ConversationalInterface()
 
     def read(self,file): 
         with open(file,"r") as f:
@@ -54,11 +54,17 @@ class PolicyGenerator:
             return False 
         
     def verify_policy(self,policy): 
-        if self.ask_policy_verification(policy):
+        #ask the user if they approve of this policy 
+        #print("policy verification result:",self.conversational_interface.ask_policy_verification(policy))
+        #print("policy: ",policy) 
+        if self.conversational_interface.ask_policy_verification(policy):
             self.validPolicy = True 
             print("Found a valid policy approved by the human!")
             with open(os.path.join(self.logging_directory,"finalPolicy.txt"),"w") as f:
                 f.write(policy)
+        else: 
+            print("Updating feedback!")
+            self.feedback = self.conversational_interface.feedback
 
     def build_policy(self,constraints): 
         print("building policy...")
@@ -104,7 +110,8 @@ class PolicyGenerator:
                 response,_ = generate_with_openai(query) 
                 if not "yes" in response.lower() and lm not in self.learned_objects:
                     print("I dont know what {} is. Ill have to ask.".format(lm))
-                    self.ask_object_clarification(lm) 
+                    #self.ask_object_clarification(lm) 
+                    self.conversational_interface.ask_object_clarification(lm) 
                     #because the interface doesnt exist yet im just going to write the object descriptors and save them in txt files 
                     self.learned_objects.append(lm)  
 
@@ -116,6 +123,7 @@ class PolicyGenerator:
             print("using enhanced prompt to generate a policy") 
             self.current_policy,_ = generate_with_openai(enhanced_prompt) 
             #self.verify_policy(self.current_policy)
+            
         '''
         else: 
             with open("prompts/modify_policy.txt","r") as f: 
@@ -158,29 +166,7 @@ class PolicyGenerator:
             f.write(self.current_policy)
 
         print("Edit policy.txt until youre happy with it")
-        input("Press Enter to Continue") 
-
-        with open("policy.txt","r") as f:
-            policy = f.read()
-
-        self.gen_code_from_policy(policy) 
-
-    def gen_code_from_policy(self,policy):
-        print("reading the policy...")
-
-        with open("prompts/step_parser_codeGen.txt","r") as f: 
-            prompt = f.read() 
-
-        enhanced_prompt = prompt.replace("*INSERT_QUERY*",self.query)
-        enhanced_prompt = enhanced_prompt.replace("*INSERT_POLICY*",policy)
-
-        raw_code,_ = generate_with_openai(enhanced_prompt)
-
-        code = remove_chatGPT_commentary(raw_code)
-
-        print("writing code to self_critique_logs/policy_execution.py")
-        with open("self_critique_logs/policy_execution.py","w") as f:
-            f.write(code) 
+        input("Press Enter to Continue")         
 
 if __name__ == "__main__":
     # Create an argument parser

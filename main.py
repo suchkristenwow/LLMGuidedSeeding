@@ -261,8 +261,8 @@ class ExperimentRunner:
         #launch the robot 
         self.launch_policy_gen()
 
-        #self.launch_policy_execution()
-        #self.start_process_monitoring()
+        self.launch_policy_execution()
+        self.start_process_monitoring()
         
         try:
             while not self.shutdown_event.is_set():

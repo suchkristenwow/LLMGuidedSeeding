@@ -28,4 +28,8 @@ Be sure to give your response in the form of a numbered list so I can easily par
 
 constraint_dictionary: *INSERT_CONSTRAINTS*
 
+Note that for any objects listed under "avoid", each time such an object is detected, the corresponding vertex in the planner graph is removed. That is, 
+you can safely exclude those from the policy. 
+
 Prompt: *INSERT_QUERY*
+
