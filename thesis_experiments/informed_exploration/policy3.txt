@@ -1,0 +1,10 @@
+1. Initialize the robot's location using lidar-inertial odometry and GPS.
+2. Start the exploration algorithm, which will guide the robot through the lab.
+3. As the robot explores the lab, use the onboard RGB cameras to search for the 'clear plastic container', which is listed under 'goal_lms' in the constraint dictionary.
+4. Once the 'clear plastic container' is detected, navigate towards it.
+5. Upon reaching the container, use the RGB cameras to detect and count the 'field flags'.
+6. If the number of flags detected is different each time the robot looks at the container, continue observing until the count remains constant for several consecutive observations. This is to ensure accuracy in flag counting.
+7. Once a consistent count of 'field flags' has been made, store this number in the system memory.
+8. As seeding is not required ('seed': False in the constraint dictionary), there is no need to record planting locations or execute any planting task.
+9. Notify the user of the final count of 'field flags'.
+10. End the task, having successfully located and counted the 'field flags' in the 'clear plastic container'.

@@ -1,0 +1,9 @@
+1. Activate the RGB camera and lidar-inertial odometry system for navigation and object detection.
+2. Begin exploring the laboratory environment, using GPS and odometry data to avoid revisiting areas already explored.
+3. Continually scan the environment for any objects matching the description of "plastic container" and "field flags".
+4. If an object resembling a "plastic container" is detected, move towards it while continuously scanning for any objects listed in the "avoid" list.
+5. Once arrived at the "plastic container", scan the container for "field flags".
+6. Count the number of "field flags" detected in the container using the robot's visual processing capabilities.
+7. Save the count and the location of the container in the system memory.
+8. After counting the flags, confirm that no more exploration is needed as per the prompt instructions and stop the exploration process.
+9. Report the count and the location of the container with the "field flags" to the user.

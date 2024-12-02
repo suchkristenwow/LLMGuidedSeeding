@@ -1,0 +1,13 @@
+1. Activate RGB cameras and lidar-inertial odometry system for navigation and localization.
+2. Start GPS tracking.
+3. Activate object recognition for 'field flag'.
+4. Navigate to the first 'field flag' detected while maintaining a safe distance of 5 cm.
+5. Once the robot reaches the first flag, log the GPS coordinates and mark this position on the system map.
+6. Repeat steps 4-5 for every 'field flag' in the plot.
+7. If an 'avoid' object is detected in the robot's path, reroute the robot to ensure it does not come into contact with the object.
+8. Once all flags have been located and logged, navigate to the first logged flag location.
+9. Because the 'seed' value is False, no seeding is required. 
+10. Move to the next logged flag location.
+11. Repeat steps 9-10 until the robot has visited all logged flag locations.
+12. Once all flag locations have been visited, return the robot to the starting position. 
+13. End the task and provide a task completion report to the user.

@@ -1,0 +1,91 @@
+>>> 
+import time
+import math
+from typing import List
+
+class PlantingRobot:
+    def __init__(self, goal_landmark: str, planting_pattern: str, pattern_offset: float, seed: bool):
+        self.goal_landmark = goal_landmark
+        self.planting_pattern = planting_pattern
+        self.pattern_offset = pattern_offset
+        self.seed = seed
+        self.landmarks = []
+        self.planted_points = []
+        self.robot_pose = None
+
+    def initialize(self):
+        # Initialize seeding system
+        print("Seeding system initialized and ready to perform the task.")
+
+    def localize(self):
+        # Robot localizes using GPS data to find its position in the plot
+        while not is_available():
+            time.sleep(1)
+
+        self.robot_pose = get_position()
+        print(f"Robot localized. Current position: {self.robot_pose.point.x}, {self.robot_pose.point.y}, {self.robot_pose.point.z}")
+
+    def identify_landmark(self):
+        # Robot identifies 'concrete' landmarks using the RGB cameras
+        all_objects = get_all_objects()
+        for index, obj in all_objects.items():
+            if obj['name'] == self.goal_landmark:
+                self.landmarks.append(Point(obj['position']['x'], obj['position']['y'], obj['position']['z']))
+        
+        print(f"Identified {len(self.landmarks)} {self.goal_landmark} landmarks.")
+
+    def navigate_to_landmark(self):
+        # Robot navigates to the goal landmark while avoiding any obstacles
+        for landmark in self.landmarks:
+            closest_waypoint = get_waypoint_closest_to_object(landmark)
+            while not is_available():
+                time.sleep(1)
+            go_to_waypoint(closest_waypoint)
+        
+        print(f"Reached the {self.goal_landmark} landmarks.")
+
+    def plant_seeds(self):
+        # Robot plants seeds in the set grid pattern
+        for i in range(int(math.sqrt(len(self.landmarks)))):
+            for j in range(int(math.sqrt(len(self.landmarks)))):
+                point_to_plant = Point(self.landmarks[i].x + j*self.pattern_offset, self.landmarks[i].y + j*self.pattern_offset, self.landmarks[i].z)
+                while not is_available():
+                    time.sleep(1)
+                go_to_waypoint(point_to_plant)
+                plant()
+                self.planted_points.append(point_to_plant)
+        
+        print(f"Finished planting seeds in the {self.goal_landmark} area.")
+
+    def go_to_start(self):
+        # Robot returns to its starting location
+        while not is_available():
+            time.sleep(1)
+        go_to_waypoint(self.robot_pose.point)
+        print("Returned to starting position.")
+
+    def summarize(self):
+        # Provide a summary of the task execution
+        print(f"Planted a total of {len(self.planted_points)} seeds.")
+        print(f"Covered an area of approximately {self.pattern_offset * math.sqrt(len(self.landmarks))} square meters.")
+
+    def save_data(self):
+        # Save the data of all planted locations
+        with open('planted_points.txt', 'w') as f:
+            for point in self.planted_points:
+                f.write(f"{point.x},{point.y},{point.z}\n")
+        print("Saved the data of all planted locations.")
+
+    def execute(self):
+        self.initialize()
+        self.localize()
+        self.identify_landmark()
+        self.navigate_to_landmark()
+        self.plant_seeds()
+        self.go_to_start()
+        self.summarize()
+        self.save_data()
+
+robot = PlantingRobot('concrete', 'grid', 1, True)
+robot.execute()
+<<<

@@ -6,7 +6,7 @@ The robot is able to observe landmarks via RGB cameras and it is able to plant s
 Given the following prompt, identify any relevant constraints or goal landmarks in the form of a dictionary so that I can write a policy to execute the desired task. 
 
 The keys to this dictionary should be the strings "meta-obstacle", "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
-which is true if the robot should plant in the specified pattern. 
+which is true if the robot should plant in the specified pattern. Note while the pltform is capable of planting, it may not be necessary for the given prompt.
 
 A meta-obstacle is an obstacle created by the platform itself. For example, if the prompt includes a command to avoid driving over areas where you've already driven, you should include 
 {"meta-obstacle":"already driven"}. Another example would be if the prompt includes a command like "Avoid driving over areas where you have already planted", you should include
@@ -16,9 +16,7 @@ For example, if the prompt was: "Plant 10 cm away from any shrubs in the plot", 
 "Seed along the fenceline in a straight row, 15 cm apart", return {"goal_lms":"fence","pattern_offset":0.15,"pattern":"line","seed":"True"}. 
 Finally, the prompt: "Count how many shrubs are in the plot." would return {"search":"shrubs","seed":"False"}.
 
-If you're not sure how to format the constraints into this dictionary format, return a question in the form of a string that would help allow you to parse the prompt 
-into the dictionary format. An example of a follow-up question could be "I'm sorry, I'm not sure how to parse your prompt. Currently, I want to format the constraints of 
-your prompt into a dictionary with the keys: "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset". Do you think your prompt constraints can be categorized 
-like this or should I edit my constraint dictionary format?"
+Consider also that there may be landmarks mentioned in the prompt that will help you find target objects. For example, if the user says 
+"I want to see if there are any foo in this area. Foo are usually found on top of bar." Then you should add "bar" to the constraint dictionary with the key "goal_lms" 
 
 Prompt: *INSERT_QUERY*

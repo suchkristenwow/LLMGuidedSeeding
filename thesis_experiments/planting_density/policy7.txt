@@ -1,0 +1,9 @@
+1. Initialize the system and load the plot bounds and constraints from the system memory.
+2. Begin scanning the environment using the RGB cameras to identify the concrete area which is the target area for planting. 
+3. Once the concrete area is identified, localize it using lidar-inertial odometry and GPS.
+4. Begin creating a grid pattern within the concrete area, with each grid point located 1 meter apart from the other as specified in the "pattern_offset".
+5. Before moving to each grid point, use the RGB camera to check for any objects listed in the "avoid" list. If any such object is detected, remove the corresponding grid point from the planner graph.
+6. Navigate to the first grid point that is free of any objects from the "avoid" list.
+7. Once at the grid point, check the "seed" variable. Since it is set to False, there is no need to plant any seeds.
+8. Move to the next grid point, following the same steps as 5, 6, and 7. Repeat this for all grid points within the concrete area.
+9. Once all grid points within the concrete area have been visited, the task is complete. Confirm the completion of the task to the user.

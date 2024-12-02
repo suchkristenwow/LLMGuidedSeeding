@@ -1,0 +1,75 @@
+>>> 
+
+import time
+import math
+
+class CleapathHusky:
+    def __init__(self):
+        self.planter = False # Planter mechanism
+        self.goal_lms = 'field flag' # Goal landmarks
+        self.landmark_offset = 0.05 # Offset from landmark
+        self.seed = True # To plant or not to plant
+        self.visited_flags = [] # List to keep track of visited flags
+        self.planted_locations = [] # List to keep track of planted locations
+
+    def activate_systems(self):
+        # activate RGB cameras and lidar-inertial odometry systems
+        pass
+
+    def engage_gps(self):
+        # engage GPS system
+        pass
+
+    def search_goal_lms(self):
+        # search for goal landmarks
+        all_objects = get_all_objects()
+
+        # filter out field flags from all_objects
+        field_flags = [op for op in all_objects if op.label == self.goal_lms and op.visited == False]
+
+        # if there are any field flags left to visit
+        if field_flags:
+            # find the closest flag
+            closest_flag = min(field_flags, key=lambda flag: math.sqrt((flag.point.x - get_position().point.x)**2 +
+                                                                       (flag.point.y - get_position().point.y)**2 +
+                                                                       (flag.point.z - get_position().point.z)**2))
+            return closest_flag
+
+        # if all flags have been visited
+        return None
+
+    def navigate_to_flag(self, flag):
+        # navigate to the flag
+        go_to_waypoint(get_waypoint_closest_to_object(flag))
+
+    def plant_seed(self):
+        # plant a seed
+        plant()
+        self.planted_locations.append(get_position().point)
+
+    def execute_task(self):
+        self.activate_systems()
+        self.engage_gps()
+
+        while True:
+            if is_available():
+                flag = self.search_goal_lms()
+                if flag is not None:
+                    self.navigate_to_flag(flag)
+                    time.sleep(5) # wait for the robot to reach the flag
+                    if self.seed:
+                        self.plant_seed()
+                    flag.visited = True
+                else:
+                    break
+
+        # return to initial position
+        go_to_waypoint(self.visited_flags[0].point)
+
+        # report task completion
+        print('Task Complete. Planted locations: ', self.planted_locations)
+
+robot = CleapathHusky()
+robot.execute_task()
+
+<<<

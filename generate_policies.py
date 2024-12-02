@@ -14,13 +14,14 @@ class PolicyGenerator:
         self,
         prompt_path="example.txt",
         config_path="example.toml",
-        logging_directory="logs",
-        plot_bounds_path="random_path.csv",
+        logging_directory="logs"
     ):
+        self.prompt_name = os.path.basename(prompt_path)[:-4]
+        print("prompt_name: ",self.prompt_name)
         self.logging_directory = logging_directory 
         self.query = self.read(prompt_path)
         self.settings = toml.load(config_path)  
-        self.plot_bounds = np.genfromtxt(plot_bounds_path)
+        #self.plot_bounds = np.genfromtxt(plot_bounds_path)
         self.current_policy = None 
         self.validPolicy = False 
         self.feedback= None 
@@ -34,14 +35,21 @@ class PolicyGenerator:
             return f.read() 
 
     def ask_object_clarification(self,object_name):
-        print(f'I dont know what a {object_name} is. Can you write a description in OOD_obj_description.txt and press Enter to continue?')
-        input("Press Enter to continue") 
-        with open("OOD_obj_description.txt","r") as f:
-            obj_description = f.read()
-        filename = object_name.replace(" ", "_") + ".txt" 
         if not os.path.exists("./custom_obj_descriptions"):
             os.mkdir("./custom_obj_descriptions")
-        shutil.copyfile("OOD_obj_description.txt",os.path.join("custom_obj_descriptions",filename)) 
+
+        object_name = object_name.replace(" ","_") 
+        filename = object_name + ".txt"
+
+        if not os.path.exists(os.path.join("custom_obj_descriptions",filename)): 
+            print(f'I dont know what a {object_name} is. Can you write a description in OOD_obj_description.txt and press Enter to continue?')
+            input("Press Enter to continue") 
+            '''
+            with open("OOD_obj_description.txt","r") as f:
+                obj_description = f.read()
+            '''
+        
+            shutil.copyfile("OOD_obj_description.txt",os.path.join("custom_obj_descriptions",filename)) 
 
     def ask_policy_verification(self,policy):
         print("What do you think of this policy? " + "\n" + policy) 
@@ -66,17 +74,11 @@ class PolicyGenerator:
             print("Updating feedback!")
             self.feedback = self.conversational_interface.feedback
 
-    def build_policy(self,constraints): 
+    def build_policy(self,constraints,dir_,iter): 
         print("building policy...")
         if self.feedback is None and self.current_policy is None: 
-            print("feedback is none!")
-            #1. Navigate to goal points, respecting the constraints 
-            # "avoid","goal_lms","pattern","landmark_offset","search", and "pattern_offset","seed" = True/False.
-            # check all of these landmarks  
-            prompt_lms = {} 
+            prompt_lms = []
             for k in constraints.keys(): 
-                #print("constraints[k]: ",constraints[k]) 
-                #print(type(constraints[k])) 
                 if isinstance(constraints[k],str): 
                     if "and" in constraints[k]:
                         #print("And is in the constraints!") 
@@ -95,26 +97,54 @@ class PolicyGenerator:
                         constraints[k] = split_constraint 
 
                 if isinstance(constraints[k],list):  
-                    #print("this is  a list!")
                     if isinstance(constraints[k][0],str): 
                         if "," in constraints[k][0]:
                             split_constraint = constraints[k][0].split(",") 
                             #print("split_constraint: ",split_constraint)
                             constraints[k] = split_constraint 
 
-            print("constraints: ",constraints) 
+            #"meta-obstacle", "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". 
+            if "avoid" in constraints.keys():
+                if isinstance(constraints["avoid"],list): 
+                    prompt_lms.extend(constraints["avoid"]) 
+                elif isinstance(constraints["avoid"],str): 
+                    prompt_lms.append(constraints["avoid"])
+            if "goal_lms" in constraints.keys():
+                if isinstance(constraints["goal_lms"],list): 
+                    prompt_lms.extend(constraints["goal_lms"]) 
+                elif isinstance(constraints["goal_lms"],str): 
+                    prompt_lms.append(constraints["goal_lms"]) 
+            if "search" in constraints.keys(): 
+                if isinstance(constraints["search"],list): 
+                    prompt_lms.extend(constraints["search"]) 
+                elif isinstance(constraints["search"],str): 
+                    prompt_lms.append(constraints["search"])  
 
-            for lm in prompt_lms:
+            for lm in prompt_lms:   
                 #is the lm in or out of distribution 
-                query = "Would a " + lm + " be in-distribution for object detectors like yolo world? Yes or no."  
+                query = "Would a " + lm + " be in-distribution for object detectors like yolo world? Specifically in the context of this prompt: " + self.query + "\n" + \
+                    "For ease of parsing, please answer with a Yes or No."
+                
+                print("checking if {} is out of distribution".format(lm)) 
                 response,_ = generate_with_openai(query) 
+                print("response: ",response) 
+
                 if not "yes" in response.lower() and lm not in self.learned_objects:
                     print("I dont know what {} is. Ill have to ask.".format(lm))
                     #self.ask_object_clarification(lm) 
-                    self.conversational_interface.ask_object_clarification(lm) 
+                    #self.conversational_interface.ask_object_clarification(lm) 
+                    self.ask_object_clarification(lm)
                     #because the interface doesnt exist yet im just going to write the object descriptors and save them in txt files 
-                    self.learned_objects.append(lm)  
-
+                    self.learned_objects.append(lm)   
+                    if 'flag' in lm:
+                        with open(os.path.join(dir_,"ood_detection"+str(iter)+".txt"),"w") as f: 
+                            f.write("True")
+                else:
+                    print(f"I think that {lm} is in-distribution") 
+                    if 'flag' in lm: 
+                        with open(os.path.join(dir_,"ood_detection"+str(iter)+".txt"),"w") as f:
+                            f.write("False")
+                
             with open("prompts/get_policy_steps.txt","r") as f:
                 prompt = f.read() 
 
@@ -147,27 +177,141 @@ class PolicyGenerator:
         with open("prompts/get_prompt_constraints.txt","r") as f:
             constraints_prompt = f.read()
         enhanced_query = constraints_prompt.replace("*INSERT_QUERY*",self.query)
-        llm_result,_ = generate_with_openai(enhanced_query) 
+
+        llm_result,history = generate_with_openai(enhanced_query) 
+        print("response: ",llm_result) 
+        print() 
+
         constraints = {} 
         i0 = llm_result.index("{"); i1 = llm_result.index("}")
         parsed_results = llm_result[i0:i1+1]
         if "}" not in parsed_results:
             parsed_results = parsed_results + "}"
         constraints = dictify(parsed_results) 
+        if "seed" in constraints.keys(): 
+            if constraints["seed"]: 
+                prompt = "Are you sure the user specified that they wanted you to plant seeds in the original prompt?" 
+                print("double checking seeding requirement ...")
+                response,_ = generate_with_openai(prompt,conversation_history=history) 
+                if not "yes" in response.lower():
+                    constraints["seed"] = False 
+                
         print("constraints: ",constraints)
+
         return constraints
         
-    def gen_policy(self): 
-        print("identifying constraints ...") 
-        #1. Identify constraints and goal landmarks from the prompt 
-        constraints = self.parse_prompt()
-        self.build_policy(constraints) 
-        with open("policy.txt","w") as f:
-            f.write(self.current_policy)
+    def gen_policy(self, constraints = None, path = None, dir_ = None, iter_ = None):
+        if constraints is None:  
+            print("identifying constraints ...") 
+            #1. Identify constraints and goal landmarks from the prompt 
+            constraints = self.parse_prompt()
+        
+        print("building policy ...")
+        self.build_policy(constraints,dir_,iter_) 
 
-        print("Edit policy.txt until youre happy with it")
-        input("Press Enter to Continue")         
+        if path is None: 
+            with open("policy.txt","w") as f:
+                f.write(self.current_policy)   
+                f.close() 
+        else: 
+            with open(path,"w") as f: 
+                print("self.current_policy: ",self.current_policy)
+                print("writing policy to path: {}".format(path))
+                f.write(self.current_policy) 
+                f.close() 
 
+    def code_gen(self,iter=None): 
+        if not os.path.exists(os.path.join("thesis_experiments",self.prompt_name)):
+            os.mkdir(os.path.join("thesis_experiments",self.prompt_name))
+
+        prompt_dir = os.path.join("thesis_experiments",self.prompt_name) 
+
+        constraint_dict = self.parse_prompt()
+        with open(os.path.join(prompt_dir,"constraints_" + str(iter) + ".txt"),"w") as f: 
+            f.write(str(constraint_dict))  
+            f.close()  
+
+        #regenerate policy 
+        self.current_policy = None 
+
+        if iter is not None:             
+            policy_path = os.path.join(prompt_dir,"policy"+str(iter)+".txt")
+            print("policy_path: ",policy_path) 
+            self.gen_policy(constraints=constraint_dict,path=policy_path,dir_=prompt_dir,iter_=iter)
+            final_policy = self.read(policy_path) 
+        else: 
+            self.gen_policy(constraints=constraint_dict)
+            final_policy = self.read("policy.txt")
+
+        prompt = self.read("prompts/step_parser_codeGen.txt")
+        
+        code_gen_prompt = prompt.replace("*INSERT_QUERY", self.query) 
+        code_gen_prompt = code_gen_prompt.replace("*INSERT_CONSTRAINT_DICT*",str(constraint_dict))
+        code_gen_prompt = code_gen_prompt.replace("*INSERT_POLICY*", final_policy)
+
+        if len(self.learned_objects) > 0:
+            for custom_obj in self.learned_objects: 
+                filename  = custom_obj.replace(" ","_") + ".txt"
+                with open("./custom_obj_descriptions/"+ filename,"r") as f:
+                    obj_description = f.read() 
+                code_gen_prompt += "\n" + f"The user has defined {custom_obj} like this: " + "\n" + obj_description 
+
+        llm_result, _ = generate_with_openai(code_gen_prompt)
+
+        if not iter is None: 
+            with open(os.path.join(prompt_dir,"result" + str(iter) + ".txt"),"w") as f: 
+                f.write(llm_result)
+            f.close() 
+
+    def seeding_failure_reGen(self,iter=None): 
+        if not os.path.exists(os.path.join("thesis_experiments",self.prompt_name)):
+            os.mkdir(os.path.join("thesis_experiments",self.prompt_name))
+
+        prompt_dir = os.path.join("thesis_experiments",self.prompt_name) 
+
+        constraint_dict = self.parse_prompt()
+        with open(os.path.join(prompt_dir,"constraints_" + str(iter) + ".txt"),"w") as f: 
+            f.write(str(constraint_dict))  
+            f.close()  
+
+        #regenerate policy 
+        self.current_policy = None 
+
+        if iter is not None:             
+            policy_path = os.path.join(prompt_dir,"policy"+str(iter)+".txt")
+            print("policy_path: ",policy_path) 
+            self.gen_policy(constraints=constraint_dict,path=policy_path,dir_=prompt_dir,iter_=iter)
+            final_policy = self.read(policy_path) 
+        else: 
+            raise OSError 
+
+        prompt = self.read("prompts/step_parser_codeGen.txt")
+        old_code = self.read(os.path.join(prompt_dir,"result"+str(iter)+".txt"))
+
+        code_gen_prompt = prompt.replace("*INSERT_QUERY", self.query) 
+        code_gen_prompt = code_gen_prompt.replace("*INSERT_CONSTRAINT_DICT*",str(constraint_dict))
+        code_gen_prompt = code_gen_prompt.replace("*INSERT_POLICY*", final_policy)
+        code_gen_prompt = code_gen_prompt.replace("*INSERT_OLD CODE*",old_code)
+
+        if len(self.learned_objects) > 0:
+            for custom_obj in self.learned_objects: 
+                filename  = custom_obj.replace(" ","_") + ".txt"
+                with open("./custom_obj_descriptions/"+ filename,"r") as f:
+                    obj_description = f.read() 
+                code_gen_prompt += "\n" + f"The user has defined {custom_obj} like this: " + "\n" + obj_description 
+
+        llm_result, _ = generate_with_openai(code_gen_prompt)
+
+        if not os.path.exists(os.path.join(prompt_dir,"faultRecovery")):
+            os.mkdir(os.path.join(prompt_dir,"faultRecovery"))
+
+        if not iter is None: 
+            with open(os.path.join(prompt_dir,"faultRecovery/result" + str(iter) + ".txt"),"w") as f: 
+                f.write(llm_result)
+            f.close() 
+        
+
+        
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description="Explore Test")
@@ -193,13 +337,15 @@ if __name__ == "__main__":
         default="logs",
     )
 
+    '''
     parser.add_argument(
         "--plot_bounds_path",
         type=str,
         help="Path of a csv file containing the perimeter of the desired area of operation",
         default="random_path.csv",
     )
-
+    '''
+    
     # Parse the command-line arguments
     args = parser.parse_args() 
     
@@ -208,8 +354,9 @@ if __name__ == "__main__":
     pg = PolicyGenerator(
         prompt_path=args.prompt_path,
         config_path=args.config_path, 
-        logging_directory=args.logging_dir,
-        plot_bounds_path=args.plot_bounds_path
+        logging_directory=args.logging_dir
     )
 
-    pg.gen_policy() 
+    for i in range(1,10):
+        print("this is iter:",i)
+        pg.code_gen(iter=i)

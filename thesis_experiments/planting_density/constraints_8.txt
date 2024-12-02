@@ -1,0 +1,1 @@
+{'goal_lms': 'concrete area', 'pattern_offset': 1, 'pattern': 'grid', 'seed': False}

@@ -1,0 +1,70 @@
+>>> 
+
+import time
+
+# Initialize an empty list to keep track of detected flags
+detected_flags = []
+
+# Counter variable to keep track of the total number of flags detected
+flag_count = 0
+
+# Begin to explore the lab, searching for the clear plastic container with the field flags
+while True:
+
+    # Check if the robot is available before proceeding
+    if is_available():
+
+        # Start the robot's exploration
+        start_volumetric_gain_exploration()
+
+        # Get all detected objects
+        all_objects = get_all_objects()
+
+        # Look for the clear plastic container among the detected objects
+        for index in all_objects:
+            obj = all_objects[index]
+
+            # If a clear plastic container is found
+            if obj['name'] == 'clear plastic container':
+
+                # Stop the robot's current exploration
+                stop_robot()
+
+                # Get the object point
+                obj_point = ObjectPoint(obj['time'], Point(obj['position']['x'], obj['position']['y'], obj['position']['z']), obj['name'], obj['confidence'], False)
+
+                # Check if the container is within the waypoint bounds
+                if check_waypoint_in_bounds(obj_point.point):
+
+                    # Navigate to the waypoint closest to the container
+                    waypoint = get_waypoint_closest_to_object(obj_point)
+                    go_to_waypoint(waypoint)
+
+                    # Check if there are field flags within the container
+                    flags = check_target_object('field flags', 2)
+
+                    if flags:
+
+                        # For each detected flag, increment the counter and add its location to the list
+                        for flag in flags:
+                            flag_count += 1
+                            detected_flags.append(flag)
+
+                    # Stop the robot's navigation once all flags are accounted for
+                    stop_robot()
+
+                    # Print out the total count of the field flags and their locations
+                    print('Total field flags detected:', flag_count)
+                    print('Locations of detected flags:', detected_flags)
+
+                    # End the execution
+                    return
+
+        # If no clear plastic container is found, pause for a moment and then continue the exploration
+        time.sleep(1)
+
+    else:
+        # If the robot is not available, pause for a moment and then check again
+        time.sleep(1)
+
+<<<

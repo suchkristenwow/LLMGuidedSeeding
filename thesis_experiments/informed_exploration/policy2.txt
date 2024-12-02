@@ -1,0 +1,11 @@
+1. Activate the robot's RGB cameras and lidar-inertial odometry system to start the observation and localization process.
+2. Start exploring the laboratory environment in a systematic pattern such as a grid or spiral, which ensures full coverage of the area.
+3. As the robot moves, it should continuously monitor its surroundings for the presence of a clear plastic container.
+4. If the robot's cameras detect an object that might be a clear plastic container, pause the exploration.
+5. Approach the detected object carefully while maintaining a safe distance. 
+6. Verify if the detected object is indeed the clear plastic container with field flags using visual recognition algorithms.
+7. If the object is confirmed to be the container with field flags, proceed to the next step. If not, go back to step 2 and continue the exploration.
+8. Count the number of field flags in the container. The robot can use image processing techniques to identify and count individual flags.
+9. Record the total count of field flags and their location in the system memory.
+10. Stop the exploration once the flags have been counted since the prompt specifies that all flags are in one container. If more containers are detected, they can be ignored.
+11. Provide feedback to the ecologist or user with the number of field flags found and their location.

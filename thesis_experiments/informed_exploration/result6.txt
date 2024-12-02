@@ -1,0 +1,53 @@
+>>> Start Python Code
+
+import time
+
+# Define the goal object label and the search object label
+goal_object_label = "clear plastic container"
+search_object_label = "field flags"
+
+# Initialize field flags counter
+field_flags_counter = 0
+
+# While the robot is not available, wait
+while not is_available():
+    time.sleep(1)
+
+# Start exploration mode
+start_volumetric_gain_exploration()
+
+# Search for the clear plastic container and the field flags
+while True:
+    # Check if the clear plastic container has been detected within a reasonable distance
+    container_detected = check_target_object(goal_object_label, 10)
+
+    # If the clear plastic container has been detected, stop exploration mode
+    if container_detected:
+        stop_robot()
+        break
+
+    # Check if the field flags have been detected within a reasonable distance
+    flags_detected = check_target_object(search_object_label, 10)
+
+    # If the field flags have been detected, increment the counter
+    if flags_detected:
+        field_flags_counter += len(flags_detected)
+
+    # If the robot is not available, wait
+    if not is_available():
+        time.sleep(1)
+
+# Print the number of field flags counted
+print("Number of field flags counted: ", field_flags_counter)
+
+# Store the total count of field flags in the system memory
+# This is just a placeholder, replace with actual code for storing in system memory
+total_count_of_field_flags = field_flags_counter
+
+# If there is any uncertainty in the count, interface with the human for more direction or context
+# This is just a placeholder, replace with actual code for interfacing with the human
+
+# Report the number of flags counted to the user
+print("Number of flags counted: ", total_count_of_field_flags)
+
+<<< End Python Code

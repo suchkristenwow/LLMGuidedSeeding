@@ -1,0 +1,11 @@
+1. Begin exploration mode to find the 'clear plastic container' based on the 'goal_lms' field from the constraint dictionary.
+2. Use the onboard RGB cameras to visually scan the environment for the 'clear plastic container'. Also, use lidar-inertial odometry and GPS for precise localization.
+3. As you explore, check for field flags. If you find any, register the location in the system memory.
+4. Continue exploring and searching for the clear plastic container.
+5. If and when the 'clear plastic container' is detected, stop exploration mode.
+6. Begin counting mode. Carefully observe the flags in the clear plastic container using the RGB cameras. Count the number of field flags.
+7. Once done counting, store the total count of field flags in the system memory.
+8. If there is any uncertainty in the count, interface with the human for more direction or context.
+9. Report the number of flags counted to the user. 
+
+Please note that according to the constraint dictionary, the 'seed' entry is marked as False, so there is no need to perform any seeding tasks. Additionally, there are no 'avoid' objects listed, so we don't need to remove any vertices from the planner graph.

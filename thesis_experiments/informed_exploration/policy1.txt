@@ -1,0 +1,9 @@
+1. Initialize the system's GPS and Lidar-inertial odometry for accurate positioning and localization.
+2. Begin exploring the laboratory environment, using the robot's RGB cameras to visually identify landmarks.
+3. While exploring, scan for the 'clear plastic container' mentioned in the 'goal_lms' parameter.
+4. If the 'clear plastic container' is not immediately found, continue exploration in a systematic pattern to cover the entire laboratory.
+5. Upon identification of the 'clear plastic container', approach the container while maintaining safe navigation protocols.
+6. Upon reaching the container, use the robot's vision system to count the number of 'field flags' inside the container.
+7. Store the count of 'field flags' in the system memory.
+8. Once the 'field flags' have been counted, stop further exploration as per the prompt instructions.
+9. Finally, communicate the count of 'field flags' back to the ecologist for their record and further instruction.

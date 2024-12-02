@@ -1,0 +1,11 @@
+1. Activate the robot's GPS and lidar-inertial odometry systems for accurate location tracking and landmark detection.
+2. Initiate the RGB cameras and begin the task.
+3. Look for the 'field flag' landmarks within the plot bounds. 
+4. Upon identifying a field flag, the robot should navigate towards it, maintaining a safe and continuous path to avoid any potential hazards.
+5. Stop the robot when it reaches a position 5 cm away from the detected field flag. This is the 'landmark_offset' value from the constraint dictionary.
+6. Check if the 'seed' value in the constraint dictionary is true, in which case the robot should plant a seed at the current location.
+7. If the seed is planted successfully, record the current GPS coordinates in the system memory.
+8. Continue to scan the area for more 'field flag' landmarks.
+9. Repeat steps 4-7 for each identified field flag until all have been visited and a seed has been planted 5 cm away from each.
+10. Once all field flags have been visited and a seed planted nearby each, the robot should stop and send a completion signal.
+11. Finally, generate a report including the list of all planted locations from the system memory for future reference and analysis.

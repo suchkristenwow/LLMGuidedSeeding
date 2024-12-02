@@ -1,0 +1,19 @@
+1. Initialize the robot's vision and navigation systems to be ready for the exploration task. 
+
+2. Using its RGB cameras, the robot should start scanning the laboratory environment for the specified 'goal_lms' which is a 'clear plastic container'. 
+
+3. While exploring, the robot should also keep track of its location and path using lidar-inertial odometry and GPS.
+
+4. If the 'clear plastic container' is found, the robot should approach the container carefully while avoiding any obstacles detected by its sensors.
+
+5. Once it is near the container, the robot should start counting the number of 'field flags' present in the container.
+
+6. The robot should use its RGB cameras to visually identify and count each individual 'field flag'. 
+
+7. Once the counting task is finished, the robot should store the count in its system memory.
+
+8. Finally, the robot should stop exploring as per the user's instruction that once the flags are found, the exploration can be stopped.
+
+9. The robot should communicate the final count of the 'field flags' to the user. This could be done through a display or any other communication means available. 
+
+10. With the task completed, the robot can then either return to its starting point or await further instructions.

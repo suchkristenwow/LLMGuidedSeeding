@@ -1,0 +1,23 @@
+1. Activate RGB cameras and lidar-inertial odometry systems to observe the environment and locate the robot's position.
+
+2. Engage the GPS system to receive accurate positioning data.
+
+3. Use the vision system to search for the goal landmarks, in this case, the field flags.
+
+4. Once a field flag is detected, calculate the distance to the flag using both GPS and lidar data.
+
+5. Command the robot to navigate towards the detected flag, stopping when it is 5 cm (0.05 m, as per the 'landmark_offset' value) away.
+
+6. If the 'seed' value is True (which it is in this case), command the robot to activate the seeding mechanism.
+
+7. Plant a seed at the current location.
+
+8. Record the coordinates of the planted location in the system memory.
+
+9. Repeat steps 3-8 until all field flags have been located and a seed has been planted near each one.
+
+10. Once all seeds have been planted as per the instructions, command the robot to return to its initial position.
+
+11. Once the robot is back at its initial position, update the system memory to indicate that the task is complete.
+
+12. Interface with the human user to report task completion and provide a list of all the locations where seeds have been planted.

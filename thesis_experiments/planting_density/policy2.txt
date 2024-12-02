@@ -1,0 +1,10 @@
+1. Begin by initializing the robot's localization systems, such as the lidar-inertial odometry and the GPS.
+2. Use the robot's RGB cameras to scan the area and identify the concrete landmarks mentioned in 'goal_lms' of the constraint dictionary. 
+3. Navigate towards the identified concrete area using the lidar-inertial odometry and the GPS systems for accurate localization.
+4. Once the robot has reached the concrete area, utilize the RGB cameras again to evaluate the area and identify any objects listed under 'avoid' in the constraint dictionary. If any are detected, remove the corresponding vertex in the planner graph.
+5. After ensuring the area is clear of any objects to be avoided, begin to map out a grid pattern for planting based on the 'pattern_offset' provided in the constraint dictionary. In this case, it would be a grid with spacing of 1m x 1m.
+6. Commence planting seeds at each point in the grid. At each point, drop a seed and mark the location in the system's memory as 'planted'. This will maintain a record of all planted locations as required.
+7. Continue this planting process, following the grid pattern until the whole concrete area has been covered. 
+8. Once all planting is complete, use the RGB cameras to conduct a final scan of the area to confirm that the seeding has been completed as per the grid pattern.
+9. Report the completion of the task and provide a list of all planted locations to the user for verification and future reference.
+10. Return the robot to its initial position or to a designated rest point, completing the task.

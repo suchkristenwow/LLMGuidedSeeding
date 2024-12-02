@@ -1,0 +1,9 @@
+1. Initialize an empty list in the system memory to keep track of detected flags.
+2. Activate the robot's RGB cameras and lidar-inertial odometry system for exploration and localization.
+3. Begin to explore the lab, navigating towards any detected "clear plastic container", which is the goal landmark according to the constraints dictionary.
+4. Use the robot's RGB cameras to detect any field flags within the clear plastic container once it is found.
+5. For each detected flag, increment a counter variable in the system memory. This variable is used to keep track of the total number of field flags detected.
+6. Add the location of each detected field flag to the previously initialized list in the system memory. This will help in keeping track of where each flag was found.
+7. Continue the exploration and detection process until all the field flags within the clear plastic container are counted.
+8. Once all flags are accounted for, the robot should stop exploring as per the prompt.
+9. Finally, relay the total count of the field flags to the user and provide the list of locations where each flag was found.

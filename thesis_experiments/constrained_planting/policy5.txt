@@ -1,0 +1,15 @@
+1. Activate the RGB cameras and lidar-inertial odometry system for initial environment mapping and object detection.
+2. Identify the field flags in the plot using the RGB cameras. 
+3. Map the locations of the detected field flags using GPS.
+4. Define a circular region with a radius of 0.05 meters (5 cm) around each flag. This will be the targeted planting area.
+5. Activate the seed planting mechanism.
+6. For each of the field flags:
+    a. Navigate to the defined region around the flag using the GPS and lidar-inertial odometry data.
+    b. Upon reaching the target, confirm the robot's position is within the defined area of the flag using the lidar-inertial odometry.
+    c. Once confirmed, initiate the seeding process.
+    d. Save the GPS coordinates of the seeded location in the system memory.
+7. After all flags have been serviced, check the system memory to ensure all targeted areas have a corresponding planted seed location.
+8. If any targeted areas are missing a planted seed location, repeat steps 6 and 7 for these specific areas.
+9. Once the planting process is complete for all flags, save the final list of planted locations in the system memory for future reference and auditing.
+10. Switch off the seed planting mechanism and the robot's navigational systems.
+11. Return the robot to its original location or charging station.

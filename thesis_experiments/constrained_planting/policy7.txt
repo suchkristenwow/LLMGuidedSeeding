@@ -1,0 +1,13 @@
+1. Activate the RGB camera and lidar-inertial odometry system on the robot to prepare for navigation and landmark detection.
+2. Use the GPS to locate the plot boundaries and ensure the robot stays within them during the operation.
+3. Search for the "field flag" landmarks in the plot using the robot's RGB cameras and lidar-inertial odometry system.
+4. Once a field flag is detected, calculate the distance to the flag. If the robot is more than 5 cm away, adjust the robot's course to move closer.
+5. When the robot is within the specified 5 cm range of a field flag, stop the robot.
+6. Activate the seed planting mechanism to plant a seed in the current location.
+7. Record the GPS coordinates of the planted seed in the system memory to maintain a list of all planted locations.
+8. Repeat steps 3 to 7 for each detected field flag in the plot.
+9. When all field flags have been detected and a seed has been planted near each one, return the robot to its starting position.
+10. Upon completion, check the system memory to confirm that a seed has been planted near each field flag.
+11. If there are any field flags that do not have a corresponding seed planting recorded, repeat steps 3 to 7 for these missed flags.
+12. Once all flags have a corresponding planting, end the planting program and switch the robot to standby mode.
+13. Provide a report to the human operator indicating the completion of the task, along with the list of GPS coordinates where seeds were planted.

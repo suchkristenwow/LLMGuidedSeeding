@@ -1,0 +1,68 @@
+>>> 
+
+import time
+
+# Step 1: Initialize the system's GPS and Lidar-inertial odometry for accurate positioning and localization.
+while not is_available():
+    time.sleep(1)
+
+# Start of exploration
+start_volumetric_gain_exploration()
+
+# Step 2: Begin exploring the laboratory environment, using the robot's RGB cameras to visually identify landmarks.
+# Step 3: While exploring, scan for the 'clear plastic container' mentioned in the 'goal_lms' parameter.
+
+while True:
+    # Check if the robot is available
+    while not is_available():
+        time.sleep(1)
+
+    # Fetch all the detected objects
+    detected_objects = get_all_objects()
+
+    # Check if the plastic container has been found
+    container = [op for op in detected_objects.values() if op['name'] == 'clear plastic container' and op['confidence'] > 0.6]
+
+    if container:
+        # Container found, stop the exploration
+        stop_robot()
+        break
+    else:
+        # Container not found, continue the exploration
+        time.sleep(1)
+
+# Step 4: If the 'clear plastic container' is not immediately found, continue exploration in a systematic pattern to cover the entire laboratory.
+# This step is covered in the above while loop.
+
+# Step 5: Upon identification of the 'clear plastic container', approach the container while maintaining safe navigation protocols.
+while not is_available():
+    time.sleep(1)
+
+# Get the waypoint closest to the container
+container_position = Point(container[0]['position']['x'], container[0]['position']['y'], container[0]['position']['z'])
+waypoint = get_waypoint_closest_to_object(container_position)
+
+# Navigate to the waypoint
+go_to_waypoint(waypoint)
+
+# Step 6: Upon reaching the container, use the robot's vision system to count the number of 'field flags' inside the container.
+while not is_available():
+    time.sleep(1)
+
+# Fetch all the detected objects
+detected_objects = get_all_objects()
+
+# Count the field flags
+field_flags = [op for op in detected_objects.values() if op['name'] == 'field flags' and op['confidence'] > 0.6]
+field_flags_count = len(field_flags)
+
+# Step 7: Store the count of 'field flags' in the system memory.
+# This is represented by the variable field_flags_count
+
+# Step 8: Once the 'field flags' have been counted, stop further exploration as per the prompt instructions.
+stop_robot()
+
+# Step 9: Finally, communicate the count of 'field flags' back to the ecologist for their record and further instruction.
+print(f'The number of field flags is: {field_flags_count}')
+
+<<<

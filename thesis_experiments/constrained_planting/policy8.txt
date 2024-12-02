@@ -1,0 +1,9 @@
+1. Activate the robot's observation system and set it to locate 'field flag' landmarks.
+2. Start the localization system using lidar-inertial odometry and GPS to keep track of the robot's position.
+3. Begin moving towards the closest detected 'field flag' while avoiding any objects listed under the "avoid" category.
+4. Once the robot is within a 5 cm distance of the 'field flag' (as specified by 'landmark_offset'), prepare the seeding mechanism.
+5. Plant the seed and record the current GPS coordinates in the system memory under 'planted locations'.
+6. Resume the search for the next 'field flag'.
+7. Repeat steps 3 to 6 until all 'field flags' have been detected and a seed has been planted within 5 cm of each.
+8. After all seeds are planted, save and store the list of 'planted locations' in the system memory for future reference and possible follow-ups.
+9. Send a completion message to the user notifying them of the task's completion and provide the list of 'planted locations'.

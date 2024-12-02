@@ -1,0 +1,83 @@
+>>> 
+```python
+import time
+from typing import List
+
+# Function to get all field flags
+def get_all_field_flags() -> List[ObjectPoint]:
+    objects = get_all_objects()
+    field_flags = [obj for obj in objects.values() if obj['name'] == 'field flag' and not obj['visited']]
+    field_flags_points = [ObjectPoint(obj['time'], Point(obj['position']['x'], obj['position']['y'], obj['position']['z']), obj['name'], obj['confidence'], obj['visited']) for obj in field_flags]
+    return field_flags_points
+
+# Function to get closest field flag
+def get_closest_field_flag(current_position: RobotPose, field_flags: List[ObjectPoint]) -> ObjectPoint:
+    min_distance = float('inf')
+    closest_flag = None
+    for flag in field_flags:
+        distance = ((flag.point.x - current_position.point.x) ** 2 + (flag.point.y - current_position.point.y) ** 2 + (flag.point.z - current_position.point.z) ** 2) ** 0.5
+        if distance < min_distance:
+            min_distance = distance
+            closest_flag = flag
+    return closest_flag
+
+# Function to move to waypoint
+def move_to_waypoint(waypoint: Point):
+    while not is_available():
+        time.sleep(1)
+    go_to_waypoint(waypoint)
+
+# Main task execution
+def execute_task():
+    # Step 1: Activate RGB cameras and lidar-inertial odometry system for navigation and localization
+    # Step 2: Start GPS tracking (assuming these steps are done automatically by the robot)
+
+    # Dictionary to hold flag locations
+    flag_locations = {}
+
+    while True:
+        # Step 3: Activate object recognition for 'field flag'
+        # Assuming this step is done automatically by the robot
+
+        # Step 4: Navigate to the first 'field flag' detected while maintaining a safe distance of 5 cm
+        field_flags = get_all_field_flags()
+        if not field_flags:
+            break
+        current_position = get_position()
+        closest_flag = get_closest_field_flag(current_position, field_flags)
+        waypoint = get_waypoint_closest_to_object(closest_flag)
+        move_to_waypoint(waypoint)
+
+        # Step 5: Once the robot reaches the first flag, log the GPS coordinates and mark this position on the system map
+        current_position = get_position()
+        flag_locations[closest_flag] = current_position.point
+
+        # Step 6: Repeat steps 4-5 for every 'field flag' in the plot
+        # This will be done automatically by the while loop
+
+    # Step 7: If an 'avoid' object is detected in the robot's path, reroute the robot to ensure it does not come into contact with the object
+    # Assuming this step is done automatically by the robot
+
+    # Step 8: Once all flags have been located and logged, navigate to the first logged flag location
+    for flag, location in flag_locations.items():
+        move_to_waypoint(location)
+
+        # Step 9: Because the 'seed' value is False, no seeding is required
+        # No action required
+
+        # Step 10: Move to the next logged flag location
+        # This will be done automatically by the for loop
+
+    # Step 11: Repeat steps 9-10 until the robot has visited all logged flag locations
+    # This will be done automatically by the for loop
+
+    # Step 12: Once all flag locations have been visited, return the robot to the starting position
+    # Assuming the starting position is at (0, 0, 0)
+    move_to_waypoint(Point(0, 0, 0))
+
+    # Step 13: End the task and provide a task completion report to the user
+    print("Task completed successfully")
+
+execute_task()
+```
+<<<

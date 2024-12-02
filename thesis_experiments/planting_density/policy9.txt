@@ -1,0 +1,23 @@
+1. Initialize the system memory list for "planted locations".
+
+2. Activate the robot's RGB cameras and lidar-inertial odometry for localization and landmark detection.
+
+3. Begin the task by searching for the 'concrete area' landmark which is our goal location using the robot's RGB camera.
+
+4. Once the 'concrete area' landmark is identified, the robot should navigate towards it using GPS guidance and lidar-inertial odometry for precision.
+
+5. Upon reaching the 'concrete area', the robot should utilize its lidar-inertial odometry to establish the boundaries of the area.
+
+6. According to the 'grid' pattern and 'pattern_offset' of 1m specified in the constraints, the robot should determine the locations within the 'concrete area' where it will plant the seeds. This can be done by creating a virtual grid on the 'concrete area' with each grid cell being 1m x 1m.
+
+7. The robot should then start from the first grid location, plant a seed, and add this location to the 'planted locations' list in the system memory. 
+
+8. The robot should then navigate to the next grid location maintaining the 1m offset distance, plant a seed, and add this location to the 'planted locations' list in the system memory.
+
+9. Repeat steps 7 and 8 for all grid locations within the 'concrete area'.
+
+10. Once all the grid locations within the 'concrete area' have been seeded, the robot should stop and update the task status as 'completed'.
+
+11. The list of 'planted locations' should be saved and made accessible for future tasks or reference. 
+
+Remember, the robot should always monitor for any objects to avoid and adjust its path accordingly. If an object is detected in a planned grid location, the robot should skip that location and move on to the next one.

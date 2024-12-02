@@ -1,0 +1,62 @@
+>>> 
+
+import time
+
+# Creating a dictionary to store the GPS coordinates of the visited flags
+visited_flags = {}
+
+# Identifying the 'field flag' landmarks
+def search_flags():
+    all_objects = get_all_objects()
+    field_flags = [obj for obj in all_objects if obj['name'] == 'field flag' and obj['visited'] == False]
+
+    return field_flags
+
+# Main function to execute the policy
+def execute_policy():
+    while is_available() == False:
+        time.sleep(1)
+
+    # Start the task
+    start_volumetric_gain_exploration()
+
+    while True:
+        # Search for 'field flag' landmarks
+        flags = search_flags()
+
+        # If there are no more flags, stop the robot and break the loop
+        if not flags:
+            stop_robot()
+            break
+
+        # For each flag, navigate to it and plant a seed
+        for flag in flags:
+            target_point = Point(flag['position']['x'], flag['position']['y'], flag['position']['z'])
+
+            # Check if the flag is within the plot bounds
+            if not check_waypoint_in_bounds(target_point):
+                continue
+
+            # Get the waypoint closest to the flag
+            waypoint = get_waypoint_closest_to_object(target_point)
+
+            # Navigate to the waypoint
+            go_to_waypoint(waypoint)
+
+            # Wait until the robot is available
+            while is_available() == False:
+                time.sleep(1)
+
+            # Plant a seed at the waypoint
+            plant()
+
+            # Record the GPS coordinates of the visited flag
+            current_pose = get_position()
+            visited_flags[flag['seq']] = current_pose.point
+
+    # Print the list of all planted locations for future reference and analysis
+    print("List of all planted locations: ", visited_flags)
+
+execute_policy()
+
+<<<

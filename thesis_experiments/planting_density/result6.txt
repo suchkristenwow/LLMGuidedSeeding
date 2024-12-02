@@ -1,0 +1,74 @@
+>>> 
+import time
+from typing import List
+
+class RevegetationRobot:
+    def __init__(self):
+        self.landmarks_visited = {} # a dict to store visited landmarks
+        self.seed_locations = [] # a list to store the positions of planted seeds
+        self.pattern_offset = 1 # the distance between seeds in a grid
+        self.goal_landmark = 'concrete' # the area to be revegetated
+
+    def execute_policy(self):
+        # Ensure the robot is available before starting the task
+        while not is_available():
+            time.sleep(1)
+
+        # Start by activating the robot's RGB cameras and lidar-inertial odometry
+        # The robot's sensors are implicitly activated through the use of the API functions
+
+        # Use GPS to determine the initial location within the plot
+        initial_position = get_position()
+        
+        # Enable the seed planting mechanism
+        # The seed planting mechanism is implicitly enabled through the use of the plant() function
+
+        # Begin by identifying the 'concrete' area
+        self.start_volumetric_gain_exploration()
+        while True:
+            all_objects = get_all_objects()
+            for index in all_objects:
+                if all_objects[index]['name'] == self.goal_landmark:
+                    stop_robot()  # Stop exploring when the 'concrete' area is found
+                    return all_objects[index]  # Return the detected 'concrete' area object
+            time.sleep(1)
+
+    def navigate_to_landmark(self, landmark):
+        landmark_position = Point(landmark['position']['x'], landmark['position']['y'], landmark['position']['z'])
+        closest_waypoint = get_waypoint_closest_to_object(landmark_position)
+        go_to_waypoint(closest_waypoint)
+
+    def start_planting(self):
+        # Calculate the number of seeds to be planted
+        # For simplicity, we will just iterate over the area in a grid pattern
+
+        # Start from the robot's current position
+        initial_seed_position = get_position()
+        current_seed_position = initial_seed_position
+
+        # Plant seeds in a grid pattern
+        while check_waypoint_in_bounds(current_seed_position):
+            # Plant a seed at the current location
+            plant()
+            # Record the location
+            self.seed_locations.append(current_seed_position)
+
+            # Move to the next position in the grid
+            current_seed_position.x += self.pattern_offset  # Move horizontally
+            if not check_waypoint_in_bounds(current_seed_position):  # If the new position is out of bounds
+                current_seed_position.x = initial_seed_position.x  # Reset the horizontal position
+                current_seed_position.y += self.pattern_offset  # Move vertically
+
+        # Navigate the robot back to its starting position
+        go_to_waypoint(initial_seed_position)
+
+        # Update the task status and provide a report
+        print("Task completed")
+        print("Number of seeds planted:", len(self.seed_locations))
+        print("Locations of seeds planted:", self.seed_locations)
+
+robot = RevegetationRobot()
+landmark = robot.execute_policy()
+robot.navigate_to_landmark(landmark)
+robot.start_planting()
+<<<

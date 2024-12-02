@@ -1,21 +1,21 @@
-1. Start the robot's initial localization using its lidar-inertial odometry and GPS systems. Capture an initial snapshot of the environment using the RGB cameras. 
+1. Initialize the robot's systems, ensuring that the camera, lidar-inertial odometry, and GPS systems are operational and ready for use. 
 
-2. If the robot's initial position is outside the plot bounds, use the navigation system to plan and execute the shortest path to move inside the plot bounds. 
+2. Begin the exploration process within the lab environment, systematically scanning the environment and creating a map using lidar-inertial odometry and GPS for localization. 
 
-3. Begin monitoring the robot's surroundings continuously using its RGB cameras. If an object matching the description of 'yellow and black striped tape' is detected, remove the corresponding vertex in the planner graph to avoid this object.
+3. Use the RGB camera to continuously look for the field flags mentioned in the prompt.
 
-4. Start to execute the lawn-mower pattern drive. This involves moving in straight lines within the plot bounds, then turning 180 degrees at each edge of the plot to move in a parallel line, repeating this pattern until the entire plot is covered. This should be done while maintaining an even distance between each pass to ensure the 'evenly spaced' requirement is met.
+4. Each time an object of interest (in this case, the flags) is detected, note its location and count on the system memory.
 
-5. At the first location in the lawn-mower pattern (i.e., each time the robot completes a full straight line pass), activate the planting system to plant a seed. Make sure that this action is performed while the robot is stationary to ensure accuracy.
+5. If an object is detected that matches the description of a clear plastic container under a window, approach it cautiously for a closer inspection.
 
-6. After planting, store the location of the planted seed in the system memory. This will create a list of all planted locations that can be referred back to later if necessary.
+6. Once the container is located, examine the contents carefully to confirm that it contains the field flags. 
 
-7. Repeat steps 4 to 6 five more times to achieve a total of six planted locations evenly spaced over the plot. Ensure that the planting locations avoid any areas where 'yellow and black striped tape' has been detected.
+7. If the container contains the flags, stop the exploration process. The task of finding the flags is completed. 
 
-8. After the sixth planting location has been reached and the seed has been planted, stop the lawn-mower pattern drive. 
+8. Count the number of flags in the container and store this information in the system memory.
 
-9. Use the RGB cameras to capture a final snapshot of the environment and the six planted locations. 
+9. Update the constraint dictionary with the total number of flags counted and their location.
 
-10. Save this information and the list of planted locations in the system memory for future reference.
+10. Report back to the user the number of flags found and their location within the lab. 
 
-11. Finally, communicate to the user that the task has been successfully completed and provide a summary of the planted locations.
+Remember, as there are no objects listed to be avoided in the constraint dictionary, the robot can freely move around the lab without removing any vertices from the planner graph.

@@ -3,10 +3,6 @@ You are guiding an autonomous robotic agent to execute the prompt given below. T
 The robot is able to observe landmarks via RGB cameras and it is able to plant seeds. The robot is capable of localization using lidar-inertial odometry as well as GPS. 
 Whenever there is some uncertainty, you can interface with the human for more direction or context. 
 
-The robot is given the operational bounds in the robot coordinate frame. This variable is called "plot_bounds". The plot bounds are given as a nx2 np array describing the
-contour. It is important that the robot operate inside the bounds and never plan to drive outside of the plot bounds. If the robot begins outside of the plot bounds, the 
-first step should be to plan the shortest route possible to be inside the bounds.
-
 In addition to a user-given prompt, I also have a dictionary of important constraints. 
 
 The entry under the key "avoid" is a list of objects the user wishes the robot to avoid. The entry under the key "goal_lms" are objects the user wishes the robot to find 

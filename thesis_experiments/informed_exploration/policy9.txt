@@ -1,0 +1,9 @@
+1. Initialize the robot and confirm that it is in a ready state.
+2. Activate the robot's RGB cameras to scan for landmarks and objects within its environment.
+3. Begin navigating the lab, utilizing lidar-inertial odometry and GPS for localization. 
+4. As the robot moves, have it continuously scan for the "goal_lms" which in this case is the "clear plastic container". 
+5. During the navigation, if the robot identifies a "clear plastic container", instruct it to move towards the container while avoiding any obstacles along the path.
+6. Once the robot has reached the container, activate its vision system to count the number of "field flags" within the container.
+7. Store the count of the field flags in the system memory.
+8. When counting is complete, stop further exploration as per the prompt instruction: "once you find the flags you can stop exploring".
+9. Finally, relay the number of field flags counted back to the human operator for review.

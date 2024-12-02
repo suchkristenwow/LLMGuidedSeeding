@@ -1,0 +1,87 @@
+>>> 
+
+import time
+
+class RevegetationRobot:
+    def __init__(self):
+        self.planted_locations = []
+        self.policy = {
+            'goal_lms': 'field flag',
+            'landmark_offset': 0.05,
+            'seed': True
+        }
+
+    def wait_until_robot_available(self):
+        while not is_available():
+            time.sleep(1)  # wait for one second before checking again
+
+    def run_policy(self):
+        self.wait_until_robot_available()
+        self.start_localization_system()
+        all_objects = get_all_objects()
+
+        while True:
+            # find the closest unvisited 'field flag'
+            closest_flag = None
+            min_distance = float('inf')
+            for obj in all_objects:
+                if obj['name'] == self.policy['goal_lms'] and not obj.visited:
+                    current_position = get_position().point
+                    obj_position = Point(obj['position']['x'], obj['position']['y'], obj['position']['z'])
+                    distance = self.calculate_distance(current_position, obj_position)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_flag = obj
+
+            # if all 'field flags' have been visited, break the loop
+            if closest_flag is None:
+                break
+
+            # navigate to the closest 'field flag'
+            closest_point = get_waypoint_closest_to_object(closest_flag)
+            if check_waypoint_in_bounds(closest_point):
+                self.wait_until_robot_available()
+                go_to_waypoint(closest_point)
+
+                # wait until the robot reaches the 'field flag'
+                while self.calculate_distance(get_position().point, closest_point) > self.policy['landmark_offset']:
+                    time.sleep(1)
+
+                # plant the seed
+                self.wait_until_robot_available()
+                plant()
+                self.planted_locations.append({
+                    'name': closest_flag['name'],
+                    'seq': closest_flag['seq'],
+                    'time': closest_flag['time'],
+                    'position': closest_flag['position']
+                })
+
+                # mark the 'field flag' as visited
+                closest_flag.visited = True
+
+        # save the 'planted locations'
+        self.save_planted_locations()
+        # notify the user of the task completion
+        self.notify_completion()
+
+    def calculate_distance(self, point1, point2):
+        return ((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2 + (point1.z - point2.z) ** 2) ** 0.5
+
+    def start_localization_system(self):
+        start_volumetric_gain_exploration()
+
+    def save_planted_locations(self):
+        with open('planted_locations.txt', 'w') as f:
+            for location in self.planted_locations:
+                f.write(str(location) + '\n')
+
+    def notify_completion(self):
+        print('Task completed. Planted locations:')
+        for location in self.planted_locations:
+            print(location)
+
+robot = RevegetationRobot()
+robot.run_policy()
+
+<<<

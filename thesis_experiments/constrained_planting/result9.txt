@@ -1,0 +1,82 @@
+>>> 
+```python
+import time
+from math import sqrt
+
+# Initialize the system
+FLAG_DISTANCE = 0.05  # distance from the flag where the seed should be planted
+visited_flags = {}  # to keep track of visited flags
+planted_seeds = []  # to keep track of planted seeds
+
+while True:
+    # Check if robot is available
+    if is_available():
+        # Get current position of the robot
+        current_position = get_position()
+        x, y, z = current_position.point.x, current_position.point.y, current_position.point.z
+
+        # Get all detected objects
+        all_objects = get_all_objects()
+
+        # Filter objects to get only flags
+        flags = [obj for obj in all_objects.values() if obj["name"] == "field flag"]
+
+        # If there are flags detected
+        if flags:
+            # Filter flags to get unvisited ones
+            unvisited_flags = [flag for flag in flags if flag["seq"] not in visited_flags]
+
+            # If there are unvisited flags
+            if unvisited_flags:
+                # Sort flags by their distance from the robot
+                unvisited_flags.sort(key=lambda f: sqrt((f["position"]["x"] - x) ** 2 + (f["position"]["y"] - y) ** 2))
+
+                # Get the nearest flag
+                nearest_flag = unvisited_flags[0]
+
+                # Get waypoint closest to this flag
+                waypoint = get_waypoint_closest_to_object(nearest_flag)
+
+                # Check if the waypoint is within the bounds
+                if check_waypoint_in_bounds(waypoint):
+                    # Move to the waypoint
+                    go_to_waypoint(waypoint)
+
+                    # Check if the robot is within the required distance from the flag
+                    if sqrt((nearest_flag["position"]["x"] - x) ** 2 + (nearest_flag["position"]["y"] - y) ** 2) <= FLAG_DISTANCE:
+                        # Plant the seed
+                        plant()
+
+                        # Mark this flag as visited
+                        visited_flags[nearest_flag["seq"]] = True
+
+                        # Store the coordinates of the planted seed
+                        planted_seeds.append((x, y, z))
+
+                        # Move away from the flag
+                        start_volumetric_gain_exploration()
+
+            # If all flags have been visited
+            else:
+                # Stop the robot
+                stop_robot()
+
+                # Print the coordinates of the planted seeds
+                print("Seeds have been planted at the following GPS coordinates:")
+                for seed in planted_seeds:
+                    print(seed)
+
+                # End the task
+                break
+
+        # If no flags are detected
+        else:
+            # Continue exploring
+            start_volumetric_gain_exploration()
+
+    # If robot is not available
+    else:
+        # Wait for some time
+        time.sleep(1)
+```
+<<<

@@ -21,7 +21,12 @@ you can safely ignore those in your policy execution.
 To execute the desired task, the ecologist has written you this list of steps:
 *INSERT_POLICY*
 
-Please write some Python code that would execute this policy. 
+I tried to use this code to execute this policy, but planting failed because the seeding mechanism measured forces that exceeded the allowable limit. 
+That is, the seeding mechanism was not able to plant due to the ground being impenetrable. 
+
+*INSERT_OLD_CODE*
+
+Please edit this existing code to fix the error. 
 
 Here is an API which you can use to control the robot.
 

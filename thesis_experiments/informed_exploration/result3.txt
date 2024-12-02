@@ -1,0 +1,58 @@
+>>> Python Code
+```python
+import time
+
+def count_flags():
+    # Initialize flag count
+    flag_count = 0
+    flag_count_previous = -1
+    
+    # Continue observing flags until the count remains constant
+    while flag_count != flag_count_previous:
+        flag_count_previous = flag_count
+        flag_count = 0
+        # Get all detected objects
+        all_objects = get_all_objects()
+
+        for object in all_objects.values():
+            # Check if the object is a flag
+            if object['name'] == 'field flags':
+                flag_count += 1
+        
+        # Delay for a while before recounting
+        time.sleep(5)
+        
+    return flag_count
+
+
+# Wait until the robot is available
+while not is_available():
+    time.sleep(1)
+
+# Initialize robot's location
+pose = get_position()
+
+# Start exploration algorithm
+start_volumetric_gain_exploration()
+
+# Keep exploring until the clear plastic container is found
+while True:
+    container_location = check_target_object('clear plastic container', 5.0)
+    if container_location is not None:
+        break
+
+    time.sleep(1)
+
+# Stop exploration
+stop_robot()
+
+# Go to the clear plastic container
+go_to_waypoint(get_waypoint_closest_to_object(container_location))
+
+# Count flags
+num_flags = count_flags()
+
+# Notify the user
+print(f"Found {num_flags} field flags in the clear plastic container.")
+```
+<<< End Python Code

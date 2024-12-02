@@ -1,0 +1,9 @@
+1. Initialize the robot's systems and make sure all sensors (RGB cameras, lidar, GPS, and inertial odometry) are functioning correctly.
+2. Start the exploration of the laboratory using the robot's autonomous navigation capabilities.
+3. While navigating, the robot should continuously scan the environment using its RGB cameras to search for the 'field flags' and 'clear plastic container' as specified in the 'search' and 'goal_lms' keys respectively in the constraint dictionary.
+4. The robot should also use its lidar and GPS systems to localize itself within the laboratory and avoid any obstacles.
+5. When a 'clear plastic container' is detected by the RGB cameras, the robot should navigate towards it while maintaining safety and avoiding any obstacles detected by the lidar and GPS.
+6. Once the robot reaches the 'clear plastic container', it should use its RGB cameras to observe and count the number of 'field flags' inside it.
+7. The robot should keep a running count of the number of 'field flags' observed in the system memory.
+8. As specified in the prompt, the robot should stop exploring once it finds the 'field flags'.
+9. The robot should then transmit the final count of the 'field flags' to the human user for further instructions or completion of the task.

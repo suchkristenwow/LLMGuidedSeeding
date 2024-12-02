@@ -1,0 +1,72 @@
+>>> Start Python Code
+
+# Import necessary libraries
+import time
+import math
+
+# Define function to wait until the robot is available
+def wait_until_robot_available():
+    while not is_available():
+        time.sleep(1)
+
+# Define function to calculate euclidean distance between two points
+def euclidean_distance(point1, point2):
+    return math.sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2 + (point2.z - point1.z)**2)
+
+# Define function to get the nearest object of specific label
+def get_nearest_object_of_label(object_label):
+    all_objects = get_all_objects()
+    robot_position = get_position().point
+
+    nearest_object = None
+    min_distance = float('inf')
+
+    for object in all_objects.values():
+        if object['name'] == object_label:
+            object_position = Point(object['position']['x'], object['position']['y'], object['position']['z'])
+            distance = euclidean_distance(robot_position, object_position)
+
+            if distance < min_distance:
+                min_distance = distance
+                nearest_object = object
+
+    return nearest_object
+
+# Initialize the robot's vision and navigation systems
+wait_until_robot_available()
+
+# Start scanning the lab for the clear plastic container
+start_volumetric_gain_exploration()
+
+# Initialize flag counter
+flag_counter = 0
+
+# Keep exploring until the clear plastic container is found
+while True:
+    # Check if the clear plastic container is found
+    clear_plastic_container = get_nearest_object_of_label('clear plastic container')
+
+    if clear_plastic_container is not None:
+        # Stop exploring
+        stop_robot()
+
+        # Approach the container
+        container_position = Point(clear_plastic_container['position']['x'], clear_plastic_container['position']['y'], clear_plastic_container['position']['z'])
+        go_to_waypoint(container_position)
+
+        # Start counting the flags
+        all_objects = get_all_objects()
+
+        for object in all_objects.values():
+            if object['name'] == 'field flags':
+                flag_counter += 1
+
+        # Store the flag count and communicate it to the user
+        print('Number of field flags: ', flag_counter)
+
+        break
+
+    # Wait for a moment before the next check
+    time.sleep(1)
+    
+<<< End Python Code

@@ -1,0 +1,10 @@
+1. Initiate the robot's navigational system and activate the RGB camera, GPS, and lidar-inertial odometry.
+2. Direct the robot to locate the 'concrete area' goal landmark utilizing the RGB camera.
+3. Once the 'concrete area' is identified, map out a grid pattern with a 'pattern_offset' of 1m x 1m using the GPS.
+4. Start from one corner of the 'concrete area' and move towards the first grid point following the planned path.
+5. At each grid intersection, check the 'seed' flag. As it is set to 'False' in this instance, the robot will not plant seeds.
+6. Navigate to the next grid point following the shortest path.
+7. Repeat steps 5 and 6 until all grid points on the 'concrete area' have been covered.
+8. Once the entire 'concrete area' is covered, stop the robot and signal task completion. 
+9. Save the grid pattern and the visited grid points to the system memory for future reference. 
+10. Return the robot to the starting point or to a designated 'safe' location.

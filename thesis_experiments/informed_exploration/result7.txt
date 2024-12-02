@@ -1,0 +1,62 @@
+>>> 
+
+import time
+
+# Define the goal and search objects based on the parsed policy dictionary
+goal_object = 'clear plastic container'
+search_object = 'field flags'
+
+# Initialize flag counter
+flag_counter = 0
+
+# Step 1: Initialize the system and ensure all sensors and actuators are working properly
+# This step is assumed to be taken care of by the system itself
+
+# Step 2: Activate the RGB cameras to observe the environment
+# This step is also assumed to be taken care of by the system itself
+
+# Step 3: Use lidar-inertial odometry and GPS for localization and navigation within the laboratory environment
+# This step is also assumed to be taken care of by the system itself
+
+# Step 4: Start a search pattern to explore the laboratory environment
+# We will use the start_volumetric_gain_exploration function for this
+while is_available():
+    start_volumetric_gain_exploration()
+    
+    # Step 5: Use the RGB camera to continuously scan the environment for the "clear plastic container"
+    # We will use the get_all_objects function for this
+    all_objects = get_all_objects()
+    
+    # Check if the goal object is in the list of detected objects
+    for index, detected_object in all_objects.items():
+        if detected_object['name'] == goal_object:
+            # Step 6: If the "clear plastic container" is found, navigate towards it while avoiding any obstacles
+            # We will use the go_to_waypoint function for this
+            while is_available():
+                stop_robot()
+                target_point = Point(detected_object['position']['x'], detected_object['position']['y'], detected_object['position']['z'])
+                go_to_waypoint(target_point)
+                
+                # Step 7: Once reached the "clear plastic container", use the RGB camera to observe and count the "field flags"
+                # We will use the check_target_object function for this
+                flags_in_container = check_target_object(search_object, 1.0)
+                if flags_in_container is not None:
+                    flag_counter += len(flags_in_container)
+                    
+                # Step 8: Store the count of the "field flags" in the system memory
+                # This step is assumed to be taken care of by the system itself
+                
+                # Step 9: Once all flags in the container are counted, stop the exploration
+                stop_robot()
+                
+                # Step 10: Record the location of the "clear plastic container" for future reference
+                # This step is assumed to be taken care of by the system itself
+                
+                # Step 11: Send a report to the user detailing the number of flags found and the location of the container
+                print(f'Number of flags found: {flag_counter}')
+                print(f'Location of the container: {target_point.x}, {target_point.y}, {target_point.z}')
+                
+                break
+    time.sleep(1)
+
+<<<

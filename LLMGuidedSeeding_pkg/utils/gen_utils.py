@@ -38,7 +38,7 @@ def dictify(results_str):
     results_str = results_str.replace("None", "null")
     
     # Convert the string to a dictionary
-    print("results_str: ", results_str)
+    #print("results_str: ", results_str)
     data_dict = json.loads(results_str)
     
     # Convert the "seed" value to a boolean

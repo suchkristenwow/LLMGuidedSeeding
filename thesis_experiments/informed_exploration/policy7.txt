@@ -1,0 +1,11 @@
+1. Initialize the system, ensuring all sensors and actuators are working properly.
+2. Activate the RGB cameras to observe the environment.
+3. Use lidar-inertial odometry and GPS for localization and navigation within the laboratory environment.
+4. Start a search pattern to explore the laboratory environment. It can be a spiral, zig-zag, or grid-based pattern depending on the layout of the lab.
+5. Use the RGB camera to continuously scan the environment for the "clear plastic container" which is listed as the goal landmark in the constraint dictionary.
+6. If the "clear plastic container" is found, navigate towards it while avoiding any obstacles. Use lidar-inertial odometry and GPS for accurate navigation.
+7. Once reached the "clear plastic container", use the RGB camera to observe and count the "field flags" which are mentioned in the 'search' key of the constraint dictionary.
+8. Store the count of the "field flags" in the system memory.
+9. Once all flags in the container are counted, stop the exploration as per the instructions in the prompt.
+10. Record the location of the "clear plastic container" for future reference.
+11. Send a report to the user detailing the number of flags found and the location of the container.

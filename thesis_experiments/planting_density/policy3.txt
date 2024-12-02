@@ -1,0 +1,8 @@
+1. Activate the robot's observation mode using the RGB cameras to identify the target location marked as 'concrete area'.
+2. Guide the robot to navigate towards the identified 'concrete area' using GPS and lidar-inertial odometry for precise localization.
+3. Once the robot reaches the 'concrete area', set the planting pattern to 'grid' with a 'pattern_offset' of 1 meter, as given in the constraint_dictionary. 
+4. Begin planting seeds according to the defined grid pattern. The robot should plant a seed, move 1 meter along the X axis, plant another seed, and repeat this process until it reaches the end of the 'concrete area'.
+5. After reaching the end of the 'concrete area' along the X axis, the robot should move 1 meter along the Y axis and start planting seeds again, moving back along the X axis. Repeat this pattern until the entire 'concrete area' is covered in the defined grid pattern.
+6. During the entire process, continuously update the system memory with the GPS coordinates of each planted location as the 'seed' boolean is set to True.
+7. Once all the seeds are planted, guide the robot to navigate back to the starting point using lidar-inertial odometry and GPS.
+8. Notify the user that the task has been successfully completed and provide the total count and locations of the planted seeds from the system memory.

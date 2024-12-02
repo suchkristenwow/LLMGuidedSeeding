@@ -29,11 +29,12 @@ class policyRehearsal:
         with open(args.constraints_dict_path,"rb") as handle: 
             self.policy_constraints = pickle.load(handle) 
 
+        '''
         self.plot_bounds = np.genfromtxt(args.plot_bounds_path,delimiter=",")  
         self.plot_bounds = self.plot_bounds[~np.isnan(self.plot_bounds).any(axis=1)]
         if not np.array_equal(self.plot_bounds[0], self.plot_bounds[-1]):
             self.plot_bounds = np.vstack([self.plot_bounds, self.plot_bounds[0]]) 
-
+        '''
         self.config_path = args.config_path
         self.parameters = toml.load(args.config_path) 
         
@@ -402,13 +403,6 @@ if __name__ == "__main__":
         help="Path to the logging directory",
         default="logs",
     )
-
-    parser.add_argument(
-        "--plot_bounds_path",
-        type=str,
-        help="Path of a csv file containing the perimeter of the desired area of operation",
-        default="random_path.csv",
-    ) 
 
     # Parse the command-line arguments
     args = parser.parse_args()  

@@ -1,0 +1,16 @@
+1. Start by activating the robot's RGB cameras and lidar-inertial odometry for visualizing the environment and localizing itself.
+2. Use the GPS to determine the initial location within the plot.
+3. Enable the seed planting mechanism as the 'seed' boolean is True.
+4. Begin by identifying the 'concrete' area which is the goal landmark as specified in the constraint dictionary.
+5. After identifying the concrete area, utilize the robot's navigation system to guide it towards this area.
+6. Once arrived at the concrete area, calculate the size of the area to determine the number of seeds to be planted based on the given density of 1m x 1m.
+7. Start the seeding process by positioning the robot at one corner of the concrete area.
+8. Plant the first seed at this corner. Record this location in the system memory as the first planted location.
+9. From the initial seeding location, move the robot 1 meter horizontally (as defined by the 'pattern_offset' in the constraint dictionary) following the 'grid' pattern.
+10. Plant the second seed at this new location and record this location in the system memory as the second planted location.
+11. Repeat steps 9 and 10 until the robot reaches the end of the concrete area horizontally.
+12. After reaching the end of the horizontal line, move the robot 1 meter vertically (as defined by the 'pattern_offset' in the constraint dictionary) and return it to the initial horizontal position.
+13. Repeat steps 9 through 12 until the entire concrete area is covered and seeds are planted in a 1m x 1m grid pattern.
+14. Once the entire area has been seeded, verify if all the locations where seeds have been planted are recorded in the system memory.
+15. Upon completion of seeding, navigate the robot back to its starting position or the designated standby position.
+16. Finally, update the task status as completed and provide a report including the number and locations of seeds planted and any obstacles encountered during the task.

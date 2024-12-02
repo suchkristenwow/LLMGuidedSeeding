@@ -1,0 +1,56 @@
+>>> 
+```python
+import math
+import time
+
+# The robot's position and the seed planting list
+robot_position = get_position()
+planted_seeds = []
+
+# Start looking for the 'concrete area' (field flags)
+while not is_available():
+    time.sleep(1)
+start_volumetric_gain_exploration()
+
+# Loop until the 'concrete area' (field flags) is found
+concrete_area = None
+while concrete_area is None:
+    time.sleep(1)
+    concrete_area = check_target_object('field flags', 5)
+stop_robot()
+
+# Navigate to the 'concrete area'
+while not is_available():
+    time.sleep(1)
+go_to_waypoint(get_waypoint_closest_to_object(concrete_area))
+
+# Define the grid pattern and offsets
+pattern = 'grid'
+pattern_offset = 1
+
+# Plant seeds in the 'concrete area' following the defined grid pattern
+x = 0
+y = 0
+while y <= math.sqrt(concrete_area):
+    while x <= math.sqrt(concrete_area):
+        if is_available() and check_waypoint_in_bounds(Point(robot_position.point.x + x, robot_position.point.y + y, 0)):
+            go_to_waypoint(Point(robot_position.point.x + x, robot_position.point.y + y, 0))
+            plant()
+            planted_seeds.append(Point(robot_position.point.x + x, robot_position.point.y + y, 0))
+            x += pattern_offset
+        else:
+            break
+    y += pattern_offset
+    x = 0
+
+# Navigate back to the starting point
+while not is_available():
+    time.sleep(1)
+go_to_waypoint(robot_position.point)
+
+# Notify the user that the task has been successfully completed
+print('Task completed successfully. Total number of seeds planted:', len(planted_seeds))
+for i, seed in enumerate(planted_seeds):
+    print('Seed', i+1, 'planted at position:', seed)
+```
+<<<

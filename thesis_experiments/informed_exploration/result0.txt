@@ -1,0 +1,50 @@
+>>> 
+```python
+import time
+
+# Initialization
+print("Initialization...")
+while not is_available():
+    time.sleep(1)
+
+# Start exploration
+print("Start exploring the laboratory...")
+start_volumetric_gain_exploration()
+
+# Variables
+field_flags_count = 0
+found_flags = False
+
+# Exploration loop
+while not found_flags:
+    # Ensure robot is available
+    while not is_available():
+        time.sleep(1)
+
+    # Get all detected objects
+    all_objects = get_all_objects()
+
+    # Check each object
+    for index in all_objects:
+        # If the object is a clear plastic container
+        if all_objects[index]['name'] == 'clear plastic container':
+            # Stop the robot
+            stop_robot()
+            # Navigate to the container
+            container_position = Point(all_objects[index]['position']['x'], all_objects[index]['position']['y'], all_objects[index]['position']['z'])
+            waypoint = get_waypoint_closest_to_object(container_position)
+            go_to_waypoint(waypoint)
+            # Count the field flags
+            for index in all_objects:
+                if all_objects[index]['name'] == 'field flags':
+                    field_flags_count += 1
+            # Flags found
+            found_flags = True
+            break
+    # Wait for a while before checking again
+    time.sleep(5)
+
+# Print the final count
+print("Final count of field flags: ", field_flags_count)
+```
+<<<

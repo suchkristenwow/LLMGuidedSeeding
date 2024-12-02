@@ -1,0 +1,49 @@
+>>> Begin Code
+
+import time
+
+# Initialize the robot and confirm that it is in a ready state.
+while not is_available():
+    print("Waiting for robot to become available...")
+    time.sleep(1)
+print("Robot is ready to start the task.")
+
+# Activate the robot's RGB cameras to scan for landmarks and objects within its environment.
+# The RGB cameras are implicitly activated as part of the robot's systems.
+
+# Begin navigating the lab, utilizing lidar-inertial odometry and GPS for localization.
+start_volumetric_gain_exploration()
+
+# As the robot moves, have it continuously scan for the "goal_lms" which in this case is the "clear plastic container".
+while True:
+    # During the navigation, if the robot identifies a "clear plastic container", instruct it to move towards the container while avoiding any obstacles along the path.
+    clear_plastic_container_location = check_target_object("clear plastic container", 10)
+    if clear_plastic_container_location is not None:
+        print("Clear plastic container detected. Moving towards it.")
+        stop_robot()
+        waypoint = get_waypoint_closest_to_object(clear_plastic_container_location)
+        go_to_waypoint(waypoint)
+        
+        # Wait until the robot reaches the container.
+        while not is_available():
+            print("Moving towards the clear plastic container...")
+            time.sleep(1)
+        print("Reached the clear plastic container.")
+        break
+
+# Once the robot has reached the container, activate its vision system to count the number of "field flags" within the container.
+field_flags = get_all_objects().get('field flags', [])
+flag_count = len(field_flags)
+
+# Store the count of the field flags in the system memory.
+# Assume a variable "memory" to simulate the system memory
+memory = {}
+memory['field_flags_count'] = flag_count
+
+# When counting is complete, stop further exploration as per the prompt instruction: "once you find the flags you can stop exploring".
+stop_robot()
+
+# Finally, relay the number of field flags counted back to the human operator for review.
+print("The number of field flags counted is: ", memory['field_flags_count'])
+
+<<< End Code

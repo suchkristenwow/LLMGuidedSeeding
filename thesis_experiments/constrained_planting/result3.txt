@@ -1,0 +1,80 @@
+>>> Start Python Code 
+
+    import time 
+    import math 
+
+    # Define the list to keep track of all planted locations
+    planted_locations = []
+
+    def calculate_distance(point1, point2):
+        """
+        Calculates the Euclidean distance between two points.
+        """
+        return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2 + (point1.z - point2.z) ** 2)
+
+    # Step 1: Initialize the robot
+    while not is_available():
+        time.sleep(1)
+
+    # Step 2, 3: Activate the cameras and lidar-inertial odometry system, and the GPS system
+    # Assuming these systems are automatically activated once the robot is available
+
+    # Step 4: Start the landmark detection module with 'field flag' as the target object
+    # Assuming this is done automatically once the robot is available
+
+    while True:  # Loop until all flags have been visited
+        # Step 5: Navigate towards the nearest detected 'field flag'
+        flags = get_all_objects()
+        if not flags:
+            print("No flags detected.")
+            break
+        else:
+            closest_flag = None
+            closest_distance = float("inf")
+
+            for flag in flags:
+                if flag["name"] == 'field flag':
+                    flag_position = Point(flag["position"]["x"], flag["position"]["y"], flag["position"]["z"])
+                    distance = calculate_distance(get_position().point, flag_position)
+                    if distance < closest_distance and not flag.visited:
+                        closest_distance = distance
+                        closest_flag = flag
+
+            if closest_flag is None:
+                print("All flags have been visited.")
+                break
+            else:
+                # Go to the waypoint closest to the detected flag
+                while not is_available():
+                    time.sleep(1)
+                waypoint = get_waypoint_closest_to_object(closest_flag)
+                go_to_waypoint(waypoint)
+
+                # Step 6: Ensure the robot is positioned within the defined 5 cm landmark offset
+                while calculate_distance(get_position().point, waypoint) > 0.05:
+                    time.sleep(1)
+
+                # Step 7: Plant a seed
+                while not is_available():
+                    time.sleep(1)
+                plant()
+
+                # Step 8: Record the GPS location of the planted seed
+                planted_locations.append(get_position())
+
+    # Step 11: Return to the starting position
+    while not is_available():
+        time.sleep(1)
+    go_to_waypoint(starting_position)
+
+    # Step 12: Provide a report to the user
+    print("Task completed. Planted locations:")
+    for location in planted_locations:
+        print(f"Time: {location.time}, Position: ({location.point.x}, {location.point.y}, {location.point.z}), Yaw: {location.yaw}")
+
+    # Step 13: Standby for further instructions or tasks
+    while not is_available():
+        time.sleep(1)
+    stop_robot()
+
+<<< End Python Code

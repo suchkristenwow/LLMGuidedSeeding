@@ -1,0 +1,70 @@
+>>> 
+```python
+import math
+import time
+import numpy as np
+
+# Policy dictionary
+policy = {'goal_lms': 'concrete', 'pattern_offset': 1, 'pattern': 'grid', 'seed': False}
+
+# Getting the plot bounds and constraints
+bounds = get_bounds_and_constraints()
+avoid_objects = bounds['avoid']
+
+# Initialize grid
+grid = initialize_grid(bounds, policy['pattern_offset'])
+
+# Start scanning the environment to identify the concrete area
+start_volumetric_gain_exploration()
+
+# Flag to track the completion of the task
+task_complete = False
+
+# Main loop
+while not task_complete:
+    # Wait for robot to become available
+    while not is_available():
+        time.sleep(0.1)
+
+    # Get all objects detected
+    all_objects = get_all_objects()
+
+    # Find the concrete area
+    concrete_object = None
+    for obj in all_objects:
+        if obj['name'] == policy['goal_lms']:
+            concrete_object = obj
+            break
+
+    # If the concrete area is found
+    if concrete_object is not None:
+        # Stop exploration
+        stop_robot()
+
+        # Compute the grid for the concrete area
+        concrete_grid = compute_grid(concrete_object, policy['pattern_offset'])
+
+        # For each point in the grid
+        for point in concrete_grid:
+            # If the point is in the avoid list, continue to next point
+            if point in avoid_objects:
+                continue
+
+            # Navigate to the point
+            go_to_waypoint(point)
+
+            # If the policy states to plant a seed
+            if policy['seed']:
+                # Plant the seed
+                plant()
+
+        # Task is complete
+        task_complete = True
+    else:
+        # Continue scanning
+        start_volumetric_gain_exploration()
+
+# Once the task is complete, confirm to the user
+print("Task complete.")
+```
+<<<

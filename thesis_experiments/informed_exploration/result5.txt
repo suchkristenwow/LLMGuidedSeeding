@@ -1,0 +1,61 @@
+>>> 
+
+import time
+
+def execute_policy():
+    # Step 1: Activate the RGB camera and lidar-inertial odometry system for navigation and object detection
+    # This step assumes the RGB camera and lidar-inertial odometry system are activated by default since there is no provided method in the API to do so.
+  
+    # Container to keep track of visited objects
+    visited_objects = []
+
+    # Start with exploration
+    if is_available():
+        start_volumetric_gain_exploration()
+    
+    while True:
+        # Step 2: Begin exploring the laboratory environment, using GPS and odometry data to avoid revisiting areas already explored.
+        # Step 3: Continually scan the environment for any objects matching the description of "plastic container" and "field flags".
+        all_objects = get_all_objects()
+        
+        for index, object_dict in all_objects.items():
+            object_point = ObjectPoint(object_dict["time"], Point(object_dict["position"]["x"], object_dict["position"]["y"], object_dict["position"]["z"]), object_dict["name"], object_dict["confidence"], False)
+
+            # Step 4: If an object resembling a "plastic container" is detected, move towards it while continuously scanning for any objects listed in the "avoid" list.
+            if object_point.label == "plastic container" and object_point not in visited_objects:
+                waypoint = get_waypoint_closest_to_object(object_point)
+
+                if is_available() and check_waypoint_in_bounds(waypoint):
+                    stop_robot()  # stop the robot to execute new command
+                    go_to_waypoint(waypoint)
+                    visited_objects.append(object_point)  # mark the container as visited
+
+                    # Step 5: Once arrived at the "plastic container", scan the container for "field flags".
+                    # Step 6: Count the number of "field flags" detected in the container using the robot's visual processing capabilities.
+                    flags_count = 0
+                    for flag_index, flag_object_dict in all_objects.items():
+                        flag_object_point = ObjectPoint(flag_object_dict["time"], Point(flag_object_dict["position"]["x"], flag_object_dict["position"]["y"], flag_object_dict["position"]["z"]), flag_object_dict["name"], flag_object_dict["confidence"], False)
+
+                        if flag_object_point.label == "field flags" and flag_object_point not in visited_objects:
+                            flags_count += 1
+                            visited_objects.append(flag_object_point)  # mark the flag as visited
+
+                    # Step 7: Save the count and the location of the container in the system memory.
+                    # This step is assuming system memory as Python variables since there is no provided method in the API to save data in system memory.
+                    container_location = waypoint
+                    flags_in_container = flags_count
+
+                    # Step 8: After counting the flags, confirm that no more exploration is needed as per the prompt instructions and stop the exploration process.
+                    stop_robot()
+                    
+                    # Step 9: Report the count and the location of the container with the "field flags" to the user.
+                    print(f"Found {flags_in_container} field flags in the container located at ({container_location.x}, {container_location.y}, {container_location.z})")
+                    
+                    return  # end the task
+
+        # Wait for a bit before next scan
+        time.sleep(0.1)
+
+execute_policy()
+
+<<<

@@ -1,0 +1,12 @@
+1. Initialize the robot's seed dispenser and set the landmark offset to 0.05 meters as per the constraint dictionary.
+2. Activate the robot's RGB camera and lidar-inertial odometry system for observation and localization.
+3. Initiate the robot's GPS system for additional navigation and localization support.
+4. Command the robot to begin searching for 'field flags', the goal landmarks as per the constraint dictionary.
+5. Once a 'field flag' is detected, use the robot's lidar-inertial odometry system to calculate the distance to the flag.
+6. If the distance is more than 0.05 meters, command the robot to move closer to the 'field flag' until the distance is approximately 0.05 meters, maintaining a safe distance to avoid potential collision.
+7. Once the robot is within the desired distance of the 'field flag', activate the seed dispenser to plant a seed.
+8. Record the GPS location of the planted seed in the system memory.
+9. Once the seeding process is complete, command the robot to move away from the 'field flag' and resume the search for the next 'field flag'.
+10. Repeat steps 5-9 until all 'field flags' in the plot have been located and seeds have been planted near them.
+11. Once all the 'field flags' have been located and seeds have been planted, command the robot to return to its starting position.
+12. Finally, provide a report to the ecologists with a list of all the GPS coordinates where the seeds were planted.

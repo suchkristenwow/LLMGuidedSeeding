@@ -1,0 +1,13 @@
+1. Initialize the robotic agent and ensure it is ready to execute tasks.
+2. Activate the RGB cameras and lidar-inertial odometry systems for navigation and localization.
+3. Activate the GPS system for precise location tracking.
+4. Start the landmark detection module with a focus on the 'field flag' as a target object to navigate towards.
+5. Navigate towards the nearest detected 'field flag'. The robot should maintain a safe distance from all other objects.
+6. Upon reaching a 'field flag', ensure the robot is positioned within the defined 5 cm landmark offset. 
+7. If the position is accurate, plant a seed using the robot's seed planting mechanism.
+8. Record the GPS location of the planted seed and add it to the system memory list of all planted locations.
+9. Once the planting task is completed, move to the next nearest 'field flag'.
+10. Repeat steps 5 to 9 until all 'field flags' have been visited and a seed has been planted within the defined offset of each one.
+11. Upon completion of the planting task at all 'field flags', return to the starting position.
+12. Provide a report to the user with a list of all planted locations and any notable events or exceptions during the execution of the task.
+13. Standby for further instructions or tasks.

@@ -1,0 +1,56 @@
+>>> Python Code
+
+# Define policy details
+POLICY = {'goal_lms': 'field flag', 'landmark_offset': 0.05, 'seed': True}
+
+# Define the object that should be avoided 
+META_OBSTACLE = {"meta-obstacle": "planted areas"}
+
+# Initialize list to keep track of visited flags
+visited_flags = []
+
+# Begin main loop
+while True:
+    # Check if the robot is available
+    if is_available():
+        # Get all detected objects
+        all_objects = get_all_objects()
+        
+        # Loop over all detected objects
+        for index, object in all_objects.items():
+            # Check if the object is a flag and not visited yet
+            if object['name'] == POLICY['goal_lms'] and object['seq'] not in visited_flags:
+                # Create a Point object for the detected flag
+                flag_point = Point(object['position']['x'], object['position']['y'], object['position']['z'])
+                
+                # Get the robot's current position
+                robot_position = get_position()
+                
+                # Check if the robot is within 5 cm of the flag
+                distance_to_flag = math.sqrt((flag_point.x - robot_position.point.x)**2 + (flag_point.y - robot_position.point.y)**2)
+                if distance_to_flag <= POLICY['landmark_offset']:
+                    # If within 5 cm, plant the seed
+                    if POLICY['seed']:
+                        plant()
+                        # Add the flag sequence number to the list of visited flags
+                        visited_flags.append(object['seq'])
+                        print("Seeds planted near flag sequence: ", object['seq'])
+                else:
+                    # If not within 5 cm, navigate to the flag
+                    closest_waypoint = get_waypoint_closest_to_object(ObjectPoint(object['time'], flag_point, object['name'], object['confidence'], False))
+                    if check_waypoint_in_bounds(closest_waypoint):
+                        go_to_waypoint(closest_waypoint)
+                    
+        # Check for meta-obstacle
+        if META_OBSTACLE['meta-obstacle'] in all_objects.keys():
+            # If meta-obstacle detected, alter the navigation path
+            start_volumetric_gain_exploration()
+            
+        # Check if all flags have been visited
+        if len(visited_flags) == len(all_objects):
+            # If all flags visited, stop the robot and break the loop
+            stop_robot()
+            print("Task complete: all flags visited and seeds planted.")
+            break
+
+<<< Python Code
