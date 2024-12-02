@@ -263,7 +263,7 @@ class PolicyGenerator:
                 f.write(llm_result)
             f.close() 
 
-    def seeding_failure_reGen(self,iter=None): 
+    def seeding_failure_reGen(self,iter=None,image_path=None): 
         if not os.path.exists(os.path.join("thesis_experiments",self.prompt_name)):
             os.mkdir(os.path.join("thesis_experiments",self.prompt_name))
 
@@ -300,7 +300,7 @@ class PolicyGenerator:
                     obj_description = f.read() 
                 code_gen_prompt += "\n" + f"The user has defined {custom_obj} like this: " + "\n" + obj_description 
 
-        llm_result, _ = generate_with_openai(code_gen_prompt)
+        llm_result, _ = generate_with_openai(code_gen_prompt,image_path=image_path)
 
         if not os.path.exists(os.path.join(prompt_dir,"faultRecovery")):
             os.mkdir(os.path.join(prompt_dir,"faultRecovery"))

@@ -26,7 +26,9 @@ That is, the seeding mechanism was not able to plant due to the ground being imp
 
 *INSERT_OLD_CODE*
 
-Please edit this existing code to fix the error. 
+I've included an image of where the error occured so you can determine the cause of the error. 
+
+Please edit this existing code to avoid this error again, if you think it's necessary. 
 
 Here is an API which you can use to control the robot.
 
