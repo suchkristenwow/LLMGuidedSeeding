@@ -286,7 +286,7 @@ class PolicyGenerator:
         else: 
             raise OSError 
 
-        prompt = self.read("prompts/step_parser_codeGen.txt")
+        prompt = self.read("prompts/seeding_failure_prompt.txt")
         old_code = self.read(os.path.join(prompt_dir,"result"+str(iter)+".txt"))
 
         code_gen_prompt = prompt.replace("*INSERT_QUERY", self.query) 
@@ -307,7 +307,7 @@ class PolicyGenerator:
         print() 
 
         if not ">>>" in  llm_result:
-            prompt = "Can you re-write the code such that it fixes the error?" 
+            prompt = "Can you re-write the code such that it fixes the error caused by the seeder hitting something hard?" 
             llm_result, _ = generate_with_openai(code_gen_prompt,image_path=image_path,conversation_history=history)  
             print("second response: ",llm_result) 
 
