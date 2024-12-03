@@ -1,32 +1,8 @@
-You are guiding an autonomous robotic agent to execute the prompt given below. The robot is supposed to help ecologists with tasks related to revegetation of degraded rangelands.
-
-This is the prompt: *INSERT_QUERY*
-
-The robot is a Cleapath Husky outfitted with lidar, IMU, and RGB cameras, as well as a planter mechanism to plant seeds.
-
-In terms of localization, the robot is capable of localization using lidar-inertial odometry as well as GPS. 
-
-The policy has been parsed like so: *INSERT_CONSTRAINT_DICT*
-
-The keys to this dictionary should be the strings "meta-obstacle", "avoid","goal_lms","pattern","landmark_offset","search", "seed", and "pattern_offset". Here, seed is a string of a boolean variable 
-which is true if the robot should plant in the specified pattern. 
-
-A meta-obstacle is an obstacle created by the platform itself. For example, if the prompt includes a command to avoid driving over areas where you've already driven, you should include 
-{"meta-obstacle":"already driven"}. Another example would be if the prompt includes a command like "Avoid driving over areas where you have already planted", you should include
-{"meta-obstacle":"planted areas"}. 
-
-Note that for any objects listed under "avoid", each time such an object is detected, the corresponding vertex in the planner graph is removed. That is, 
-you can safely ignore those in your policy execution.
-
-To execute the desired task, the ecologist has written you this list of steps:
-*INSERT_POLICY*
-
-I tried to use this code to execute this policy, but planting failed because the seeding mechanism measured forces that exceeded the allowable limit. 
-That is, the seeding mechanism was not able to plant due to the ground being impenetrable. 
+Can you update this code such that it takes into account these constraints: *INSERT_CONSTRAINT_DICT*
 
 *INSERT_OLD_CODE*
 
-I've included an image of where the error occured so you can determine the cause of the error. 
+The problem with this code is that the seeder cannot plant in the targeted location due to it being impenetrable. 
 
 Please edit this existing code to avoid this error again, if you think it's necessary. 
 

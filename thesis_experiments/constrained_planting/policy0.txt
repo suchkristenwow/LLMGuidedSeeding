@@ -1,11 +1,11 @@
-1. Activate the robot's camera and lidar-inertial odometry systems for localization and landmark detection.
-2. Begin scanning the environment for field flags using RGB cameras.
-3. Whenever a field flag is detected, mark the location on the system map.
-4. Check the current location with respect to the detected field flag using GPS and lidar-inertial odometry.
-5. Calculate the optimal path to the detected field flag location, maintaining a 5 cm (or 0.05 m) offset from the field flag, and adjust the robot's route accordingly.
-6. If there is an obstacle detected on the planned path, recalculate the route to maintain the required offset from the field flag while avoiding the obstacle.
-7. Once arrived at the location, activate the seed planting mechanism to plant a seed.
-8. Record the coordinates of the planted seed into the system memory.
-9. Repeat steps 2 to 8 until all field flags in the plot have been identified and a seed has been planted near each one.
-10. Once all field flags have been accounted for and seeds planted accordingly, return to the starting position.
-11. Send a completion signal to the user indicating that the task of planting seeds near all field flags has been completed. Provide the list of all the locations where the seeds were planted for user's reference.
+1. Begin by initializing the robotic agent's navigational and seeding systems.
+2. Access the list of 'field flags' from the system memory.
+3. For each 'field flag', follow the steps below:
+   1. Use the robot's RGB cameras, lidar-inertial odometry, and GPS to accurately locate the current 'field flag'.
+   2. Once the 'field flag' is located, calculate the optimal path to the 'field flag' while maintaining a safe distance of 5 cm (as given by 'landmark_offset' in the constraint dictionary).
+   3. Navigate the robot along the calculated path towards the 'field flag'.
+   4. Upon reaching the 'field flag', confirm the location using the robot's localization capabilities.
+   5. If the location is confirmed, activate the seeding mechanism of the robot to plant a seed within the 5 cm radius of the 'field flag'.
+   6. Once the seed is planted, record the exact location of the planted seed in the system memory.
+4. After all 'field flags' have been visited and the corresponding seeds have been planted, return the robot to its starting position.
+5. Finally, save and update the list of planted locations in the system memory for future reference.

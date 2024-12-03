@@ -41,8 +41,9 @@ def dictify(results_str):
     #print("results_str: ", results_str)
     data_dict = json.loads(results_str)
     
-    # Convert the "seed" value to a boolean
-    data_dict["seed"] = bool(data_dict["seed"])
+    if "seed" in data_dict.keys(): 
+        # Convert the "seed" value to a boolean
+        data_dict["seed"] = bool(data_dict["seed"])
     
     return data_dict
 

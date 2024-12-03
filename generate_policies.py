@@ -9,6 +9,31 @@ import shutil
 
 from UI import ConversationalInterface
 
+def clean_json_string(json_string):
+    """
+    Cleans a JSON-like string by removing comments and ensuring proper formatting.
+    Ensures commas are correctly placed between key-value pairs without adding trailing commas.
+    """
+    lines = json_string.splitlines()
+    cleaned_lines = []
+    for line in lines:
+        line = line.split("#")[0].split("//")[0].strip()  # Remove comments
+        if line:
+            cleaned_lines.append(line)
+
+    # Join lines into a single string
+    cleaned_json = "\n".join(cleaned_lines)
+
+    # Replace Python-style True/False/None with JSON-compliant true/false/null
+    cleaned_json = cleaned_json.replace("True", "true").replace("False", "false").replace("None", "null")
+
+    # Remove any trailing commas inside JSON objects or arrays
+    cleaned_json = cleaned_json.replace(",\n}", "\n}")
+    cleaned_json = cleaned_json.replace(",\n]", "\n]")
+
+    return cleaned_json
+
+
 class PolicyGenerator: 
     def __init__(
         self,
@@ -199,7 +224,7 @@ class PolicyGenerator:
         print("constraints: ",constraints)
 
         return constraints
-        
+    
     def gen_policy(self, constraints = None, path = None, dir_ = None, iter_ = None):
         if constraints is None:  
             print("identifying constraints ...") 
@@ -214,11 +239,12 @@ class PolicyGenerator:
                 f.write(self.current_policy)   
                 f.close() 
         else: 
-            with open(path,"w") as f: 
-                print("self.current_policy: ",self.current_policy)
-                print("writing policy to path: {}".format(path))
-                f.write(self.current_policy) 
-                f.close() 
+            if not os.path.exists(path): 
+                with open(path,"w") as f: 
+                    print("self.current_policy: ",self.current_policy)
+                    print("writing policy to path: {}".format(path))
+                    f.write(self.current_policy) 
+                    f.close() 
 
     def code_gen(self,iter=None): 
         if not os.path.exists(os.path.join("thesis_experiments",self.prompt_name)):
@@ -286,13 +312,13 @@ class PolicyGenerator:
         else: 
             raise OSError 
 
-        prompt = self.read("prompts/seeding_failure_prompt.txt")
+        prompt = self.read("prompts/fix_constraints.txt")
+    
         old_code = self.read(os.path.join(prompt_dir,"result"+str(iter)+".txt"))
 
         code_gen_prompt = prompt.replace("*INSERT_QUERY", self.query) 
         code_gen_prompt = code_gen_prompt.replace("*INSERT_CONSTRAINT_DICT*",str(constraint_dict))
         code_gen_prompt = code_gen_prompt.replace("*INSERT_POLICY*", final_policy)
-        code_gen_prompt = code_gen_prompt.replace("*INSERT_OLD CODE*",old_code)
 
         if len(self.learned_objects) > 0:
             for custom_obj in self.learned_objects: 
@@ -301,14 +327,40 @@ class PolicyGenerator:
                     obj_description = f.read() 
                 code_gen_prompt += "\n" + f"The user has defined {custom_obj} like this: " + "\n" + obj_description 
 
+        print("prompt: ",code_gen_prompt) 
+
         llm_result, history = generate_with_openai(code_gen_prompt,image_path=image_path)
 
-        print("first response: ",llm_result)
+        print("llm_result: ",llm_result)
+
+        print("constraint_dict: ",constraint_dict) 
+
+        print() 
+
+        new_constraints = {} 
+        i0 = llm_result.index("{"); i1 = llm_result.index("}")
+        parsed_results = llm_result[i0:i1+1]
+        if "}" not in parsed_results:
+            parsed_results = parsed_results + "}"
+
+        new_constraints = clean_json_string(parsed_results)                 
+
+        prompt = self.read("prompts/seeding_failure_prompt.txt") 
+
+        code_gen_prompt = prompt.replace("*INSERT_CONSTRAINT_DICT*",str(new_constraints))
+        code_gen_prompt = code_gen_prompt.replace("*INSERT_OLD_CODE*",old_code)     
+
+        print("prompt: ",code_gen_prompt)    
+        
+        llm_result, history = generate_with_openai(code_gen_prompt,image_path=image_path,conversation_history=history)  
+
+        print("llm_result: ",llm_result) 
         print() 
 
         if not ">>>" in  llm_result:
             prompt = "Can you re-write the code such that it fixes the error caused by the seeder hitting something hard?" 
-            llm_result, _ = generate_with_openai(code_gen_prompt,image_path=image_path,conversation_history=history)  
+            print("prompt: ",prompt) 
+            llm_result, _ = generate_with_openai(prompt,image_path=image_path,conversation_history=history)  
             print("second response: ",llm_result) 
 
         if not os.path.exists(os.path.join(prompt_dir,"faultRecovery")):
@@ -319,6 +371,11 @@ class PolicyGenerator:
                 print("writing {}".format(os.path.join(prompt_dir,"faultRecovery/result" + str(iter) + ".txt")))
                 f.write(llm_result)
             f.close() 
+            with open(os.path.join(prompt_dir,"faultRecovery/new_constraints" + str(iter) + ".txt"),"w") as f: 
+                print("writing {}".format(os.path.join(prompt_dir,"faultRecovery/new_constraints" + str(iter) + ".txt")))
+                f.write(str(new_constraints))
+            f.close() 
+
                 
 if __name__ == "__main__":
     # Create an argument parser
