@@ -1,57 +1,63 @@
 >>> 
+
 import time
 import math
 
-# Step 1: Activate the RGB cameras and lidar-inertial odometry system for initial environment mapping and object detection.
-# This should have been done at the initialization of the robot and its sensors.
+# Define constants
+OBJECT_LABEL = "field flag"
+DISTANCE_THRESHOLD = 0.05  # 5 cm
+PLANTED_LOCATIONS = []
+MAX_WAIT_TIME = 5  # maximum time in seconds to wait for the robot to be available
 
-# Step 2: Identify the field flags in the plot using the RGB cameras.
-# The robot will use its built-in object detection to identify the field flags. This doesn't require any explicit code.
+# Step 1: Activate the RGB camera and lidar-inertial odometry to locate and identify all field flags within the plot.
+# Since the API does not provide a function to explicitly activate these devices, we assume that they are automatically activated.
 
-# Step 3: Map the locations of the detected field flags using GPS.
-# The robot will use its built-in object detection to map the locations of the field flags. This doesn't require any explicit code.
+# Step 2: Begin to navigate towards the first detected field flag using GPS and lidar-inertial odometry for precise localization.
+# Step 3: As you approach each field flag, use the lidar-inertial odometry to maintain a distance of 0.05 meters (5 cm).
+# Step 4: Upon reaching the designated offset from the field flag, initiate the seed planting procedure.
+# Step 5: Record the location of the planted seed in the system memory.
+# Step 6: Repeat steps 2 through 5 for each identified field flag within the plot.
 
-# Step 4: Define a circular region with a radius of 0.05 meters (5 cm) around each flag. This will be the targeted planting area.
-# This is handled in the go_to_waypoint and plant function, the robot will plant once within 5 cm of every field flag.
+# Check if robot is available
+while not is_available():
+    # Wait for the robot to be available
+    time.sleep(MAX_WAIT_TIME)
 
-# Step 5: Activate the seed planting mechanism.
-# This should have been done at the initialization of the robot and its planter mechanism.
-
+# Get all objects detected
 all_objects = get_all_objects()
-field_flags = [ObjectPoint(obj["time"], Point(obj["position"]["x"], obj["position"]["y"], obj["position"]["z"]), obj["name"], obj["confidence"], False) for obj in all_objects if obj["name"] == 'field flag']
 
-# Step 6: For each of the field flags:
-for field_flag in field_flags:
-    # a. Navigate to the defined region around the flag using the GPS and lidar-inertial odometry data.
-    waypoint = get_waypoint_closest_to_object(field_flag)
-    while not is_available():
-        time.sleep(1)
-    go_to_waypoint(waypoint)
+for index, object_dict in all_objects.items():
+    if object_dict["name"] == OBJECT_LABEL:
+        # Get position of the object
+        object_position = Point(object_dict["position"]["x"], object_dict["position"]["y"], object_dict["position"]["z"])
+        # Create an ObjectPoint instance for the object
+        object_point = ObjectPoint(object_dict["time"], object_position, object_dict["name"], object_dict["confidence"], False)
+        
+        # Check if the waypoint is within bounds
+        if check_waypoint_in_bounds(object_point.point):
+            waypoint = get_waypoint_closest_to_object(object_point)
 
-    # b. Upon reaching the target, confirm the robot's position is within the defined area of the flag using the lidar-inertial odometry.
-    while math.sqrt((get_position().point.x - field_flag.point.x)**2 + (get_position().point.y - field_flag.point.y)**2) > 0.05:
-        time.sleep(1)
+            # Navigate to waypoint closest to object
+            go_to_waypoint(waypoint)
 
-    # c. Once confirmed, initiate the seeding process.
-    while not is_available():
-        time.sleep(1)
-    plant()
+            # Wait until the robot is at the waypoint, within the specified distance threshold
+            while math.hypot(get_position().point.x - waypoint.x, get_position().point.y - waypoint.y) > DISTANCE_THRESHOLD:
+                time.sleep(0.5)  # Wait for 0.5 seconds before checking the distance again
 
-    # d. Save the GPS coordinates of the seeded location in the system memory.
-    field_flag.visited = True
+            # Plant the seed
+            plant()
 
-# Step 7: After all flags have been serviced, check the system memory to ensure all targeted areas have a corresponding planted seed location.
-# Step 8: If any targeted areas are missing a planted seed location, repeat steps 6 and 7 for these specific areas.
-# The process will automatically repeat for every field flag due to the for loop.
+            # Record the location of the planted seed
+            PLANTED_LOCATIONS.append(waypoint)
+            
+# Step 7: After all field flags have been approached and seeds have been planted accordingly, return to the starting position.
+# This can be done by stopping the robot, since the robot will automatically return to the starting position when it is stopped.
+stop_robot()
 
-# Step 9: Once the planting process is complete for all flags, save the final list of planted locations in the system memory for future reference and auditing.
-# This is handled by the field_flag.visited attribute.
+# Step 8: Provide a summary report of all the planted locations to the user and save this report in the system memory for future reference.
+print(f"Summary report of all the planted locations: {PLANTED_LOCATIONS}")
 
-# Step 10: Switch off the seed planting mechanism and the robot's navigational systems.
-# This should be handled by the robot's control system when it's not in use.
+# Step 9: Standby for any further instructions or tasks from the user.
+# Since the robot is already stopped, it is in standby mode.
 
-# Step 11: Return the robot to its original location or charging station.
-# This can be done by calling the go_to_waypoint function with the initial starting location or charging station.
-# However, the exact coordinates are not provided in the prompt. The function call would look something like this:
-# go_to_waypoint(Point(initial_x, initial_y, initial_z))
 <<<

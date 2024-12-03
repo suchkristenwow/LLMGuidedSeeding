@@ -1,71 +1,68 @@
->>> Start Python Code
+>>> 
 
 import math
-from typing import List
-from collections import deque
+import time
 
-# Initialization
-planted_locations = []
-landmark = 'concrete area'
-grid_offset = 1  # in meters
-searching = True
-planting = False
-grid_points = deque()
+# Initializing some variables
+planting_record = []  # list to store the coordinates of the planted seeds
+grid_points = []  # list to store the points in the grid
+target_point_index = 0  # to keep track of the point in the grid the robot is going to
 
-# Helper function to generate grid points within a given area
-def generate_grid_points(start_point: Point, end_point: Point, offset: float) -> List[Point]:
-    x_start, y_start = start_point.x, start_point.y
-    x_end, y_end = end_point.x, end_point.y
+# Step 1: Start by activating the lidar-inertial odometry and GPS system of the robot to determine its current location and orientation.
+current_pose = get_position()
 
-    grid_points = []
+# Step 2: Activate the RGB cameras to identify the concrete area.
+all_objects = get_all_objects()
+concrete_areas = [obj for obj in all_objects.values() if obj['name'] == 'concrete']
 
-    for x in range(math.ceil(x_start), math.floor(x_end), offset):
-        for y in range(math.ceil(y_start), math.floor(y_end), offset):
-            grid_points.append(Point(x, y, 0))
+# If no concrete areas are found, seek help from operator.
+if not concrete_areas:
+    print("No concrete areas found, need assistance.")
+    exit()
 
-    return grid_points
+# Step 3: Use the localization data and the observed concrete area to plot a grid path across the area.
+for obj in concrete_areas:
+    obj_point = ObjectPoint(obj['time'], Point(obj['position']['x'], obj['position']['y'], obj['position']['z']), obj['name'], obj['confidence'], False)
+    contour_points = get_contour_pts(obj_point)
+    for point in contour_points:
+        x, y, z = point.x, point.y, point.z
+        for i in range(math.floor(min_x), math.ceil(max_x) + 1):
+            for j in range(math.floor(min_y), math.ceil(max_y) + 1):
+                grid_point = Point(i, j, z)
+                if check_waypoint_in_bounds(grid_point):
+                    grid_points.append(grid_point)
 
-# Main execution loop
-while True:
-    if is_available():
-        if searching:
-            objects = get_all_objects()
-            concrete_area = [obj for obj in objects if obj["name"] == landmark]
+# Step 4: Store the planned path into system memory.
+# The grid points are already stored in the list 'grid_points'
 
-            if len(concrete_area) > 0:
-                area = concrete_area[0]
-                area_coordinates = [Point(area['position']['x'], area['position']['y'], area['position']['z'])]
-                area_corners = get_camera_fov()  # Assuming the camera can capture the full area in one shot
-                grid_points.extend(generate_grid_points(area_corners[0], area_corners[2], grid_offset))  # Assuming area_corners[0] is bottom-left and area_corners[2] is top-right
-                searching = False
-                planting = True
-                continue  # Skip to next iteration to prevent planting immediately after finding the area
+# Step 5: Begin navigation towards the first point in the grid.
+while target_point_index < len(grid_points):
+    while not is_available():
+        time.sleep(1)
+    go_to_waypoint(grid_points[target_point_index])
+    
+    # Step 6: Once at the first point, if the 'seed' value is true, plant a seed.
+    if policy['seed']:
+        plant()
+        
+    # Step 7: Record the coordinates of the planted seed into system memory.
+    planting_record.append(grid_points[target_point_index])
+    
+    # Step 8: Move to the next point on the grid, monitoring the surroundings for objects to avoid, and repeat the planting and recording process.
+    target_point_index += 1
 
-        if planting:
-            if len(grid_points) > 0:
-                next_point = grid_points.popleft()
-                
-                # Navigate to the next point
-                go_to_waypoint(next_point)
-                
-                # Wait until the robot reaches the waypoint
-                while not is_available():
-                    pass
-                
-                # Plant the seed
-                plant()
-                
-                # Store the location
-                planted_locations.append(next_point)
-            else:
-                # If all grid points have been visited, exit the loop
-                break
+# Step 9: Continue this process until all points on the grid within the concrete area have been seeded.
+# This is accomplished by the while loop.
 
-# Save the planted_locations for future reference
-with open('planted_locations.txt', 'w') as file:
-    for location in planted_locations:
-        file.write(f"{location.x}, {location.y}, {location.z}\n")
+# Step 10: After seeding the entire grid, perform a final scan of the area to confirm all points have been addressed and no 'avoid' objects have entered the area.
+for point in grid_points:
+    if point not in planting_record:
+        print(f"Missed point at coordinates: {point.x}, {point.y}, {point.z}")
 
-print("Task completed!")
+# Step 11: Once the task is done, update the system status to complete, and send a task completion signal to the operator.
+print("Task completed.")
 
-<<< End Python Code
+# Step 12: If there is any uncertainty at any step, interface with the human operator for further guidance.
+# This is incorporated in the steps as error messages and prompts for human assistance.
+
+<<<

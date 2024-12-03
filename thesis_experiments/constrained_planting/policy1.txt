@@ -1,12 +1,10 @@
-1. Activate the RGB cameras and lidar-inertial odometry system to observe the surroundings and to localize the robot.
-2. Activate the GPS system for an additional method of localization.
-3. Begin navigating the plot, using the cameras to detect landmarks, specifically looking for field flags as indicated in the 'goal_lms' entry of the constraint dictionary.
-4. Once a field flag is detected, navigate towards it.
-5. Upon reaching the field flag, verify the robot is within the 5 cm offset as indicated by the 'landmark_offset' in the constraint dictionary.
-6. If the robot is not within the 5 cm range, make necessary adjustments until the robot is within the required range.
-7. Once within the required range, activate the seed planting mechanism, ensuring the 'seed' entry in the constraint dictionary is set to 'True'.
-8. Plant the seeds at the current location.
-9. Save the planted location to the system memory for future reference.
-10. Repeat the process from step 3 for every field flag in the plot until all flags have been attended to.
-11. If an "avoid" object is detected, alter the navigation path to bypass the object, removing its vertex from the planner graph.
-12. Once all flags have been attended to, stop the seeding process and return the robot to its starting position.
+1. Activate the robot's RGB cameras and GPS system for identifying the landmarks and for localization respectively.
+2. Initiate the lidar-inertial odometry system to assist with precise positioning relative to the identified landmarks.
+3. Use the RGB cameras to look for the 'field flag' landmarks as mentioned in the 'goal_lms' key of the constraint dictionary.
+4. Once a 'field flag' landmark is detected, use the GPS and lidar-inertial odometry system to navigate towards the landmark.
+5. As the robot approaches the field flag, ensure the offset of 0.05 meters (5 cm) as mentioned in 'landmark_offset' key. This can be achieved using lidar-inertial odometry data.
+6. When the robot is positioned correctly, initiate the seed planting mechanism to plant a seed at the current location.
+7. Store the GPS coordinates of the planted seed location in the system memory for future reference.
+8. Repeat steps 3 to 7 for every 'field flag' landmark detected by the RGB cameras in the plot. 
+9. Once all 'field flag' landmarks have been attended to and seeds have been planted, return the robot to the starting position.
+10. Update the task status to complete and provide a report of all the planted locations for user review.

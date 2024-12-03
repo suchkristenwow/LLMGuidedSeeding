@@ -1,15 +1,17 @@
-1. Initialize the location memory list to keep track of all the planted locations, given the 'seed' boolean is True.
-2. Utilize the robot's RGB cameras and lidar-inertial odometry to identify and locate the 'concrete area', which is the goal landmark as per the constraint dictionary.
-3. Once the 'concrete area' is identified, use GPS to fix the exact coordinates of this area. 
-4. Start with the south-west most point of the concrete area (considering North as up) and mark it as the starting point.
-5. Move to the starting point using the robot's autonomous navigation system.
-6. Plant the first seed at the starting point and add this location to the location memory list.
-7. Now, form a grid pattern as per the 'pattern_offset' defined in the constraint dictionary. In this case, it's 1 meter.
-8. Start moving in the east direction from the starting point, maintaining a distance of 1 meter between each point as per the grid pattern.
-9. At each point, stop and plant a seed. Add the coordinates of each of these points to the location memory list.
-10. Continue this process until the end of the concrete area is reached in the east direction.
-11. Once the end is reached, move north by 1 meter from the last planted point and start moving west, repeating the seed planting process.
-12. Alternate between east and west direction after each row (1 meter apart), and repeat the process until the entire concrete area is covered by the grid.
-13. The task is complete when all the points in the grid pattern over the concrete area have a seed planted.
-14. For the robot's safety and to avoid damaging the newly planted seeds, carefully navigate the robot out of the concrete area using the most direct path to the nearest edge.
-15. Maintain the location memory list in the system memory for future reference and further tasks if needed.
+1. Activate the RGB cameras and lidar-inertial odometry system to start observation of the environment.
+2. Use GPS for initial localization and orientation.
+3. Search and identify the 'concrete area' as defined in the 'goal_lms' of the constraint dictionary using the RGB cameras.
+4. Navigate towards the identified 'concrete area'.
+5. Upon reaching the 'concrete area', initiate the planting process. 
+6. Check the 'pattern' parameter from the constraint dictionary which is 'grid' in this case.
+7. Begin the planting process on a grid pattern with 'pattern_offset' of 1m as specified in the constraint dictionary.
+8. Plant a seed at the current location and store the coordinates of this location in the system memory.
+9. Move 1m to the right, plant a seed, and store the new location in the system memory.
+10. Repeat step 9 until the edge of the 'concrete area' is reached.
+11. Upon reaching the edge, move 1m forward and plant a seed, store the new location in the system memory.
+12. Move 1m to the left, plant a seed, and store the new location in the system memory.
+13. Repeat step 12 until the other edge of the 'concrete area' is reached.
+14. Continue alternating between steps 9-13 and steps 11-13, creating a grid pattern of planted seeds 1m apart until the entire 'concrete area' is covered.
+15. Once the entire 'concrete area' is covered, stop the planting process.
+16. Navigate back to the starting point or a designated location using GPS and stored coordinates.
+17. End the task and switch off the RGB cameras and lidar-inertial odometry system.

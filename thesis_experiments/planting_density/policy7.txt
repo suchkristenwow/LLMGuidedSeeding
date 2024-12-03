@@ -1,9 +1,13 @@
-1. Initialize the system and load the plot bounds and constraints from the system memory.
-2. Begin scanning the environment using the RGB cameras to identify the concrete area which is the target area for planting. 
-3. Once the concrete area is identified, localize it using lidar-inertial odometry and GPS.
-4. Begin creating a grid pattern within the concrete area, with each grid point located 1 meter apart from the other as specified in the "pattern_offset".
-5. Before moving to each grid point, use the RGB camera to check for any objects listed in the "avoid" list. If any such object is detected, remove the corresponding grid point from the planner graph.
-6. Navigate to the first grid point that is free of any objects from the "avoid" list.
-7. Once at the grid point, check the "seed" variable. Since it is set to False, there is no need to plant any seeds.
-8. Move to the next grid point, following the same steps as 5, 6, and 7. Repeat this for all grid points within the concrete area.
-9. Once all grid points within the concrete area have been visited, the task is complete. Confirm the completion of the task to the user.
+1. Begin by activating the RGB cameras and lidar-inertial odometry system for optimal navigation and localization.
+2. Use the GPS system to pinpoint the robot's starting position within the plot.
+3. Search for the 'concrete area' landmark using the RGB cameras.
+4. Once the 'concrete area' landmark is detected, navigate towards it. Use the GPS and lidar-inertial odometry system to track movement and ensure accurate positioning.
+5. Upon reaching the 'concrete area', determine the boundaries of this region to guide the grid pattern planting.
+6. Start at one corner of the 'concrete area'. This will be the first point in the grid pattern. 
+7. Activate the planting mechanism to plant a seed at the current location. 
+8. Record the current GPS coordinates and save it to the system memory as the location of the planted seed.
+9. Move 1m to the right from the current position, maintaining the same direction. This movement is in line with the 'pattern_offset' of 1 meter specified in the constraint dictionary.
+10. If the new location is still within the bounds of the 'concrete area', repeat steps 7-9. If the new location is outside the 'concrete area', proceed to step 11.
+11. Move 1m forward from the current position, turning right 90 degrees, and then turn left 90 degrees to maintain the original direction. This move sets the start of a new row in the grid pattern.
+12. If the new location is still within the bounds of the 'concrete area', repeat steps 7-10 until the end of the row is reached again. If the new location is outside the 'concrete area', the task is complete.
+13. During the entire process, if any uncertainty arises, initiate an interface with the human operator for further direction or context.

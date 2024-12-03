@@ -1,10 +1,14 @@
-1. Initiate the robot's navigational system and activate the RGB camera, GPS, and lidar-inertial odometry.
-2. Direct the robot to locate the 'concrete area' goal landmark utilizing the RGB camera.
-3. Once the 'concrete area' is identified, map out a grid pattern with a 'pattern_offset' of 1m x 1m using the GPS.
-4. Start from one corner of the 'concrete area' and move towards the first grid point following the planned path.
-5. At each grid intersection, check the 'seed' flag. As it is set to 'False' in this instance, the robot will not plant seeds.
-6. Navigate to the next grid point following the shortest path.
-7. Repeat steps 5 and 6 until all grid points on the 'concrete area' have been covered.
-8. Once the entire 'concrete area' is covered, stop the robot and signal task completion. 
-9. Save the grid pattern and the visited grid points to the system memory for future reference. 
-10. Return the robot to the starting point or to a designated 'safe' location.
+1. Activate the RGB cameras and lidar-inertial odometry system for object detection and localization.
+2. Start the navigation process to the 'goal_lms' which is the 'concrete area'. Use GPS to ensure the most accurate location tracking.
+3. Once reached, scan the concrete area to get the size and shape for the grid planning.
+4. Calculate the number of grid points needed based on the 'pattern_offset' which is 1 meter. This will provide us with the total grid points where seeds will be planted.
+5. Begin at one corner of the concrete area, and prepare to plant the first seed.
+6. Deploy the seed planting mechanism to plant the first seed.
+7. Save the current location in system memory as a planted location.
+8. Move 1 meter to the right (as per the 'pattern' and 'pattern_offset' from the constraint dictionary) to reach the next grid point.
+9. Repeat steps 6-8 until you reach the end of the row.
+10. At the end of the row, move 1 meter ahead and align yourself to start a new row of planting.
+11. Repeat steps 6-10 until the entire concrete area is covered as per the 1m x 1m grid.
+12. Once completed, perform a final scan to confirm all grid points have been seeded correctly.
+13. If any grid points are missed, navigate to those points and plant seeds.
+14. After confirming all points have been seeded, send a completion message to the user and go into standby mode.

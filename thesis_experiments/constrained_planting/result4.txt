@@ -1,75 +1,46 @@
 >>> 
-
 import time
 import math
 
-class CleapathHusky:
+class RevegetationRobot:
     def __init__(self):
-        self.planter = False # Planter mechanism
-        self.goal_lms = 'field flag' # Goal landmarks
-        self.landmark_offset = 0.05 # Offset from landmark
-        self.seed = True # To plant or not to plant
-        self.visited_flags = [] # List to keep track of visited flags
-        self.planted_locations = [] # List to keep track of planted locations
+        self.planted_points = []
+        self.landmark_offset = 0.05
+        self.goal_lms = 'field flag'
 
-    def activate_systems(self):
-        # activate RGB cameras and lidar-inertial odometry systems
-        pass
+    def distance_between_points(self, p1, p2):
+        return math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2 + (p1.z - p2.z)**2)
 
-    def engage_gps(self):
-        # engage GPS system
-        pass
-
-    def search_goal_lms(self):
-        # search for goal landmarks
-        all_objects = get_all_objects()
-
-        # filter out field flags from all_objects
-        field_flags = [op for op in all_objects if op.label == self.goal_lms and op.visited == False]
-
-        # if there are any field flags left to visit
-        if field_flags:
-            # find the closest flag
-            closest_flag = min(field_flags, key=lambda flag: math.sqrt((flag.point.x - get_position().point.x)**2 +
-                                                                       (flag.point.y - get_position().point.y)**2 +
-                                                                       (flag.point.z - get_position().point.z)**2))
-            return closest_flag
-
-        # if all flags have been visited
-        return None
-
-    def navigate_to_flag(self, flag):
-        # navigate to the flag
-        go_to_waypoint(get_waypoint_closest_to_object(flag))
-
-    def plant_seed(self):
-        # plant a seed
-        plant()
-        self.planted_locations.append(get_position().point)
-
-    def execute_task(self):
-        self.activate_systems()
-        self.engage_gps()
-
+    def execute_policy(self):
         while True:
             if is_available():
-                flag = self.search_goal_lms()
-                if flag is not None:
-                    self.navigate_to_flag(flag)
-                    time.sleep(5) # wait for the robot to reach the flag
-                    if self.seed:
-                        self.plant_seed()
-                    flag.visited = True
-                else:
+                field_flags = get_all_objects()
+                for flag in field_flags:
+                    if flag["name"] == self.goal_lms:
+                        flag_point = Point(flag["position"]["x"], flag["position"]["y"], flag["position"]["z"])
+                        robot_pose = get_position()
+                        robot_point = robot_pose.point
+
+                        while self.distance_between_points(flag_point, robot_point) > self.landmark_offset:
+                            if is_available():
+                                waypoint = get_waypoint_closest_to_object(flag_point)
+                                if check_waypoint_in_bounds(waypoint):
+                                    go_to_waypoint(waypoint)
+                                    time.sleep(2)  # Allow robot to move towards waypoint
+
+                        # Check if robot is in range to plant seed
+                        if self.distance_between_points(flag_point, robot_point) <= self.landmark_offset:
+                            if is_available():
+                                plant()  # Plant seed
+                                self.planted_points.append(flag_point)  # Record planted location
+
+                # If no more flags are detected or all detected flags have had seeds planted near them
+                if not field_flags or all(flag["position"] in self.planted_points for flag in field_flags):
                     break
 
-        # return to initial position
-        go_to_waypoint(self.visited_flags[0].point)
+        # Store and report all planted locations
+        print("List of all planted locations:", self.planted_points)
 
-        # report task completion
-        print('Task Complete. Planted locations: ', self.planted_locations)
-
-robot = CleapathHusky()
-robot.execute_task()
-
+robot = RevegetationRobot()
+robot.execute_policy()
 <<<

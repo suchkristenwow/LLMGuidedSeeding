@@ -98,7 +98,30 @@ For ease of parsing please put >>> right before your code, and <<< at the end of
                     }
 
         """
-        
+    
+    def get_contour_pts(ObjectPoint) -> Point[]:
+        """
+        Computes the contour of an object from its instance segmentation mask, 
+        projects the contour points into the world frame, and identifies which of those points lie on the ground.
+
+        This function takes in a point representing the object and uses the instance segmentation mask 
+        associated with the object to extract its contour. The extracted contour is then transformed 
+        from the image or camera frame into the world frame. Each projected point is checked against the 
+        ground plane to determine if it is on the ground. 
+
+        Use when avoiding objects or targeting certain ground conditions. For example in the prompt: "Plant in the grass",
+        you should call this function to get the contours of the grass area. 
+
+        Args:
+            ObjectPoint: The input object point, typically a 3D coordinate or a representative feature 
+                        of the object in question.
+
+        Returns:
+            Point[]: A list of 3D points in the world frame that define the contour of the object 
+                        and are verified to lie on the ground plane. Returns an empty list if no points 
+                        are found to lie on the ground.
+        """
+
     def get_camera_fov() -> Point[]:
         """
         Returns a list of 4 (x,y) Points of the field of view of the cameras. Can help keep track of what areas are observed. 
@@ -121,7 +144,7 @@ For ease of parsing please put >>> right before your code, and <<< at the end of
         Checks if the targeted object has been detected and returns its position
         if it hasn't been visited before and is within a certain distance threshold.
 
-        Returns list of Point if there is more than one.
+        Returns list of Point if there is more than one such Point equidistant from the robot.
 
         Otherwise, returns None.
 

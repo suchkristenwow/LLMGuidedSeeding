@@ -1,0 +1,62 @@
+>>> 
+
+import time
+import math
+
+class RevegetationAgent:
+    def __init__(self):
+        self.field_flags = []
+        self.planted_locations = []
+
+    def calculate_distance(self, point1: Point, point2: Point):
+        return math.sqrt((point1.x - point2.x)**2 + (point1.y - point2.y)**2 + (point1.z - point2.z)**2)
+
+    def plant_seed(self):
+        while not is_available():
+            time.sleep(1)
+        plant()
+
+    def navigate_to_flag(self, flag_point: Point):
+        while not is_available():
+            time.sleep(1)
+        go_to_waypoint(flag_point)
+
+    def execute_task(self):
+        # Scanning the environment for 'field flags'
+        while True:
+            objects = get_all_objects()
+            for index, obj in objects.items():
+                if obj['name'] == 'field flag' and obj['confidence'] > 0.7:
+                    flag_point = Point(obj['position']['x'], obj['position']['y'], obj['position']['z'])
+                    self.field_flags.append(flag_point)
+
+            if len(self.field_flags) == 0:
+                # If no more 'field flags' are detected within the plot bounds, conclude the task
+                break
+
+            for flag in self.field_flags:
+                robot_position = get_position().point
+                distance_to_flag = self.calculate_distance(robot_position, flag)
+
+                # If the calculated distance is more than 0.05 meters (5 cm), move the robot closer to the 'field flag' until the distance is exactly 0.05 meters
+                while distance_to_flag > 0.05:
+                    self.navigate_to_flag(flag)
+                    robot_position = get_position().point
+                    distance_to_flag = self.calculate_distance(robot_position, flag)
+
+                # Once the robot is within 0.05 meters of the 'field flag', activate the seeding mechanism to plant a seed
+                self.plant_seed()
+
+                # After planting, record the current location in system memory as a 'planted location'
+                self.planted_locations.append(robot_position)
+
+                # Move the robot away from the 'field flag' and start the scanning process again for the next 'field flag'
+                self.field_flags.remove(flag)
+
+        print("Task completed!")
+        print(f"Planted locations: {self.planted_locations}")
+
+revegetation_agent = RevegetationAgent()
+revegetation_agent.execute_task()
+
+<<<

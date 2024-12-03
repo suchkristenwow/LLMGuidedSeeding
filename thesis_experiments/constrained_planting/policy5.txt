@@ -1,15 +1,9 @@
-1. Activate the RGB cameras and lidar-inertial odometry system for initial environment mapping and object detection.
-2. Identify the field flags in the plot using the RGB cameras. 
-3. Map the locations of the detected field flags using GPS.
-4. Define a circular region with a radius of 0.05 meters (5 cm) around each flag. This will be the targeted planting area.
-5. Activate the seed planting mechanism.
-6. For each of the field flags:
-    a. Navigate to the defined region around the flag using the GPS and lidar-inertial odometry data.
-    b. Upon reaching the target, confirm the robot's position is within the defined area of the flag using the lidar-inertial odometry.
-    c. Once confirmed, initiate the seeding process.
-    d. Save the GPS coordinates of the seeded location in the system memory.
-7. After all flags have been serviced, check the system memory to ensure all targeted areas have a corresponding planted seed location.
-8. If any targeted areas are missing a planted seed location, repeat steps 6 and 7 for these specific areas.
-9. Once the planting process is complete for all flags, save the final list of planted locations in the system memory for future reference and auditing.
-10. Switch off the seed planting mechanism and the robot's navigational systems.
-11. Return the robot to its original location or charging station.
+1. Activate the RGB camera and lidar-inertial odometry to locate and identify all field flags within the plot.
+2. Begin to navigate towards the first detected field flag using GPS and lidar-inertial odometry for precise localization.
+3. As you approach each field flag, use the lidar-inertial odometry to maintain a distance of 0.05 meters (5 cm).
+4. Upon reaching the designated offset from the field flag, initiate the seed planting procedure.
+5. Record the location of the planted seed in the system memory.
+6. Repeat steps 2 through 5 for each identified field flag within the plot.
+7. After all field flags have been approached and seeds have been planted accordingly, return to the starting position.
+8. Provide a summary report of all the planted locations to the user and save this report in the system memory for future reference.
+9. Standby for any further instructions or tasks from the user.

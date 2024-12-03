@@ -1,23 +1,11 @@
-1. Activate RGB cameras and lidar-inertial odometry systems to observe the environment and locate the robot's position.
-
-2. Engage the GPS system to receive accurate positioning data.
-
-3. Use the vision system to search for the goal landmarks, in this case, the field flags.
-
-4. Once a field flag is detected, calculate the distance to the flag using both GPS and lidar data.
-
-5. Command the robot to navigate towards the detected flag, stopping when it is 5 cm (0.05 m, as per the 'landmark_offset' value) away.
-
-6. If the 'seed' value is True (which it is in this case), command the robot to activate the seeding mechanism.
-
-7. Plant a seed at the current location.
-
-8. Record the coordinates of the planted location in the system memory.
-
-9. Repeat steps 3-8 until all field flags have been located and a seed has been planted near each one.
-
-10. Once all seeds have been planted as per the instructions, command the robot to return to its initial position.
-
-11. Once the robot is back at its initial position, update the system memory to indicate that the task is complete.
-
-12. Interface with the human user to report task completion and provide a list of all the locations where seeds have been planted.
+1. Turn on the RGB camera and Lidar-inertial odometry systems for landmark detection and localization. Enable GPS for additional localization support.
+2. Begin a search for the 'field flag' landmarks as defined in 'goal_lms' within the constraint dictionary.
+3. Once a 'field flag' landmark is detected by the RGB camera, use the lidar-inertial odometry to compute the robot's distance to the flag.
+4. If the robot is not within the required 5 cm range as specified by the 'landmark_offset' in the constraint dictionary, navigate towards the flag.
+5. Repeat step 4 until the robot is within the desired 5 cm range of the field flag. Be sure to monitor the surroundings for any objects listed under "avoid". If such an object is detected, adjust the path to maintain a safe distance.
+6. Once within the specified range, activate the planting mechanism and plant the seed.
+7. Update the list in the system memory with the location of the newly planted seed.
+8. Once the planting process is complete, continue the search for the next 'field flag' landmark.
+9. Repeat steps 3 to 8 for every 'field flag' detected within the plot boundaries.
+10. If no additional 'field flag' landmarks are detected, or all detected flags have had seeds planted near them, end the task.
+11. Store the list of all planted locations and report it for further ecological analysis and monitoring.

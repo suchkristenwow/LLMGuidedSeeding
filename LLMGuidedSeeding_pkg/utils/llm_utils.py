@@ -66,7 +66,7 @@ def generate_with_openai(prompt, conversation_history=None, max_retries=25, retr
         data = {
             "model": "gpt-4-turbo",
             "messages": conversation_history,
-            "max_tokens": 300
+            "max_tokens": 4096
         }
 
     response = None

@@ -1,13 +1,12 @@
-1. Initialize the seeding system and make sure it's ready to perform the task.
-2. Activate the robot's RGB cameras and lidar-inertial odometry for navigation and landmark detection.
-3. Direct the robot to start localization using GPS data to find its position in the plot.
-4. Program the robot to identify the 'concrete' landmarks using the RGB cameras.
-5. Once the concrete area has been identified, set this as the goal landmark for the robot.
-6. Activate the navigation system to guide the robot to the goal landmark. The navigation system should avoid any obstacles or features listed under "avoid" in the constraint dictionary. 
-7. After reaching the concrete area, set the planting pattern as 'grid' with an offset of 1 meter as specified in the constraint dictionary.
-8. Direct the robot to start planting seeds in the set grid pattern. The robot should make sure the distance between each planted seed is 1 meter in both directions (length and width) to maintain the desired density.
-9. As each seed is planted, record the location in the system memory for future reference.
-10. Continue the planting operation until the entire concrete area has been covered according to the grid pattern.
-11. Once the planting task is completed, direct the robot to return to its starting location or a designated ending point.
-12. Provide a summary of the task execution, including the number of seeds planted and the area covered.
-13. Save the data of all planted locations in case it is needed for future tasks or analysis.
+1. Activate the robot's RGB cameras and GPS for observing landmarks and localization respectively.
+2. Using the lidar-inertial odometry, calculate the current position of the robot.
+3. Identify the 'concrete area' as the goal landmark using the RGB cameras. If the concrete area cannot be found, interface with the human for more direction or context.
+4. Calculate a path to the 'concrete area' while avoiding any objects listed in the 'avoid' list. If a path cannot be found, interface with the human for more direction or context.
+5. Navigate towards the 'concrete area' along the calculated path.
+6. Once the robot is in the 'concrete area', calculate a grid pattern for planting the seeds with a density of 1m x 1m using the 'pattern_offset' value from the constraint dictionary.
+7. Start at the first point of the calculated grid pattern.
+8. Plant a seed at the current position and add the coordinates of the planted location to the system memory.
+9. Move to the next point in the grid pattern.
+10. Repeat steps 8 and 9 until all points in the grid pattern have been visited and seeds have been planted.
+11. Once all seeds have been planted, navigate back to the starting point or a designated 'end' point.
+12. Signal task completion and standby for further instructions.

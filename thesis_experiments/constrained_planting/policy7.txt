@@ -1,13 +1,9 @@
-1. Activate the RGB camera and lidar-inertial odometry system on the robot to prepare for navigation and landmark detection.
-2. Use the GPS to locate the plot boundaries and ensure the robot stays within them during the operation.
-3. Search for the "field flag" landmarks in the plot using the robot's RGB cameras and lidar-inertial odometry system.
-4. Once a field flag is detected, calculate the distance to the flag. If the robot is more than 5 cm away, adjust the robot's course to move closer.
-5. When the robot is within the specified 5 cm range of a field flag, stop the robot.
-6. Activate the seed planting mechanism to plant a seed in the current location.
-7. Record the GPS coordinates of the planted seed in the system memory to maintain a list of all planted locations.
-8. Repeat steps 3 to 7 for each detected field flag in the plot.
-9. When all field flags have been detected and a seed has been planted near each one, return the robot to its starting position.
-10. Upon completion, check the system memory to confirm that a seed has been planted near each field flag.
-11. If there are any field flags that do not have a corresponding seed planting recorded, repeat steps 3 to 7 for these missed flags.
-12. Once all flags have a corresponding planting, end the planting program and switch the robot to standby mode.
-13. Provide a report to the human operator indicating the completion of the task, along with the list of GPS coordinates where seeds were planted.
+1. Use the onboard RGB cameras to search for the "field flag" landmark, the goal object as listed in the constraint dictionary.
+2. Once a field flag is detected, use lidar-inertial odometry and GPS for localization and to accurately determine the distance to the field flag.
+3. Navigate towards the field flag, ensuring to maintain a safe distance as specified by the 'landmark_offset' value in the constraint dictionary, which is 0.05 meters or 5 cm.
+4. Upon reaching the desired location, which is within 5 cm of the field flag, initiate the seeding operation if 'seed' is set to True in the constraint dictionary.
+5. Record the exact coordinates of the planted location in the system memory for future reference, as per the policy requirement when 'seed' is True.
+6. After the seeding operation is complete, use the RGB cameras to search for the next field flag in the plot.
+7. Repeat steps 2 to 5 for every field flag found in the plot.
+8. Continue this process until all field flags in the plot have been found and seeds have been planted within 5 cm of each of them.
+9. Once all field flags have been accounted for and the planting is completed, halt the operation and update the system status as 'task completed'.

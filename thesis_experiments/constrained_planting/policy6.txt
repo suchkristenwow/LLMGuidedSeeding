@@ -1,13 +1,23 @@
-1. Activate RGB cameras and lidar-inertial odometry system for navigation and localization.
-2. Start GPS tracking.
-3. Activate object recognition for 'field flag'.
-4. Navigate to the first 'field flag' detected while maintaining a safe distance of 5 cm.
-5. Once the robot reaches the first flag, log the GPS coordinates and mark this position on the system map.
-6. Repeat steps 4-5 for every 'field flag' in the plot.
-7. If an 'avoid' object is detected in the robot's path, reroute the robot to ensure it does not come into contact with the object.
-8. Once all flags have been located and logged, navigate to the first logged flag location.
-9. Because the 'seed' value is False, no seeding is required. 
-10. Move to the next logged flag location.
-11. Repeat steps 9-10 until the robot has visited all logged flag locations.
-12. Once all flag locations have been visited, return the robot to the starting position. 
-13. End the task and provide a task completion report to the user.
+1. Initialize the list for storing the locations where seeds have been planted.
+
+2. Turn on the RGB cameras to observe landmarks and to detect field flags.
+
+3. Using the GPS and lidar-inertial odometry, localize the robot in the plot.
+
+4. Start moving within the plot, continually observing for the 'field flag' landmark using the RGB cameras.
+
+5. Upon detecting a field flag, calculate the distance between the robot and the flag using the lidar-inertial odometry system.
+
+6. If the distance is more than 5 cm, navigate the robot towards the flag while continually calculating the distance.
+
+7. Once within the 5 cm range, stop the robot. 
+
+8. Activate the seeding system to plant a seed at this location.
+
+9. Record the location of the planted seed in the list initialized in step 1.
+
+10. After the seed is planted, move away from the current field flag and resume search for the next field flag.
+
+11. Continue repeating steps 4 to 10 until all field flags have been found and a seed has been planted near each one.
+
+12. Once the task is complete, store the list of all planted locations in the system memory.

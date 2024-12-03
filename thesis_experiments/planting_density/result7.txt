@@ -1,70 +1,58 @@
->>> 
-```python
+>>> Start Python Code
+
 import math
-import time
-import numpy as np
 
-# Policy dictionary
-policy = {'goal_lms': 'concrete', 'pattern_offset': 1, 'pattern': 'grid', 'seed': False}
+# Initial setup
+if is_available():
+    start_volumetric_gain_exploration()
 
-# Getting the plot bounds and constraints
-bounds = get_bounds_and_constraints()
-avoid_objects = bounds['avoid']
+# Search for the 'concrete area' landmark using the RGB cameras.
+while True:
+    concrete_area = check_target_object('concrete area', float('inf'))
+    if concrete_area:
+        break
 
-# Initialize grid
-grid = initialize_grid(bounds, policy['pattern_offset'])
+# Once the 'concrete area' landmark is detected, navigate towards it.
+go_to_waypoint(get_waypoint_closest_to_object(concrete_area))
 
-# Start scanning the environment to identify the concrete area
-start_volumetric_gain_exploration()
+# Define grid parameters
+grid_spacing = 1 # in meters
 
-# Flag to track the completion of the task
-task_complete = False
+# Define seed planting function
+def plant_seeds_on_grid(start_point, end_point, grid_spacing):
+    """
+    Plant seeds on a grid from start point to end point with a specific spacing
+    """
+    x_distance = end_point.x - start_point.x
+    y_distance = end_point.y - start_point.y
 
-# Main loop
-while not task_complete:
-    # Wait for robot to become available
-    while not is_available():
-        time.sleep(0.1)
+    x_steps = math.floor(x_distance/grid_spacing)
+    y_steps = math.floor(y_distance/grid_spacing)
 
-    # Get all objects detected
-    all_objects = get_all_objects()
+    for i in range(x_steps):
+        for j in range(y_steps):
+            if is_available():
+                x = start_point.x + i*grid_spacing
+                y = start_point.y + j*grid_spacing
 
-    # Find the concrete area
-    concrete_object = None
-    for obj in all_objects:
-        if obj['name'] == policy['goal_lms']:
-            concrete_object = obj
-            break
+                # Move to next planting location
+                waypoint = Point(x, y, start_point.z)
+                go_to_waypoint(waypoint)
 
-    # If the concrete area is found
-    if concrete_object is not None:
-        # Stop exploration
-        stop_robot()
-
-        # Compute the grid for the concrete area
-        concrete_grid = compute_grid(concrete_object, policy['pattern_offset'])
-
-        # For each point in the grid
-        for point in concrete_grid:
-            # If the point is in the avoid list, continue to next point
-            if point in avoid_objects:
-                continue
-
-            # Navigate to the point
-            go_to_waypoint(point)
-
-            # If the policy states to plant a seed
-            if policy['seed']:
-                # Plant the seed
+                # Plant seed
                 plant()
 
-        # Task is complete
-        task_complete = True
-    else:
-        # Continue scanning
-        start_volumetric_gain_exploration()
+# Get the contour of the concrete area
+contour_pts = get_contour_pts(concrete_area)
 
-# Once the task is complete, confirm to the user
-print("Task complete.")
-```
-<<<
+# Assuming the contour points are in a rectangular shape, sort them by their x and y coordinates 
+# to find the top left and bottom right points
+contour_pts.sort(key=lambda pt: (pt.x, pt.y))
+
+# Plant seeds on the grid
+plant_seeds_on_grid(contour_pts[0], contour_pts[-1], grid_spacing)
+
+# Stop the robot after planting
+stop_robot()
+
+<<< End Python Code

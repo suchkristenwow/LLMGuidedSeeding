@@ -1,91 +1,89 @@
 >>> 
-import time
 import math
-from typing import List
+import time
 
-class PlantingRobot:
-    def __init__(self, goal_landmark: str, planting_pattern: str, pattern_offset: float, seed: bool):
-        self.goal_landmark = goal_landmark
-        self.planting_pattern = planting_pattern
-        self.pattern_offset = pattern_offset
-        self.seed = seed
-        self.landmarks = []
-        self.planted_points = []
-        self.robot_pose = None
+class AutonomousRobot:
+    def __init__(self, api):
+        self.api = api
+        self.grid_points = []
+        self.current_point_index = 0
+        self.goal_lms = 'concrete area'
+        self.pattern = 'grid'
+        self.pattern_offset = 1
+        self.seed = True
+        self.current_position = None
 
-    def initialize(self):
-        # Initialize seeding system
-        print("Seeding system initialized and ready to perform the task.")
+    def calculate_grid_pattern(self):
+        """
+        Calculate a grid pattern with a spacing of 1m x 1m.
+        """
+        points = self.api.get_contour_pts(self.goal_lms)
+        x_values = [point.x for point in points]
+        y_values = [point.y for point in points]
 
-    def localize(self):
-        # Robot localizes using GPS data to find its position in the plot
-        while not is_available():
-            time.sleep(1)
+        min_x = min(x_values)
+        max_x = max(x_values)
+        min_y = min(y_values)
+        max_y = max(y_values)
 
-        self.robot_pose = get_position()
-        print(f"Robot localized. Current position: {self.robot_pose.point.x}, {self.robot_pose.point.y}, {self.robot_pose.point.z}")
+        x_steps = math.ceil((max_x - min_x) / self.pattern_offset)
+        y_steps = math.ceil((max_y - min_y) / self.pattern_offset)
 
-    def identify_landmark(self):
-        # Robot identifies 'concrete' landmarks using the RGB cameras
-        all_objects = get_all_objects()
-        for index, obj in all_objects.items():
-            if obj['name'] == self.goal_landmark:
-                self.landmarks.append(Point(obj['position']['x'], obj['position']['y'], obj['position']['z']))
-        
-        print(f"Identified {len(self.landmarks)} {self.goal_landmark} landmarks.")
-
-    def navigate_to_landmark(self):
-        # Robot navigates to the goal landmark while avoiding any obstacles
-        for landmark in self.landmarks:
-            closest_waypoint = get_waypoint_closest_to_object(landmark)
-            while not is_available():
-                time.sleep(1)
-            go_to_waypoint(closest_waypoint)
-        
-        print(f"Reached the {self.goal_landmark} landmarks.")
-
-    def plant_seeds(self):
-        # Robot plants seeds in the set grid pattern
-        for i in range(int(math.sqrt(len(self.landmarks)))):
-            for j in range(int(math.sqrt(len(self.landmarks)))):
-                point_to_plant = Point(self.landmarks[i].x + j*self.pattern_offset, self.landmarks[i].y + j*self.pattern_offset, self.landmarks[i].z)
-                while not is_available():
-                    time.sleep(1)
-                go_to_waypoint(point_to_plant)
-                plant()
-                self.planted_points.append(point_to_plant)
-        
-        print(f"Finished planting seeds in the {self.goal_landmark} area.")
-
-    def go_to_start(self):
-        # Robot returns to its starting location
-        while not is_available():
-            time.sleep(1)
-        go_to_waypoint(self.robot_pose.point)
-        print("Returned to starting position.")
-
-    def summarize(self):
-        # Provide a summary of the task execution
-        print(f"Planted a total of {len(self.planted_points)} seeds.")
-        print(f"Covered an area of approximately {self.pattern_offset * math.sqrt(len(self.landmarks))} square meters.")
-
-    def save_data(self):
-        # Save the data of all planted locations
-        with open('planted_points.txt', 'w') as f:
-            for point in self.planted_points:
-                f.write(f"{point.x},{point.y},{point.z}\n")
-        print("Saved the data of all planted locations.")
+        for i in range(x_steps):
+            for j in range(y_steps):
+                x = min_x + i * self.pattern_offset
+                y = min_y + j * self.pattern_offset
+                self.grid_points.append(self.api.Point(x, y, 0))
 
     def execute(self):
-        self.initialize()
-        self.localize()
-        self.identify_landmark()
-        self.navigate_to_landmark()
-        self.plant_seeds()
-        self.go_to_start()
-        self.summarize()
-        self.save_data()
+        """
+        Main execution function.
+        """
+        # Step 1
+        while not self.api.is_available():
+            time.sleep(1)
 
-robot = PlantingRobot('concrete', 'grid', 1, True)
+        # Step 2
+        self.current_position = self.api.get_position()
+
+        # Step 3
+        while not self.api.check_target_object(self.goal_lms, 10):
+            self.api.start_volumetric_gain_exploration()
+            time.sleep(1)
+            self.api.stop_robot()
+
+        # Step 4
+        goal_point = self.api.get_waypoint_closest_to_object(self.goal_lms)
+        if goal_point is None:
+            print("No path found to goal landmark.")
+            return
+
+        # Step 5
+        self.api.go_to_waypoint(goal_point)
+
+        # Step 6
+        self.calculate_grid_pattern()
+
+        # Step 7
+        self.api.go_to_waypoint(self.grid_points[self.current_point_index])
+
+        # Step 8-10
+        while self.current_point_index < len(self.grid_points):
+            while not self.api.is_available():
+                time.sleep(1)
+
+            self.api.plant()
+            self.current_point_index += 1
+            if self.current_point_index < len(self.grid_points):
+                self.api.go_to_waypoint(self.grid_points[self.current_point_index])
+
+        # Step 11
+        self.api.go_to_waypoint(self.current_position.point)
+
+        # Step 12
+        print("Task completed successfully.")
+
+# Instantiate robot and start execution
+robot = AutonomousRobot(api)
 robot.execute()
 <<<

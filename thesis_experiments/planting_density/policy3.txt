@@ -1,8 +1,14 @@
-1. Activate the robot's observation mode using the RGB cameras to identify the target location marked as 'concrete area'.
-2. Guide the robot to navigate towards the identified 'concrete area' using GPS and lidar-inertial odometry for precise localization.
-3. Once the robot reaches the 'concrete area', set the planting pattern to 'grid' with a 'pattern_offset' of 1 meter, as given in the constraint_dictionary. 
-4. Begin planting seeds according to the defined grid pattern. The robot should plant a seed, move 1 meter along the X axis, plant another seed, and repeat this process until it reaches the end of the 'concrete area'.
-5. After reaching the end of the 'concrete area' along the X axis, the robot should move 1 meter along the Y axis and start planting seeds again, moving back along the X axis. Repeat this pattern until the entire 'concrete area' is covered in the defined grid pattern.
-6. During the entire process, continuously update the system memory with the GPS coordinates of each planted location as the 'seed' boolean is set to True.
-7. Once all the seeds are planted, guide the robot to navigate back to the starting point using lidar-inertial odometry and GPS.
-8. Notify the user that the task has been successfully completed and provide the total count and locations of the planted seeds from the system memory.
+1. Navigate to the predefined rangeland plot starting point.
+2. Activate RGB cameras and lidar-inertial odometry system for localization and identification of the 'concrete area' as per the 'goal_lms' from the constraint dictionary.
+3. Upon detecting the 'concrete area', begin planning the 'grid' pattern as per the 'pattern' from the constraint dictionary with 'pattern_offset' of 1m x 1m. This refers to the spacing between each planting spot.
+4. Initialize the planting process: 
+   - 4.1. Activate the seed planting mechanism.
+   - 4.2. Plant the first seed at the initial point of the 'concrete area'.
+   - 4.3. Store the planted location in system memory.
+5. Navigate 1 meter (as per 'pattern_offset') away from the initial point along the planned grid path.
+6. Repeat steps 4 and 5 until the end of the row is reached.
+7. At the end of the row, navigate 1 meter (as per 'pattern_offset') perpendicular to the previous row and begin the next row from step 4.
+8. Continue this process until the entire 'concrete area' is covered, avoiding any obstacles if detected and making sure each seed is planted 1 meter away from the others in a grid pattern.
+9. Upon completion, verify all the planted locations stored in the system memory to ensure the planting task has been executed as per the desired density.
+10. If the task is completed successfully, send a task completion notification to the human operator. If not, identify the areas that were missed or incorrectly planted and repeat the relevant steps.
+11. Return to the starting point after the task is fully completed.

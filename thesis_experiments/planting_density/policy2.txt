@@ -1,10 +1,13 @@
-1. Begin by initializing the robot's localization systems, such as the lidar-inertial odometry and the GPS.
-2. Use the robot's RGB cameras to scan the area and identify the concrete landmarks mentioned in 'goal_lms' of the constraint dictionary. 
-3. Navigate towards the identified concrete area using the lidar-inertial odometry and the GPS systems for accurate localization.
-4. Once the robot has reached the concrete area, utilize the RGB cameras again to evaluate the area and identify any objects listed under 'avoid' in the constraint dictionary. If any are detected, remove the corresponding vertex in the planner graph.
-5. After ensuring the area is clear of any objects to be avoided, begin to map out a grid pattern for planting based on the 'pattern_offset' provided in the constraint dictionary. In this case, it would be a grid with spacing of 1m x 1m.
-6. Commence planting seeds at each point in the grid. At each point, drop a seed and mark the location in the system's memory as 'planted'. This will maintain a record of all planted locations as required.
-7. Continue this planting process, following the grid pattern until the whole concrete area has been covered. 
-8. Once all planting is complete, use the RGB cameras to conduct a final scan of the area to confirm that the seeding has been completed as per the grid pattern.
-9. Report the completion of the task and provide a list of all planted locations to the user for verification and future reference.
-10. Return the robot to its initial position or to a designated rest point, completing the task.
+1. Activate the robot's RGB camera and lidar-inertial odometry system to identify the surroundings.
+2. Use the RGB camera to search for the 'concrete area', which is defined as the goal landmark in the constraint dictionary.
+3. Once the 'concrete area' is identified, use the robot's localization features to navigate towards it.
+4. Check the 'seed' key in the constraint dictionary. Since it's set to 'False', do not activate the seeding mechanism.
+5. Based on the 'pattern' key in the constraint dictionary, plant in a 'grid' pattern.
+6. Use the 'pattern_offset' key to guide the grid pattern, ensuring a density of 1m x 1m. This means the robot will move in a pattern that resembles a grid, with each point of the grid being 1 meter apart from the other.
+7. Begin by placing the robot at the first point in the grid. 
+8. Move in a straight line to the next point in the grid, 1 meter away, checking for any obstacles in the path.
+9. If an obstacle is detected, navigate around it and return to the correct grid path.
+10. Continue this process until the entire 'concrete area' has been covered in the specified grid pattern.
+11. If the robot encounters an object listed under "avoid", it will remove the corresponding vertex in the planner graph and safely navigate around it.
+12. Once the task is completed, return the robot to the starting position.
+13. Finally, save the route taken and grid points covered into the system memory for future reference.

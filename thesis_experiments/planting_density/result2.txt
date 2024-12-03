@@ -1,87 +1,81 @@
->>> Start Python Code
+>>> 
 
-import math
+# Required libraries
 import time
+import math
 
-class RangelandRevegetation:
-    def __init__(self, policy):
-        self.policy = policy
-        self.planted_points = []
-        self.grid_points = []
-        self.concrete_landmark = None
+# Policy dictionary provided
+policy = {'goal_lms': 'concrete area', 
+          'pattern_offset': 1, 
+          'pattern': 'grid', 
+          'seed': False}
 
-    def is_point_in_concrete_area(self, point):
-        """
-        Assuming the concrete area is represented by a rectangle, 
-        this function checks whether a point lies within it or not.
-        """
-        # Assuming concrete_landmark.position represents the center of the rectangle
-        # and concrete_landmark.width and concrete_landmark.height represent its dimensions.
-        if self.concrete_landmark is not None:
-            return ((point.x >= self.concrete_landmark.position.x - self.concrete_landmark.width/2) and 
-                    (point.x <= self.concrete_landmark.position.x + self.concrete_landmark.width/2) and 
-                    (point.y >= self.concrete_landmark.position.y - self.concrete_landmark.height/2) and 
-                    (point.y <= self.concrete_landmark.position.y + self.concrete_landmark.height/2))
-        else:
-            return False
+# Step 1: Activate the robot's RGB camera and lidar-inertial odometry system to identify the surroundings.
+# The hardware activation is assumed to be handled by the robot and does not need explicit code. 
 
-    def create_planting_grid(self):
-        """
-        Function to generate a grid of points for planting with a given pattern offset.
-        """
-        # assuming concrete_landmark.width and concrete_landmark.height represent the dimensions of the area to plant
-        rows = math.ceil(self.concrete_landmark.height / self.policy['pattern_offset'])
-        columns = math.ceil(self.concrete_landmark.width / self.policy['pattern_offset'])
+# Step 2: Use the RGB camera to search for the 'concrete area'.
+# This would be done using the get_all_objects() function and finding our target landmark.
 
-        for i in range(rows):
-            for j in range(columns):
-                x = self.concrete_landmark.position.x - self.concrete_landmark.width/2 + i * self.policy['pattern_offset']
-                y = self.concrete_landmark.position.y - self.concrete_landmark.height/2 + j * self.policy['pattern_offset']
-                point = Point(x, y, 0)
-                if self.is_point_in_concrete_area(point):
-                    self.grid_points.append(point)
+# Step 3: Navigate to the 'concrete area'.
+def navigate_to_landmark(landmark):
+    while not is_available():  # Wait for robot to be available
+        time.sleep(1)  # Sleep for 1 second before checking again
 
-    def execute(self):
-        while not is_available():
-            time.sleep(1)
-
-        landmarks = get_all_objects()
-
-        for _, landmark in landmarks.items():
-            if landmark["name"] == self.policy['goal_lms']:
-                self.concrete_landmark = landmark
+    objects = get_all_objects()  # Get all detected objects
+    for obj in objects.values():  # Iterate through all objects
+        if obj['name'] == landmark:  # Check if current object is the landmark we're looking for
+            obj_point = ObjectPoint(obj['time'], Point(obj['position']['x'], obj['position']['y'], obj['position']['z']), obj['name'], obj['confidence'], False)
+            target_point = get_waypoint_closest_to_object(obj_point)  # Get waypoint closest to landmark
+            if check_waypoint_in_bounds(target_point):  # Check if waypoint is within bounds
+                go_to_waypoint(target_point)  # Navigate to waypoint
                 break
 
-        # Navigate to the concrete area
-        waypoint = get_waypoint_closest_to_object(self.concrete_landmark)
-        go_to_waypoint(waypoint)
+# Step 4: Check the 'seed' key in the policy. Since it's set to 'False', do not activate the seeding mechanism.
+# No need for explicit code, as seeding mechanism will not be activated due to 'seed' key being False.
 
-        while not is_available():
-            time.sleep(1)
+# Step 5 & 6: Plant in a 'grid' pattern with a density of 1m x 1m.
+# Step 7: Begin by placing the robot at the first point in the grid.
+# Step 8 & 9: Move in a straight line to the next point in the grid, 1 meter away, checking for any obstacles in the path.
+# Step 10: Continue this process until the entire 'concrete area' has been covered in the specified grid pattern.
+# Note: This function assumes a 2D grid (x,y) on a flat surface. If the grid needs to be 3D, the code would need adjustments.
+def execute_grid_pattern(landmark, offset):
+    objects = get_all_objects()  # Get all detected objects
+    for obj in objects.values():  # Iterate through all objects
+        if obj['name'] == landmark:  # Check if current object is the landmark we're looking for
+            landmark_point = Point(obj['position']['x'], obj['position']['y'], obj['position']['z'])
+            contour_points = get_contour_pts(landmark_point)  # Get contour points of landmark
 
-        # Create the planting grid
-        self.create_planting_grid()
+            # Generate grid points within the contour of the landmark
+            grid_points = generate_grid_points(contour_points, offset)
 
-        # Start planting
-        for point in self.grid_points:
-            if check_waypoint_in_bounds(point):
-                go_to_waypoint(point)
-                while not is_available():
-                    time.sleep(1)
-                plant()
-                self.planted_points.append(point)
+            # Navigate to each grid point and plant
+            for point in grid_points:
+                while not is_available():  # Wait for robot to be available
+                    time.sleep(1)  # Sleep for 1 second before checking again
 
-        return self.planted_points
+                if check_waypoint_in_bounds(point):  # Check if waypoint is within bounds
+                    go_to_waypoint(point)  # Navigate to waypoint
+                    if policy['seed']:  # Check if robot should plant
+                        plant()  # Plant seed
 
-# Define the policy
-policy = {'goal_lms': 'concrete', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+def generate_grid_points(contour_points, offset):
+    min_x = min([point.x for point in contour_points])
+    max_x = max([point.x for point in contour_points])
+    min_y = min([point.y for point in contour_points])
+    max_y = max([point.y for point in contour_points])
 
-# Execute the policy
-revegetation = RangelandRevegetation(policy)
-planted_points = revegetation.execute()
+    # Initialize grid points
+    grid_points = []
 
-# Print the planted locations
-for point in planted_points:
-    print(f"Planted at ({point.x}, {point.y}, {point.z})")
+    # Create grid points with the given offset
+    for x in range(math.floor(min_x), math.ceil(max_x), offset):
+        for y in range(math.floor(min_y), math.ceil(max_y), offset):
+            grid_points.append(Point(x, y, 0))  # Assuming a flat surface (z = 0)
 
->>> End Python Code
+    return grid_points
+
+# Execute the steps
+navigate_to_landmark(policy['goal_lms'])
+execute_grid_pattern(policy['goal_lms'], policy['pattern_offset'])
+
+<<<

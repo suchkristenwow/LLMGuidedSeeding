@@ -1,9 +1,10 @@
-1. Activate the robot's observation system and set it to locate 'field flag' landmarks.
-2. Start the localization system using lidar-inertial odometry and GPS to keep track of the robot's position.
-3. Begin moving towards the closest detected 'field flag' while avoiding any objects listed under the "avoid" category.
-4. Once the robot is within a 5 cm distance of the 'field flag' (as specified by 'landmark_offset'), prepare the seeding mechanism.
-5. Plant the seed and record the current GPS coordinates in the system memory under 'planted locations'.
-6. Resume the search for the next 'field flag'.
-7. Repeat steps 3 to 6 until all 'field flags' have been detected and a seed has been planted within 5 cm of each.
-8. After all seeds are planted, save and store the list of 'planted locations' in the system memory for future reference and possible follow-ups.
-9. Send a completion message to the user notifying them of the task's completion and provide the list of 'planted locations'.
+1. Activate the robot's localization system using lidar-inertial odometry and GPS to determine its initial position in the plot.
+2. Activate the robot's RGB cameras for visual recognition of landmarks.
+3. Start a search for the 'field flag' landmarks mentioned in the goal_lms of the constraint dictionary using the robot's visual recognition system. 
+4. Once a field flag landmark is identified, navigate the robot towards it, ensuring it maintains a distance of 0.05 m (or 5 cm) as indicated by the 'landmark_offset' in the constraint dictionary. 
+5. On reaching the desired position, initiate the planting process. The robot should then plant a seed.
+6. Record the location of the planted seed in the system memory for tracking and future reference, as per the 'seed' boolean being set to True.
+7. Repeat steps 3 to 6 for all detected field flag landmarks within the plot. 
+8. Once all field flags have been located and seeds have been planted 5 cm away from each, verify the list of planted locations in the system memory to ensure all tasks have been carried out as per the prompt.
+9. End the task when all field flags have been accounted for and the planting process has been successfully executed near each flag. The robot can now return to its initial position or await further instructions.
+10. Finally, update the user with the task completion status and the list of locations where the seeds have been planted.

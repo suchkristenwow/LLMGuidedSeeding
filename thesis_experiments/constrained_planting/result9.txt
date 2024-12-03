@@ -1,82 +1,92 @@
 >>> 
 ```python
 import time
-from math import sqrt
+import math
 
-# Initialize the system
-FLAG_DISTANCE = 0.05  # distance from the flag where the seed should be planted
-visited_flags = {}  # to keep track of visited flags
-planted_seeds = []  # to keep track of planted seeds
+class ReVegetation:
+    def __init__(self):
+        self.planted_locations = []  # List to store all planted locations
+        self.field_flag = "field flag"  # String to denote field flags
+        self.landmark_offset = 0.05  # Offset from the field flag to plant the seeds
+        self.seed = True  # Boolean to denote if the seed is to be planted
 
-while True:
-    # Check if robot is available
-    if is_available():
-        # Get current position of the robot
-        current_position = get_position()
-        x, y, z = current_position.point.x, current_position.point.y, current_position.point.z
+    def start_task(self):
+        # Ensure the robot is available before beginning the task
+        while not is_available():
+            time.sleep(0.1)
 
-        # Get all detected objects
+        # Activate camera and lidar for object detection
+        self.activate_sensors()
+
+        # Start task of planting seeds near field flags
+        self.plant_seeds()
+
+        # Save planted locations for future reference
+        self.save_planted_locations()
+
+        # Inform user about task completion
+        print("Task Completed. A total of", len(self.planted_locations), "locations have been planted.")
+
+    def activate_sensors(self):
+        """
+        Activates the RGB cameras and lidar-inertial odometry systems for detection and localization
+        """
+        pass  # Assuming the cameras and lidar are activated by default
+
+    def plant_seeds(self):
+        # Get all observed objects
         all_objects = get_all_objects()
+        
+        # Loop through all detected objects and plant seeds near field flags
+        for obj in all_objects.values():
+            if obj['name'] == self.field_flag:
+                self.navigate_and_plant(obj)
 
-        # Filter objects to get only flags
-        flags = [obj for obj in all_objects.values() if obj["name"] == "field flag"]
+    def navigate_and_plant(self, obj):
+        """
+        Navigate towards a field flag and plant seed near it.
+        """
+        field_flag_position = Point(obj['position']['x'], obj['position']['y'], obj['position']['z'])
+        
+        # Navigate to flag
+        self.go_to_waypoint(field_flag_position)
+        
+        # Verify current location and distance from flag
+        current_pose = get_position()
+        distance = self.calculate_distance(current_pose.point, field_flag_position)
 
-        # If there are flags detected
-        if flags:
-            # Filter flags to get unvisited ones
-            unvisited_flags = [flag for flag in flags if flag["seq"] not in visited_flags]
+        # If within 5cm of flag, plant seed
+        if self.seed and distance <= self.landmark_offset:
+            plant()
+            self.planted_locations.append(current_pose.point)
 
-            # If there are unvisited flags
-            if unvisited_flags:
-                # Sort flags by their distance from the robot
-                unvisited_flags.sort(key=lambda f: sqrt((f["position"]["x"] - x) ** 2 + (f["position"]["y"] - y) ** 2))
-
-                # Get the nearest flag
-                nearest_flag = unvisited_flags[0]
-
-                # Get waypoint closest to this flag
-                waypoint = get_waypoint_closest_to_object(nearest_flag)
-
-                # Check if the waypoint is within the bounds
-                if check_waypoint_in_bounds(waypoint):
-                    # Move to the waypoint
-                    go_to_waypoint(waypoint)
-
-                    # Check if the robot is within the required distance from the flag
-                    if sqrt((nearest_flag["position"]["x"] - x) ** 2 + (nearest_flag["position"]["y"] - y) ** 2) <= FLAG_DISTANCE:
-                        # Plant the seed
-                        plant()
-
-                        # Mark this flag as visited
-                        visited_flags[nearest_flag["seq"]] = True
-
-                        # Store the coordinates of the planted seed
-                        planted_seeds.append((x, y, z))
-
-                        # Move away from the flag
-                        start_volumetric_gain_exploration()
-
-            # If all flags have been visited
-            else:
-                # Stop the robot
-                stop_robot()
-
-                # Print the coordinates of the planted seeds
-                print("Seeds have been planted at the following GPS coordinates:")
-                for seed in planted_seeds:
-                    print(seed)
-
-                # End the task
-                break
-
-        # If no flags are detected
+    def go_to_waypoint(self, pt):
+        """
+        Make the robot navigate to a specified point.
+        """
+        # Check if waypoint is within bounds
+        if check_waypoint_in_bounds(pt):
+            while not is_available():
+                time.sleep(0.1)
+            go_to_waypoint(pt)
         else:
-            # Continue exploring
-            start_volumetric_gain_exploration()
+            print("Waypoint out of bounds.")
 
-    # If robot is not available
-    else:
-        # Wait for some time
-        time.sleep(1)
+    def calculate_distance(self, point1, point2):
+        """
+        Calculate the Euclidean distance between two points.
+        """
+        return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2 + (point1.z - point2.z) ** 2)
+
+    def save_planted_locations(self):
+        """
+        Save the list of planted locations in system memory.
+        """
+        # Assuming there is a system function to save the data
+        pass
+
+# Initialize the re-vegetation task
+task = ReVegetation()
+task.start_task()
 ```
 <<<

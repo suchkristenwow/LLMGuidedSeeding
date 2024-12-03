@@ -268,6 +268,7 @@ class PolicyGenerator:
             os.mkdir(os.path.join("thesis_experiments",self.prompt_name))
 
         prompt_dir = os.path.join("thesis_experiments",self.prompt_name) 
+        print("prompt dir: ",prompt_dir) 
 
         constraint_dict = self.parse_prompt()
         with open(os.path.join(prompt_dir,"constraints_" + str(iter) + ".txt"),"w") as f: 
@@ -300,18 +301,25 @@ class PolicyGenerator:
                     obj_description = f.read() 
                 code_gen_prompt += "\n" + f"The user has defined {custom_obj} like this: " + "\n" + obj_description 
 
-        llm_result, _ = generate_with_openai(code_gen_prompt,image_path=image_path)
+        llm_result, history = generate_with_openai(code_gen_prompt,image_path=image_path)
+
+        print("first response: ",llm_result)
+        print() 
+
+        if not ">>>" in  llm_result:
+            prompt = "Can you re-write the code such that it fixes the error?" 
+            llm_result, _ = generate_with_openai(code_gen_prompt,image_path=image_path,conversation_history=history)  
+            print("second response: ",llm_result) 
 
         if not os.path.exists(os.path.join(prompt_dir,"faultRecovery")):
             os.mkdir(os.path.join(prompt_dir,"faultRecovery"))
 
         if not iter is None: 
             with open(os.path.join(prompt_dir,"faultRecovery/result" + str(iter) + ".txt"),"w") as f: 
+                print("writing {}".format(os.path.join(prompt_dir,"faultRecovery/result" + str(iter) + ".txt")))
                 f.write(llm_result)
             f.close() 
-        
-
-        
+                
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description="Explore Test")
@@ -357,6 +365,4 @@ if __name__ == "__main__":
         logging_directory=args.logging_dir
     )
 
-    for i in range(1,10):
-        print("this is iter:",i)
-        pg.code_gen(iter=i)
+    pg.seeding_failure_reGen(iter=0,image_path="/home/kristen/Downloads/sidewalk.jpg")

@@ -1,13 +1,11 @@
-1. Activate the RGB cameras and the lidar-inertial odometry system to observe and localize the environment.
-2. Identify the 'concrete' landmarks using the RGB camera.
-3. Use the GPS and lidar-inertial odometry system to navigate towards the 'concrete' landmarks.
-4. Once arrived at the 'concrete' landmark, initialize an empty list to store all the planted locations.
-5. Start the planting process with the 'grid' pattern. This means planting seeds at regular intervals of 1m x 1m as specified by the 'pattern_offset' key.
-6. Plant the first seed at the current location and add this location to the list of planted locations.
-7. Use the lidar-inertial odometry system to move 1m away horizontally from the first planted seed.
-8. Plant the next seed and add this new location to the list of planted locations.
-9. Repeat steps 7 and 8 until the end of the 'concrete' area is reached.
-10. Upon reaching the end of the area, use the lidar-inertial odometry system to move 1m vertically from the first row of planted seeds.
-11. Repeat steps 7 to 10 until the entire 'concrete' area is covered.
-12. If any uncertainty or unexpected situation arises during the process, interface with the human operator for further directions.
-13. After planting seeds throughout the 'concrete' area, save the list of planted locations to the system memory for future reference.
+1. Start by enabling the robot's GPS and lidar-inertial odometry for precise localization.
+2. Command the robot to use its RGB cameras to identify and locate the concrete area specified in the 'goal_lms' field of the constraint dictionary.
+3. Once the concrete area is identified, create a virtual grid overlay on the area with a density of 1m x 1m as specified in the 'pattern_offset' field.
+4. Command the robot to start at one corner of the concrete area.
+5. Command the robot to plant a seed at the current position.
+6. Save the coordinates of the planted location in the system memory.
+7. Command the robot to move to the next grid point by navigating 1m over on the grid.
+8. Repeat steps 5-7 for all points on the grid until the entire concrete area has been covered, making sure to avoid any objects specified in the "avoid" field.
+9. Once all points on the grid have been seeded, perform a final sweep with the RGB cameras to confirm that seeds have been planted at all points on the grid.
+10. If any grid point was missed or a seed was not successfully planted, command the robot to return to that point and plant a seed.
+11. Once seeding is complete, provide a final report to the user summarizing the locations where seeds were planted and any obstacles that were avoided during the task.

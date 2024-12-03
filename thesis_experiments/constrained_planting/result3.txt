@@ -1,80 +1,67 @@
->>> Start Python Code 
+>>> 
+import math
+import time
 
-    import time 
-    import math 
+class ReVegetationRobot:
+    def __init__(self):
+        self.seeds_planted = []
 
-    # Define the list to keep track of all planted locations
-    planted_locations = []
+    def distance_to_flag(self, flag_location, current_location):
+        return math.sqrt((flag_location.x - current_location.x)**2 +
+                         (flag_location.y - current_location.y)**2 +
+                         (flag_location.z - current_location.z)**2)
+    
+    def execute_policy(self):
+        # 1. Activate the RGB cameras to start scanning for the 'field flag'
+        print("RGB cameras activated, scanning for field flags...")
 
-    def calculate_distance(point1, point2):
-        """
-        Calculates the Euclidean distance between two points.
-        """
-        return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2 + (point1.z - point2.z) ** 2)
-
-    # Step 1: Initialize the robot
-    while not is_available():
-        time.sleep(1)
-
-    # Step 2, 3: Activate the cameras and lidar-inertial odometry system, and the GPS system
-    # Assuming these systems are automatically activated once the robot is available
-
-    # Step 4: Start the landmark detection module with 'field flag' as the target object
-    # Assuming this is done automatically once the robot is available
-
-    while True:  # Loop until all flags have been visited
-        # Step 5: Navigate towards the nearest detected 'field flag'
-        flags = get_all_objects()
-        if not flags:
-            print("No flags detected.")
-            break
-        else:
-            closest_flag = None
-            closest_distance = float("inf")
-
-            for flag in flags:
-                if flag["name"] == 'field flag':
-                    flag_position = Point(flag["position"]["x"], flag["position"]["y"], flag["position"]["z"])
-                    distance = calculate_distance(get_position().point, flag_position)
-                    if distance < closest_distance and not flag.visited:
-                        closest_distance = distance
-                        closest_flag = flag
-
-            if closest_flag is None:
-                print("All flags have been visited.")
-                break
+        while True:
+            # Check if robot is available before performing tasks
+            while not is_available():
+                time.sleep(1)
+            
+            # 2. Activate the GPS and lidar-inertial odometry systems for localization
+            print("GPS and lidar-inertial odometry systems activated.")
+            
+            # 3. Once a 'field flag' is detected, calculate the distance to the flag
+            field_flags = get_all_objects()
+            for flag in field_flags.values():
+                if flag['name'] == 'field flag':
+                    flag_position = Point(flag['position']['x'], flag['position']['y'], flag['position']['z'])
+                    flag_object_point = ObjectPoint(flag['time'], flag_position, flag['name'], flag['confidence'], False)
+                    
+                    # 4. If the robot is farther than 0.05m from the 'field flag', move towards the flag
+                    current_position = get_position().point
+                    distance = self.distance_to_flag(flag_object_point.point, current_position)
+                    if distance > 0.05:
+                        print("Moving towards the flag...")
+                        go_to_waypoint(get_waypoint_closest_to_object(flag_object_point))
+                        
+                        # Check if robot is now at correct distance
+                        current_position = get_position().point
+                        distance = self.distance_to_flag(flag_object_point.point, current_position)
+                        if distance > 0.05:
+                            continue
+                    
+                    # 5. Once the robot is 0.05m away from the 'field flag', activate the seed planting system
+                    if 'seed' and 'landmark_offset' in policy and policy['seed'] == True and policy['landmark_offset'] == 0.05:
+                        print("Activating seed planting system...")
+                        
+                        # 6. Plant a seed at the current location
+                        plant()
+                        
+                        # 7. Record the location of the planted seed in the system memory
+                        self.seeds_planted.append(current_position)
+                        print(f"Seed planted at location: {current_position}")
+                    
+                    # 8. Scan the surrounding area for more 'field flags'
+                    print("Scanning for more field flags...")
+                    break
             else:
-                # Go to the waypoint closest to the detected flag
-                while not is_available():
-                    time.sleep(1)
-                waypoint = get_waypoint_closest_to_object(closest_flag)
-                go_to_waypoint(waypoint)
+                # 10. If no more 'field flags' are detected, end the task.
+                print("No more field flags detected. Ending task.")
+                break
 
-                # Step 6: Ensure the robot is positioned within the defined 5 cm landmark offset
-                while calculate_distance(get_position().point, waypoint) > 0.05:
-                    time.sleep(1)
-
-                # Step 7: Plant a seed
-                while not is_available():
-                    time.sleep(1)
-                plant()
-
-                # Step 8: Record the GPS location of the planted seed
-                planted_locations.append(get_position())
-
-    # Step 11: Return to the starting position
-    while not is_available():
-        time.sleep(1)
-    go_to_waypoint(starting_position)
-
-    # Step 12: Provide a report to the user
-    print("Task completed. Planted locations:")
-    for location in planted_locations:
-        print(f"Time: {location.time}, Position: ({location.point.x}, {location.point.y}, {location.point.z}), Yaw: {location.yaw}")
-
-    # Step 13: Standby for further instructions or tasks
-    while not is_available():
-        time.sleep(1)
-    stop_robot()
-
-<<< End Python Code
+robot = ReVegetationRobot()
+robot.execute_policy()
+<<<

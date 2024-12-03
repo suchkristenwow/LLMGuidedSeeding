@@ -1,0 +1,25 @@
+1. Initialize the system and prepare for the task. Turn on all necessary sensors and ensure all systems are functioning properly.
+
+2. Use the RGB cameras and lidar-inertial odometry to identify the plot boundaries and the concrete area. Update the internal map accordingly.
+
+3. Utilize the GPS system for accurate positioning. The robot should confirm its current location and orient itself towards the concrete area.
+
+4. Calculate the grid pattern with a 1m x 1m offset using the 'pattern_offset' value from the constraint dictionary.
+
+5. Starting from one corner of the concrete area, navigate to the first grid point.
+
+6. Once the robot has reached the first grid point, trigger the seed planting mechanism.
+
+7. After planting a seed, save the coordinates of this location to the system memory.
+
+8. Move to the next grid point by following the pre-calculated grid pattern.
+
+9. Repeat steps 6 to 8 for each grid point within the concrete area. Ensure that the robot plants a seed and saves the location to system memory at each grid point.
+
+10. If an obstacle is encountered, use the RGB cameras and lidar-inertial odometry to identify it. If it's on the 'avoid' list, remove the corresponding vertex in the planner graph and recalculate the route.
+
+11. Once all grid points within the concrete area have been covered, cross-verify the planted locations list with the grid points to ensure all points have been seeded.
+
+12. Finally, return to the starting position and update the status to "Task completed".
+
+13. Report the final task status and the list of all planted locations to the user.

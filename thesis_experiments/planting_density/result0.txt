@@ -1,0 +1,61 @@
+>>> 
+
+import math
+import time
+
+# Initialization
+policy = {'goal_lms': 'concrete', 'pattern': 'grid', 'pattern_offset': 1, 'seed': True}
+grid_points = []
+planted_points = []
+available = is_available()
+while not available:
+    time.sleep(0.5)
+    available = is_available()
+
+# Define the grid generation function
+def generate_grid(area, offset):
+    x_min = min(p.x for p in area)
+    x_max = max(p.x for p in area)
+    y_min = min(p.y for p in area)
+    y_max = max(p.y for p in area)
+    x = x_min
+    while x <= x_max:
+        y = y_min
+        while y <= y_max:
+            yield Point(x, y, 0)
+            y += offset
+        x += offset
+
+# Identifying plot boundaries and the concrete area
+all_objects = get_all_objects()
+concrete = [Point(obj["position"]["x"], obj["position"]["y"], obj["position"]["z"]) for obj in all_objects.values() if obj["name"] == policy["goal_lms"]]
+concrete_contour = get_contour_pts(concrete)
+
+# Calculating the grid
+grid_points = list(generate_grid(concrete_contour, policy["pattern_offset"]))
+
+# Executing the seeding procedure
+for point in grid_points:
+    if not check_waypoint_in_bounds(point):
+        continue
+    available = is_available()
+    while not available:
+        time.sleep(0.5)
+        available = is_available()
+    go_to_waypoint(point)
+    available = is_available()
+    while not available:
+        time.sleep(0.5)
+        available = is_available()
+    plant()
+    planted_points.append(point)
+
+# Verify and report the task completion
+if set(planted_points) == set(grid_points):
+    print("Task completed")
+else:
+    print("Some grid points were missed")
+
+print("The planted locations are: ", planted_points)
+
+<<<

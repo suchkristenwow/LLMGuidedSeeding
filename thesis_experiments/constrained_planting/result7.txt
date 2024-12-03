@@ -1,97 +1,62 @@
->>> Begin Python Code
-
-import math
+>>> 
+```python
+import time
 from typing import List
 
-class RangelandRevegetation:
-    def __init__(self):
-        self.planted_seeds = []
-        self.field_flags = []
-        self.distance_threshold = 0.05  # 5 cm
+# Define a function to execute the task.
+def execute_task():
+    # Check if the robot is available.
+    while not is_available():
+        time.sleep(1)  # Wait for 1 second and then check again.
 
-    def distance_to_target(self, point1: Point, point2: Point) -> float:
-        """
-        Calculate the Euclidean distance between the robot and the target point.
+    # Get the list of all objects in the scene.
+    all_objects = get_all_objects()
 
-        Args:
-            point1 (Point): Current point
-            point2 (Point): Target point
+    # Filter the list to only include field flags.
+    field_flags = [obj for obj in all_objects if obj["name"] == "field flag"]
 
-        Returns:
-            float: Euclidean distance between current point and target point.
-        """
-        return math.sqrt((point1.x - point2.x)**2 + (point1.y - point2.y)**2 + (point1.z - point2.z)**2)
+    # Check if there are any field flags in the scene.
+    if not field_flags:
+        print("No field flags detected.")
+        return
 
-    def navigate_to_target(self, target: Point):
-        """
-        Function to navigate the robot to the target location.
+    # Sort the field flags by their sequence number.
+    field_flags.sort(key=lambda obj: obj["seq"])
 
-        Args:
-            target (Point): Target point to navigate to.
-        """
-        while True:
-            if is_available():
-                go_to_waypoint(target)
-                break
+    # Iterate over each field flag.
+    for flag in field_flags:
+        # Extract the position of the field flag.
+        flag_pos = Point(flag["position"]["x"], flag["position"]["y"], flag["position"]["z"])
 
-    def execute_task(self):
-        # Step 1: Activate the RGB camera and lidar-inertial odometry system on the robot
-        # Assumed to be always on, and there's no provided function in the API to turn it on/off
+        # Check if the waypoint is within bounds.
+        if not check_waypoint_in_bounds(flag_pos):
+            print(f"Field flag at {flag_pos.x}, {flag_pos.y}, {flag_pos.z} is out of bounds.")
+            continue
 
-        # Step 2: Use the GPS to locate the plot boundaries and ensure the robot stays within them during the operation
-        # Assumed that the robot is already in the plot, and it will not leave the plot due to "check_waypoint_in_bounds" function
+        # Get the waypoint closest to the field flag.
+        waypoint = get_waypoint_closest_to_object(ObjectPoint(flag["time"], flag_pos, flag["name"], flag["confidence"], False))
 
-        # Step 3: Search for the "field flag" landmarks in the plot using the robot's RGB cameras and lidar-inertial odometry system
-        while True:
-            if is_available():
-                start_volumetric_gain_exploration()
+        # Navigate to the waypoint.
+        go_to_waypoint(waypoint)
 
-                # Retrieve all detected objects
-                all_objects = get_all_objects()
-                
-                # Filter for field flags
-                self.field_flags = [obj for obj in all_objects if obj['name'] == 'field flag' and not obj.visited]
-                
-                if self.field_flags:
-                    stop_robot()
-                    break
+        # Wait until the robot is available again.
+        while not is_available():
+            time.sleep(1)  # Wait for 1 second and then check again.
 
-        # Steps 4 to 7: Navigate to each flag, plant a seed, and record the location
-        for flag in self.field_flags:
-            flag_point = Point(flag["position"]["x"], flag["position"]["y"], flag["position"]["z"])
+        # Plant a seed.
+        plant()
 
-            # Step 4: Navigate to flag
-            self.navigate_to_target(flag_point)
+        # Wait until the robot is available again.
+        while not is_available():
+            time.sleep(1)  # Wait for 1 second and then check again.
 
-            # Step 5: Stop the robot when it's within the specified 5 cm range of a field flag
-            while True:
-                robot_pose = get_position()
-                distance_to_flag = self.distance_to_target(robot_pose.point, flag_point)
-                
-                if distance_to_flag <= self.distance_threshold:
-                    stop_robot()
-                    break
+    # Stop the robot after all field flags have been visited.
+    stop_robot()
 
-            # Step 6: Activate the seed planting mechanism to plant a seed in the current location
-            if is_available():
-                plant()
+    # Print a success message.
+    print("Task completed successfully.")
 
-            # Step 7: Record the GPS coordinates of the planted seed in the system memory
-            self.planted_seeds.append(flag_point)
-
-        # Step 8 to 11: Repeat steps 3 to 7 for each detected field flag in the plot
-        # This has been covered in the above loop
-
-        # Step 12: Once all flags have a corresponding planting, end the planting program and switch the robot to standby mode
-        # Assuming the robot goes to standby mode by itself when no commands are being executed
-
-        # Step 13: Provide a report to the human operator indicating the completion of the task, along with the list of GPS coordinates where seeds were planted.
-        print("Task completed! Seeds have been planted at the following locations:")
-        for seed in self.planted_seeds:
-            print(f"X: {seed.x}, Y: {seed.y}, Z: {seed.z}")
-
-# Execute the task
-revegetation = RangelandRevegetation()
-revegetation.execute_task()
-
-<<< End Python Code
+# Call the function to execute the task.
+execute_task()
+```
+<<<
