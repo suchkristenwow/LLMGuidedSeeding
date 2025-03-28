@@ -1,21 +1,16 @@
-1. Initialize the robot's systems, ensuring that the camera, lidar-inertial odometry, and GPS systems are operational and ready for use. 
-
-2. Begin the exploration process within the lab environment, systematically scanning the environment and creating a map using lidar-inertial odometry and GPS for localization. 
-
-3. Use the RGB camera to continuously look for the field flags mentioned in the prompt.
-
-4. Each time an object of interest (in this case, the flags) is detected, note its location and count on the system memory.
-
-5. If an object is detected that matches the description of a clear plastic container under a window, approach it cautiously for a closer inspection.
-
-6. Once the container is located, examine the contents carefully to confirm that it contains the field flags. 
-
-7. If the container contains the flags, stop the exploration process. The task of finding the flags is completed. 
-
-8. Count the number of flags in the container and store this information in the system memory.
-
-9. Update the constraint dictionary with the total number of flags counted and their location.
-
-10. Report back to the user the number of flags found and their location within the lab. 
-
-Remember, as there are no objects listed to be avoided in the constraint dictionary, the robot can freely move around the lab without removing any vertices from the planner graph.
+1. Initialize a blank list in the system memory to store the planted locations.
+2. Initialize the robot's location using the GPS system. 
+3. Use the lidar-inertial odometry system to accurately track the robot's movements.
+4. Use the RGB camera to observe and identify any 'conmods' or 'planted areas'.
+5. If any 'conmods' or 'planted areas' are identified, record their location and exclude them from the planner graph.
+6. Begin to move in a straight line towards the initial point of the grid.
+7. Once the robot reaches the first point on the grid, pause and plant a seed.
+8. Record this location in the system memory under the list of planted locations.
+9. Move one meter to the right while avoiding any 'conmods' or 'planted areas'.
+10. Repeat steps 7 to 9 for the entire row.
+11. After completing a row, move one meter forward to start the next row, while avoiding any 'conmods' or 'planted areas'.
+12. Repeat steps 7 to 11 until the entire area has been planted.
+13. Once all seeds are planted, review the list of planted locations in system memory to ensure all points of the grid have been covered.
+14. If any points are missing, navigate to these points while avoiding any 'conmods' or 'planted areas', and repeat steps 7 and 8.
+15. Once all points have been planted, the task is completed and the robot can be returned to its initial location using the GPS system.
+16. The robot's system memory should retain the list of planted locations for future reference and to avoid these areas in subsequent tasks.

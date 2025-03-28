@@ -145,6 +145,7 @@ class PolicyGenerator:
                 elif isinstance(constraints["search"],str): 
                     prompt_lms.append(constraints["search"])  
 
+            '''
             for lm in prompt_lms:   
                 #is the lm in or out of distribution 
                 query = "Would a " + lm + " be in-distribution for object detectors like yolo world? Specifically in the context of this prompt: " + self.query + "\n" + \
@@ -170,6 +171,8 @@ class PolicyGenerator:
                         with open(os.path.join(dir_,"ood_detection"+str(iter)+".txt"),"w") as f:
                             f.write("False")
                 
+            '''
+            
             with open("prompts/get_policy_steps.txt","r") as f:
                 prompt = f.read() 
 
@@ -421,5 +424,5 @@ if __name__ == "__main__":
         config_path=args.config_path, 
         logging_directory=args.logging_dir
     )
-
-    pg.seeding_failure_reGen(iter=0,image_path="/home/kristen/Downloads/sidewalk.jpg")
+    pg.gen_policy()
+    #pg.seeding_failure_reGen(iter=0,image_path="/home/kristen/Downloads/sidewalk.jpg")
